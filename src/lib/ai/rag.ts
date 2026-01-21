@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import { createServerClient } from '@/lib/supabase/client';
 import { generateEmbedding } from './embeddings';
 import type { MatchedChunk, SourceReference, PersonaContext } from '@/types';
+import { fetchLatestRepos } from '../external/github';
+import type { ChatCompletionTool, ChatCompletionMessageParam } from 'openai/resources/index';
 
 let openaiClient: OpenAI | null = null;
 
@@ -27,6 +29,29 @@ const STYLE_DESCRIPTIONS: Record<string, string> = {
   enthusiastic: 'Be high energy and excited! Use exclamation points appropriately (but don\'t overdo it). Show genuine passion for every topic.',
   calm: 'Be measured, thoughtful, and reflective. Take time to explain things clearly. Use a soothing, steady tone.',
 };
+
+
+/**
+ * Define tools available to the AI
+ */
+const TOOLS: ChatCompletionTool[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'fetch_latest_projects',
+      description: 'Fetch the latest projects and repositories from the owner\'s GitHub profile. Use this when the user asks about recent work, latest projects, or what the owner has been building lately.',
+      parameters: {
+        type: 'object',
+        properties: {
+          limit: {
+            type: 'number',
+            description: 'Number of repositories to fetch (default: 5)',
+          },
+        },
+      },
+    },
+  },
+];
 
 /**
  * Generate a dynamic system prompt with persona awareness
@@ -221,18 +246,58 @@ export async function generateResponse(
     query
   );
   
-  const completion = await openai.chat.completions.create({
+  let messages: ChatCompletionMessageParam[] = [
+    { role: 'system', content: systemPrompt },
+    ...conversationMessages.map(m => ({ 
+      role: m.role as 'user' | 'assistant', 
+      content: m.content 
+    })),
+  ];
+
+  let completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      ...conversationMessages.map(m => ({ 
-        role: m.role as 'user' | 'assistant', 
-        content: m.content 
-      })),
-    ],
-    temperature: 0.75, // Slightly higher for more natural variation
-    max_tokens: 600,   // Allow slightly longer responses for natural flow
+    messages,
+    tools: persona?.external_links?.github ? TOOLS : undefined,
+    tool_choice: 'auto',
+    temperature: 0.75,
+    max_tokens: 600,
   });
+  
+  let responseMessage = completion.choices[0]?.message;
+
+  // Handle tool calls if any
+  if (responseMessage.tool_calls) {
+    messages.push(responseMessage);
+    
+    for (const toolCall of responseMessage.tool_calls) {
+      if (toolCall.function.name === 'fetch_latest_projects') {
+        const args = JSON.parse(toolCall.function.arguments);
+        const { limit = 5 } = args;
+        
+        const githubUrl = persona?.external_links?.github;
+        if (githubUrl) {
+          const repos = await fetchLatestRepos(githubUrl, limit);
+          const toolResult = repos.length > 0 
+            ? JSON.stringify(repos)
+            : "No repositories found or could not fetch from GitHub.";
+            
+          messages.push({
+            tool_call_id: toolCall.id,
+            role: 'tool',
+            content: toolResult,
+          });
+        }
+      }
+    }
+    
+    // Second call to generate final response with tool results
+    completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages,
+      temperature: 0.75,
+      max_tokens: 600,
+    });
+  }
   
   const response = completion.choices[0]?.message?.content || 
     "Hmm, I hit a snag there. Mind trying again?";

@@ -144,140 +144,145 @@ export default function IntegrationsPage() {
   }
 
   return (
-    <div className="animate-fade-in content-container">
-      <div className="page-header integrations-header">
-        <div className="header-text">
-          <h1 className="page-title text-gradient">Integrations</h1>
-          <p className="page-subtitle">
-            Configure, customize, and embed your intelligent chatbot on any
-            website
-          </p>
-        </div>
-        <button
-          className="btn btn-primary create-widget-btn"
-          onClick={() => openModal()}
-        >
-          <Plus size={18} />
-          <span>Create Widget</span>
-        </button>
-      </div>
-
-      {widgets.length === 0 ? (
-        <div className="card glass-hover empty-integrations-card">
-          <div className="empty-state">
-            <div className="empty-icon-glow">
-              <Code2 size={48} />
-            </div>
-            <h3 className="empty-title">No active widgets</h3>
-            <p className="empty-desc">
-              Create a custom chat widget to start collecting leads and
-              answering questions on your site.
+    <>
+      <div className="animate-fade-in content-container">
+        <div className="page-header integrations-header">
+          <div className="header-text">
+            <h1 className="page-title text-gradient">Integrations</h1>
+            <p className="page-subtitle">
+              Configure, customize, and embed your intelligent chatbot on any
+              website
             </p>
-            <button className="btn btn-primary" onClick={() => openModal()}>
-              <Plus size={18} />
-              Create Your First Widget
-            </button>
           </div>
+          <button
+            className="btn btn-primary create-widget-btn"
+            onClick={() => openModal()}
+          >
+            <Plus size={18} />
+            <span>Create Widget</span>
+          </button>
         </div>
-      ) : (
-        <div className="widgets-grid">
-          {widgets.map((widget) => (
-            <div key={widget.id} className="card glass widget-card">
-              <div className="widget-card-header">
-                <div className="widget-identity">
-                  <div className="widget-status-dot pulsing" />
-                  <div className="widget-meta">
-                    <h3 className="widget-name">{widget.name}</h3>
-                    <div className="widget-key-wrapper">
-                      <span className="key-label">ID:</span>
-                      <code className="widget-key">{widget.widget_key}</code>
+
+        {widgets.length === 0 ? (
+          <div className="card glass-hover empty-integrations-card">
+            <div className="empty-state">
+              <div className="empty-icon-glow">
+                <Code2 size={48} />
+              </div>
+              <h3 className="empty-title">No active widgets</h3>
+              <p className="empty-desc">
+                Create a custom chat widget to start collecting leads and
+                answering questions on your site.
+              </p>
+              <button className="btn btn-primary" onClick={() => openModal()}>
+                <Plus size={18} />
+                Create Your First Widget
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="widgets-grid">
+            {widgets.map((widget) => (
+              <div key={widget.id} className="card glass widget-card">
+                <div className="widget-card-header">
+                  <div className="widget-identity">
+                    <div className="widget-status-dot pulsing" />
+                    <div className="widget-meta">
+                      <h3 className="widget-name">{widget.name}</h3>
+                      <div className="widget-key-wrapper">
+                        <span className="key-label">ID:</span>
+                        <code className="widget-key">{widget.widget_key}</code>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="widget-actions">
-                  <button
-                    className="action-btn-ghost info"
-                    onClick={() => openModal(widget)}
-                    title="Edit Settings"
-                  >
-                    <Settings size={18} />
-                  </button>
-                  <button
-                    className="action-btn-ghost danger"
-                    onClick={() => handleDelete(widget.widget_key)}
-                    title="Delete Widget"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="widget-details-grid">
-                <div className="detail-item">
-                  <span className="detail-label">Theme</span>
-                  <span className="detail-value text-capitalize">
-                    {widget.theme}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Position</span>
-                  <span className="detail-value text-capitalize">
-                    {widget.position.replace("-", " ")}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <span className="detail-label">Accent Color</span>
-                  <div className="color-preview">
-                    <div
-                      className="color-swatch"
-                      style={{ background: widget.primary_color }}
-                    />
-                    <span className="color-hex">{widget.primary_color}</span>
+                  <div className="widget-actions">
+                    <button
+                      className="action-btn-ghost info"
+                      onClick={() => openModal(widget)}
+                      title="Edit Settings"
+                    >
+                      <Settings size={18} />
+                    </button>
+                    <button
+                      className="action-btn-ghost danger"
+                      onClick={() => handleDelete(widget.widget_key)}
+                      title="Delete Widget"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
                 </div>
-                <div className="detail-item full-width">
-                  <span className="detail-label">Visibility Control</span>
-                  <span className="detail-value">
-                    {widget.allowed_domains?.length
-                      ? `Active on: ${widget.allowed_domains.join(", ")}`
-                      : "Public (All Domains)"}
-                  </span>
+
+                <div className="widget-details-grid">
+                  <div className="detail-item">
+                    <span className="detail-label">Theme</span>
+                    <span className="detail-value text-capitalize">
+                      {widget.theme}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Position</span>
+                    <span className="detail-value text-capitalize">
+                      {widget.position.replace("-", " ")}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Accent Color</span>
+                    <div className="color-preview">
+                      <div
+                        className="color-swatch"
+                        style={{ background: widget.primary_color }}
+                      />
+                      <span className="color-hex">{widget.primary_color}</span>
+                    </div>
+                  </div>
+                  <div className="detail-item full-width">
+                    <span className="detail-label">Visibility Control</span>
+                    <span className="detail-value">
+                      {widget.allowed_domains?.length
+                        ? `Active on: ${widget.allowed_domains.join(", ")}`
+                        : "Public (All Domains)"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="embed-section">
+                  <div className="embed-header">
+                    <Globe size={14} className="text-muted" />
+                    <span className="embed-label">Installation Code</span>
+                  </div>
+                  <div className="embed-code-wrapper">
+                    <pre className="embed-code">
+                      {`<script\n  src="${typeof window !== "undefined" ? window.location.origin : ""}/widget.js"\n  data-widget-key="${widget.widget_key}"\n></script>`}
+                    </pre>
+                    <button
+                      className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
+                      onClick={() => copyEmbedCode(widget)}
+                    >
+                      {copiedKey === widget.widget_key ? (
+                        <Check size={16} />
+                      ) : (
+                        <Copy size={16} />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="embed-section">
-                <div className="embed-header">
-                  <Globe size={14} className="text-muted" />
-                  <span className="embed-label">Installation Code</span>
-                </div>
-                <div className="embed-code-wrapper">
-                  <pre className="embed-code">
-                    {`<script\n  src="${typeof window !== "undefined" ? window.location.origin : ""}/widget.js"\n  data-widget-key="${widget.widget_key}"\n></script>`}
-                  </pre>
-                  <button
-                    className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
-                    onClick={() => copyEmbedCode(widget)}
-                  >
-                    {copiedKey === widget.widget_key ? (
-                      <Check size={16} />
-                    ) : (
-                      <Copy size={16} />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Widget Modal */}
+      {/* Widget Modal moved outside transition wrapper to prevent container transform interference */}
       {isModalOpen && (
         <div
-          className="modal-overlay animate-fade-in"
+          className="modal-overlay animate-overlay"
           onClick={() => setIsModalOpen(false)}
         >
-          <div className="modal-glass" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-glass animate-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div className="modal-header-text">
                 <h2 className="modal-title">
@@ -686,7 +691,7 @@ export default function IntegrationsPage() {
         .modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.85);
+          background: rgba(0, 0, 0, 0.7);
           backdrop-filter: blur(12px);
           display: flex;
           align-items: center;
@@ -694,6 +699,7 @@ export default function IntegrationsPage() {
           z-index: 1000;
           padding: 24px;
         }
+
         .modal-glass {
           background: #0f172a;
           border: 1px solid var(--border-color);
@@ -702,6 +708,8 @@ export default function IntegrationsPage() {
           border-radius: 24px;
           display: flex;
           flex-direction: column;
+          max-height: 90vh;
+          overflow-y: auto;
           box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
         }
         .modal-header {
@@ -806,6 +814,6 @@ export default function IntegrationsPage() {
           text-transform: capitalize;
         }
       `}</style>
-    </div>
+    </>
   );
 }
