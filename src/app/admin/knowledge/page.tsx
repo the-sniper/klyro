@@ -145,51 +145,42 @@ export default function KnowledgeBasePage() {
     queued: { icon: Clock, label: "Queued", className: "badge-info" },
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-vh-400">
+        <Loader2 size={32} className="animate-spin text-accent" />
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fade-in">
-      <div
-        className="page-header"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <div>
-          <h1 className="page-title">Knowledge Base</h1>
+    <div className="animate-fade-in content-container">
+      <div className="page-header knowledge-header">
+        <div className="header-text">
+          <h1 className="page-title text-gradient">Knowledge Base</h1>
           <p className="page-subtitle">
-            Manage the documents that power your chatbot
+            Manage the documents that power your chatbot's intelligence
           </p>
         </div>
         <button
-          className="btn btn-primary"
+          className="btn btn-primary add-doc-btn"
           onClick={() => setIsModalOpen(true)}
         >
           <Plus size={18} />
-          Add Document
+          <span>Add Document</span>
         </button>
       </div>
 
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "300px",
-          }}
-        >
-          <Loader2 size={32} className="animate-spin" />
-        </div>
-      ) : documents.length === 0 ? (
-        <div className="card">
+      {documents.length === 0 ? (
+        <div className="card glass-hover empty-knowledge-card">
           <div className="empty-state">
-            <div className="empty-state-icon">
-              <FileText size={36} />
+            <div className="empty-icon-glow">
+              <FileText size={48} />
             </div>
-            <h3 className="empty-state-title">No documents yet</h3>
-            <p className="empty-state-text">
-              Add documents to train your chatbot with relevant information.
+            <h3 className="empty-title">Your knowledge base is empty</h3>
+            <p className="empty-desc">
+              Train your chatbot by adding documents, text snippets, or website
+              URLs.
             </p>
             <button
               className="btn btn-primary"
@@ -201,17 +192,17 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
       ) : (
-        <div className="card" style={{ padding: 0 }}>
-          <div className="table-container">
-            <table className="table">
+        <div className="card glass knowledge-table-card">
+          <div className="table-wrapper">
+            <table className="premium-table">
               <thead>
                 <tr>
-                  <th>Name</th>
+                  <th>Document Name</th>
                   <th>Source</th>
                   <th>Category</th>
                   <th>Status</th>
-                  <th>Updated</th>
-                  <th>Actions</th>
+                  <th>Last Sync</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -222,25 +213,11 @@ export default function KnowledgeBasePage() {
                   const StatusIcon = status.icon;
 
                   return (
-                    <tr key={doc.id}>
+                    <tr key={doc.id} className="table-row-hover">
                       <td>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                          }}
-                        >
+                        <div className="doc-identity">
                           <div
-                            style={{
-                              width: "36px",
-                              height: "36px",
-                              background: "var(--bg-tertiary)",
-                              borderRadius: "var(--radius)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
+                            className={`doc-icon-wrapper ${doc.source_type}`}
                           >
                             {doc.source_type === "url" ? (
                               <Globe size={18} />
@@ -248,48 +225,53 @@ export default function KnowledgeBasePage() {
                               <FileText size={18} />
                             )}
                           </div>
-                          <span style={{ fontWeight: 500 }}>{doc.name}</span>
+                          <span className="doc-name">{doc.name}</span>
                         </div>
                       </td>
-                      <td
-                        style={{
-                          color: "var(--text-secondary)",
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        {doc.source_type}
-                      </td>
-                      <td
-                        style={{
-                          color: "var(--text-secondary)",
-                          textTransform: "capitalize",
-                        }}
-                      >
-                        {doc.category || "General"}
-                      </td>
                       <td>
-                        <span className={`badge ${status.className}`}>
-                          <StatusIcon size={12} />
-                          {status.label}
+                        <span className="source-tag text-capitalize">
+                          {doc.source_type}
                         </span>
                       </td>
-                      <td style={{ color: "var(--text-secondary)" }}>
-                        {new Date(doc.updated_at).toLocaleDateString()}
+                      <td>
+                        <span className="category-label text-capitalize">
+                          {doc.category || "General"}
+                        </span>
                       </td>
                       <td>
-                        <div style={{ display: "flex", gap: "8px" }}>
+                        <div className={`status-pill ${status.className}`}>
+                          <StatusIcon
+                            size={12}
+                            className={
+                              doc.status === "processing" ? "animate-spin" : ""
+                            }
+                          />
+                          <span>{status.label}</span>
+                        </div>
+                      </td>
+                      <td className="text-muted">
+                        {new Date(doc.updated_at).toLocaleDateString(
+                          undefined,
+                          {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          },
+                        )}
+                      </td>
+                      <td className="text-right">
+                        <div className="actions-flex">
                           <button
-                            className="btn btn-ghost"
+                            className="action-btn-ghost info"
                             onClick={() => handleReprocess(doc.id)}
-                            title="Reprocess"
+                            title="Reprocess Document"
                           >
                             <RefreshCw size={16} />
                           </button>
                           <button
-                            className="btn btn-ghost"
+                            className="action-btn-ghost danger"
                             onClick={() => handleDelete(doc.id)}
-                            style={{ color: "var(--error)" }}
-                            title="Delete"
+                            title="Delete Document"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -306,86 +288,101 @@ export default function KnowledgeBasePage() {
 
       {/* Add Document Modal */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay animate-fade-in"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div className="modal-glass" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">Add Document</h2>
+              <div className="modal-header-text">
+                <h2 className="modal-title">Add Knowledge</h2>
+                <p className="modal-subtitle">
+                  Choose a source to train your AI
+                </p>
+              </div>
               <button
-                className="modal-close"
+                className="modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label className="form-label">Source Type</label>
-                <div className="toggle-group">
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="source-toggle-grid">
+                {[
+                  {
+                    id: "file",
+                    label: "File",
+                    icon: Upload,
+                    desc: "PDF, TXT, MD",
+                  },
+                  {
+                    id: "text",
+                    label: "Text",
+                    icon: FileText,
+                    desc: "Manual entry",
+                  },
+                  {
+                    id: "url",
+                    label: "URL",
+                    icon: Globe,
+                    desc: "Website link",
+                  },
+                ].map((type) => (
                   <button
+                    key={type.id}
                     type="button"
-                    className={`toggle-btn ${sourceType === "file" ? "active" : ""}`}
-                    onClick={() => setSourceType("file")}
+                    className={`source-option ${sourceType === type.id ? "active" : ""}`}
+                    onClick={() => setSourceType(type.id as any)}
                   >
-                    <Upload size={16} style={{ marginRight: "8px" }} />
-                    File
+                    <type.icon size={20} />
+                    <div className="option-info">
+                      <span className="option-label">{type.label}</span>
+                      <span className="option-desc">{type.desc}</span>
+                    </div>
                   </button>
-                  <button
-                    type="button"
-                    className={`toggle-btn ${sourceType === "text" ? "active" : ""}`}
-                    onClick={() => setSourceType("text")}
-                  >
-                    <FileText size={16} style={{ marginRight: "8px" }} />
-                    Text
-                  </button>
-                  <button
-                    type="button"
-                    className={`toggle-btn ${sourceType === "url" ? "active" : ""}`}
-                    onClick={() => setSourceType("url")}
-                  >
-                    <Globe size={16} style={{ marginRight: "8px" }} />
-                    URL
-                  </button>
+                ))}
+              </div>
+
+              <div className="form-grid">
+                <div className="form-group flex-1">
+                  <label className="form-label">Document Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g., Company Overview"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                  />
                 </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Document Name</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g., Work Experience"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Category</label>
-                <select
-                  className="form-select"
-                  value={formData.category}
-                  onChange={(e) =>
-                    setFormData({ ...formData, category: e.target.value })
-                  }
-                >
-                  <option value="general">General</option>
-                  <option value="experience">Experience</option>
-                  <option value="projects">Projects</option>
-                  <option value="skills">Skills</option>
-                  <option value="education">Education</option>
-                  <option value="contact">Contact</option>
-                </select>
+                <div className="form-group min-w-200">
+                  <label className="form-label">Category</label>
+                  <select
+                    className="form-select"
+                    value={formData.category}
+                    onChange={(e) =>
+                      setFormData({ ...formData, category: e.target.value })
+                    }
+                  >
+                    <option value="general">General</option>
+                    <option value="experience">Experience</option>
+                    <option value="projects">Projects</option>
+                    <option value="skills">Skills</option>
+                    <option value="education">Education</option>
+                    <option value="contact">Contact</option>
+                  </select>
+                </div>
               </div>
 
               {sourceType === "file" && (
                 <div className="form-group">
                   <label className="form-label">Upload File</label>
                   <div
-                    className="file-upload-area"
+                    className={`dropzone ${selectedFile ? "has-file" : ""}`}
                     onClick={() =>
                       document.getElementById("file-input")?.click()
                     }
@@ -403,90 +400,61 @@ export default function KnowledgeBasePage() {
                       const file = e.dataTransfer.files[0];
                       if (file) {
                         setSelectedFile(file);
-                        if (!formData.name) {
+                        if (!formData.name)
                           setFormData({
                             ...formData,
                             name: file.name.replace(/\.[^/.]+$/, ""),
                           });
-                        }
                       }
-                    }}
-                    style={{
-                      border: "2px dashed var(--border-primary)",
-                      borderRadius: "var(--radius)",
-                      padding: "32px",
-                      textAlign: "center",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      background: selectedFile
-                        ? "var(--bg-tertiary)"
-                        : "transparent",
                     }}
                   >
                     <input
                       id="file-input"
                       type="file"
                       accept=".txt,.pdf,.md,.doc,.docx"
-                      style={{ display: "none" }}
+                      className="hidden"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setSelectedFile(file);
-                          if (!formData.name) {
+                          if (!formData.name)
                             setFormData({
                               ...formData,
                               name: file.name.replace(/\.[^/.]+$/, ""),
                             });
-                          }
                         }
                       }}
                     />
                     {selectedFile ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "12px",
-                        }}
-                      >
-                        <FileText size={24} />
-                        <span style={{ fontWeight: 500 }}>
-                          {selectedFile.name}
-                        </span>
+                      <div className="selected-file-preview">
+                        <FileText size={32} className="text-accent" />
+                        <div className="file-info">
+                          <span className="file-name">{selectedFile.name}</span>
+                          <span className="file-size">
+                            {(selectedFile.size / 1024).toFixed(1)} KB
+                          </span>
+                        </div>
                         <button
                           type="button"
-                          className="btn btn-ghost"
+                          className="remove-file-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedFile(null);
                           }}
-                          style={{ padding: "4px" }}
                         >
                           <X size={16} />
                         </button>
                       </div>
                     ) : (
-                      <>
-                        <Upload
-                          size={32}
-                          style={{ marginBottom: "12px", opacity: 0.5 }}
-                        />
-                        <p
-                          style={{ margin: 0, color: "var(--text-secondary)" }}
-                        >
-                          Drag and drop a file, or click to browse
+                      <div className="dropzone-content">
+                        <div className="upload-icon-circle">
+                          <Upload size={24} />
+                        </div>
+                        <p className="dropzone-main">Click or drag to upload</p>
+                        <p className="dropzone-sub">
+                          PDF, TXT, or Markdown up to 10MB
                         </p>
-                        <p
-                          style={{
-                            margin: "8px 0 0",
-                            fontSize: "12px",
-                            color: "var(--text-tertiary)",
-                          }}
-                        >
-                          Supports .txt, .pdf, .md, .doc, .docx
-                        </p>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -496,58 +464,58 @@ export default function KnowledgeBasePage() {
                 <div className="form-group">
                   <label className="form-label">Content</label>
                   <textarea
-                    className="form-textarea"
-                    placeholder="Paste your content here..."
+                    className="form-textarea knowledge-textarea"
+                    placeholder="Provide information the AI should learn..."
                     value={formData.content}
                     onChange={(e) =>
                       setFormData({ ...formData, content: e.target.value })
                     }
                     required
-                    style={{ minHeight: "150px" }}
                   />
                 </div>
               )}
 
               {sourceType === "url" && (
                 <div className="form-group">
-                  <label className="form-label">URL</label>
-                  <input
-                    type="url"
-                    className="form-input"
-                    placeholder="https://example.com/about"
-                    value={formData.sourceUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sourceUrl: e.target.value })
-                    }
-                    required
-                  />
+                  <label className="form-label">Website URL</label>
+                  <div className="url-input-wrapper">
+                    <Globe size={18} className="url-icon" />
+                    <input
+                      type="url"
+                      className="form-input url-input"
+                      placeholder="https://example.com/about"
+                      value={formData.sourceUrl}
+                      onChange={(e) =>
+                        setFormData({ ...formData, sourceUrl: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ flex: 1 }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn btn-primary submit-btn"
                   disabled={submitting}
-                  style={{ flex: 1 }}
                 >
                   {submitting ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
-                      Processing...
+                      Adding...
                     </>
                   ) : (
                     <>
-                      <Upload size={18} />
-                      Add Document
+                      <CheckCircle size={18} />
+                      Save Knowledge
                     </>
                   )}
                 </button>
@@ -556,6 +524,402 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .content-container {
+          max-width: 1200px;
+        }
+        .knowledge-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .add-doc-btn {
+          height: 48px;
+          min-width: 180px;
+        }
+        .text-gradient {
+          background: linear-gradient(to bottom, #fff, #94a3b8);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .empty-knowledge-card {
+          padding: 80px 40px;
+          text-align: center;
+          display: flex;
+          justify-content: center;
+        }
+        .empty-icon-glow {
+          width: 80px;
+          height: 80px;
+          background: rgba(59, 130, 246, 0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 24px;
+          color: var(--accent-primary);
+          box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        }
+        .empty-title {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 12px;
+        }
+        .empty-desc {
+          color: var(--text-secondary);
+          max-width: 400px;
+          margin: 0 auto 32px;
+          font-size: 16px;
+        }
+
+        .knowledge-table-card {
+          padding: 0;
+          overflow: hidden;
+          border: 1px solid var(--border-color);
+        }
+        .table-wrapper {
+          width: 100%;
+          overflow-x: auto;
+        }
+        .premium-table {
+          width: 100%;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        .premium-table th {
+          padding: 16px 24px;
+          background: rgba(255, 255, 255, 0.02);
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-muted);
+          border-bottom: 1px solid var(--border-color);
+        }
+        .premium-table td {
+          padding: 20px 24px;
+          border-bottom: 1px solid var(--border-color);
+          vertical-align: middle;
+        }
+        .table-row-hover:hover {
+          background: rgba(255, 255, 255, 0.015);
+        }
+
+        .doc-identity {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+        }
+        .doc-icon-wrapper {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-tertiary);
+          color: var(--text-secondary);
+        }
+        .doc-icon-wrapper.url {
+          color: var(--accent-primary);
+          background: rgba(59, 130, 246, 0.1);
+        }
+        .doc-name {
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .source-tag {
+          font-size: 13px;
+          color: var(--text-secondary);
+        }
+        .category-label {
+          font-size: 13px;
+          color: var(--text-secondary);
+        }
+        .status-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+        }
+        .badge-success {
+          background: rgba(16, 185, 129, 0.1);
+          color: var(--success);
+        }
+        .badge-warning {
+          background: rgba(245, 158, 11, 0.1);
+          color: var(--warning);
+        }
+        .badge-error {
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--error);
+        }
+        .badge-info {
+          background: rgba(59, 130, 246, 0.1);
+          color: var(--accent-primary);
+        }
+
+        .actions-flex {
+          display: flex;
+          gap: 4px;
+          justify-content: flex-end;
+        }
+        .action-btn-ghost {
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--text-muted);
+        }
+        .action-btn-ghost:hover {
+          background: var(--bg-tertiary);
+          color: var(--text-primary);
+        }
+        .action-btn-ghost.danger:hover {
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--error);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.8);
+          backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 24px;
+        }
+        .modal-glass {
+          background: #0f172a;
+          border: 1px solid var(--border-color);
+          width: 100%;
+          max-width: 640px;
+          border-radius: 24px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-header {
+          padding: 32px 32px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .modal-title {
+          font-size: 24px;
+          font-weight: 800;
+          margin-bottom: 4px;
+        }
+        .modal-subtitle {
+          font-size: 14px;
+          color: var(--text-secondary);
+        }
+        .modal-close-btn {
+          background: var(--bg-tertiary);
+          border: none;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .modal-close-btn:hover {
+          background: var(--border-color);
+          color: var(--text-primary);
+        }
+
+        .modal-form {
+          padding: 32px;
+        }
+        .source-toggle-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          margin-bottom: 32px;
+        }
+        .source-option {
+          padding: 20px 16px;
+          border: 1px solid var(--border-color);
+          background: var(--bg-tertiary);
+          border-radius: 16px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--text-secondary);
+        }
+        .source-option:hover {
+          border-color: var(--border-hover);
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .source-option.active {
+          border-color: var(--accent-primary);
+          background: rgba(59, 130, 246, 0.05);
+          color: var(--accent-primary);
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.05);
+        }
+        .option-label {
+          display: block;
+          font-weight: 700;
+          font-size: 14px;
+          color: var(--text-primary);
+          margin-bottom: 2px;
+        }
+        .source-option.active .option-label {
+          color: var(--accent-primary);
+        }
+        .option-desc {
+          font-size: 11px;
+          opacity: 0.7;
+        }
+
+        .form-grid {
+          display: flex;
+          gap: 20px;
+          margin-bottom: 24px;
+        }
+        .flex-1 {
+          flex: 1;
+        }
+        .min-w-200 {
+          min-width: 200px;
+        }
+
+        .dropzone {
+          border: 2px dashed var(--border-color);
+          border-radius: 16px;
+          padding: 40px;
+          text-align: center;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .dropzone:hover,
+        .dropzone.drag-over {
+          border-color: var(--accent-primary);
+          background: rgba(59, 130, 246, 0.02);
+        }
+        .upload-icon-circle {
+          width: 48px;
+          height: 48px;
+          background: var(--bg-tertiary);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 16px;
+          color: var(--text-muted);
+        }
+        .dropzone-main {
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        .dropzone-sub {
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+        .hidden {
+          display: none;
+        }
+
+        .selected-file-preview {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 12px;
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 12px;
+          text-align: left;
+        }
+        .file-info {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
+        .file-name {
+          font-weight: 600;
+          font-size: 14px;
+        }
+        .file-size {
+          font-size: 11px;
+          color: var(--text-muted);
+        }
+        .remove-file-btn {
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          cursor: pointer;
+          padding: 4px;
+        }
+        .remove-file-btn:hover {
+          color: var(--error);
+        }
+
+        .knowledge-textarea {
+          min-height: 200px;
+          resize: vertical;
+        }
+        .url-input-wrapper {
+          position: relative;
+        }
+        .url-icon {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+        }
+        .url-input {
+          padding-left: 48px;
+        }
+
+        .modal-footer {
+          display: flex;
+          gap: 16px;
+          margin-top: 40px;
+        }
+        .modal-footer .btn {
+          flex: 1;
+          height: 52px;
+          font-weight: 700;
+        }
+        .submit-btn {
+          box-shadow: var(--accent-glow);
+        }
+
+        .text-capitalize {
+          text-transform: capitalize;
+        }
+        .text-right {
+          text-align: right;
+        }
+        .text-muted {
+          color: var(--text-muted);
+        }
+      `}</style>
     </div>
   );
 }

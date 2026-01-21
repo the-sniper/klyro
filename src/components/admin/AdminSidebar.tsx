@@ -8,13 +8,13 @@ import {
   MessageSquare,
   Code2,
   Sparkles,
-  User,
+  Fingerprint,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/knowledge", label: "Knowledge Base", icon: Database },
-  { href: "/admin/persona", label: "Persona", icon: User },
+  { href: "/admin/persona", label: "AI Persona", icon: Fingerprint },
   { href: "/admin/test-chat", label: "Test Chat", icon: MessageSquare },
   { href: "/admin/integrations", label: "Integrations", icon: Code2 },
 ];
@@ -23,10 +23,10 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="admin-sidebar">
+    <aside className="admin-sidebar glass">
       <Link href="/admin" className="sidebar-logo">
         <div className="sidebar-logo-icon">
-          <Sparkles size={20} />
+          <Sparkles size={24} />
         </div>
         <span className="sidebar-logo-text">Chatfolio</span>
       </Link>
@@ -43,7 +43,7 @@ export function AdminSidebar() {
               href={item.href}
               className={`sidebar-link ${isActive ? "active" : ""}`}
             >
-              <item.icon size={20} />
+              <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
               <span>{item.label}</span>
             </Link>
           );

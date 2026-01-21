@@ -135,48 +135,43 @@ export default function IntegrationsPage() {
     setTimeout(() => setCopiedKey(null), 2000);
   }
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-vh-400">
+        <Loader2 size={32} className="animate-spin text-accent" />
+      </div>
+    );
+  }
+
   return (
-    <div className="animate-fade-in">
-      <div
-        className="page-header"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <div>
-          <h1 className="page-title">Integrations</h1>
+    <div className="animate-fade-in content-container">
+      <div className="page-header integrations-header">
+        <div className="header-text">
+          <h1 className="page-title text-gradient">Integrations</h1>
           <p className="page-subtitle">
-            Configure and embed your chatbot widget
+            Configure, customize, and embed your intelligent chatbot on any
+            website
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => openModal()}>
+        <button
+          className="btn btn-primary create-widget-btn"
+          onClick={() => openModal()}
+        >
           <Plus size={18} />
-          Create Widget
+          <span>Create Widget</span>
         </button>
       </div>
 
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "300px",
-          }}
-        >
-          <Loader2 size={32} className="animate-spin" />
-        </div>
-      ) : widgets.length === 0 ? (
-        <div className="card">
+      {widgets.length === 0 ? (
+        <div className="card glass-hover empty-integrations-card">
           <div className="empty-state">
-            <div className="empty-state-icon">
-              <Code2 size={36} />
+            <div className="empty-icon-glow">
+              <Code2 size={48} />
             </div>
-            <h3 className="empty-state-title">No widgets yet</h3>
-            <p className="empty-state-text">
-              Create a widget to embed your chatbot on any website.
+            <h3 className="empty-title">No active widgets</h3>
+            <p className="empty-desc">
+              Create a custom chat widget to start collecting leads and
+              answering questions on your site.
             </p>
             <button className="btn btn-primary" onClick={() => openModal()}>
               <Plus size={18} />
@@ -185,180 +180,88 @@ export default function IntegrationsPage() {
           </div>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div className="widgets-grid">
           {widgets.map((widget) => (
-            <div key={widget.id} className="card">
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "20px",
-                }}
-              >
-                <div>
-                  <h3
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 600,
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {widget.name}
-                  </h3>
-                  <p
-                    style={{ fontSize: "14px", color: "var(--text-secondary)" }}
-                  >
-                    Key:{" "}
-                    <code
-                      style={{
-                        background: "var(--bg-tertiary)",
-                        padding: "2px 6px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {widget.widget_key}
-                    </code>
-                  </p>
+            <div key={widget.id} className="card glass widget-card">
+              <div className="widget-card-header">
+                <div className="widget-identity">
+                  <div className="widget-status-dot pulsing" />
+                  <div className="widget-meta">
+                    <h3 className="widget-name">{widget.name}</h3>
+                    <div className="widget-key-wrapper">
+                      <span className="key-label">ID:</span>
+                      <code className="widget-key">{widget.widget_key}</code>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div className="widget-actions">
                   <button
-                    className="btn btn-ghost"
+                    className="action-btn-ghost info"
                     onClick={() => openModal(widget)}
+                    title="Edit Settings"
                   >
-                    <Settings size={16} />
+                    <Settings size={18} />
                   </button>
                   <button
-                    className="btn btn-ghost"
+                    className="action-btn-ghost danger"
                     onClick={() => handleDelete(widget.widget_key)}
-                    style={{ color: "var(--error)" }}
+                    title="Delete Widget"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-                  gap: "16px",
-                  marginBottom: "20px",
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Theme
-                  </div>
-                  <div
-                    style={{ fontSize: "14px", textTransform: "capitalize" }}
-                  >
+              <div className="widget-details-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Theme</span>
+                  <span className="detail-value text-capitalize">
                     {widget.theme}
-                  </div>
+                  </span>
                 </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Position
-                  </div>
-                  <div
-                    style={{ fontSize: "14px", textTransform: "capitalize" }}
-                  >
+                <div className="detail-item">
+                  <span className="detail-label">Position</span>
+                  <span className="detail-value text-capitalize">
                     {widget.position.replace("-", " ")}
-                  </div>
+                  </span>
                 </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Color
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
+                <div className="detail-item">
+                  <span className="detail-label">Accent Color</span>
+                  <div className="color-preview">
                     <div
-                      style={{
-                        width: "20px",
-                        height: "20px",
-                        background: widget.primary_color,
-                        borderRadius: "4px",
-                        border: "1px solid var(--border-color)",
-                      }}
-                    ></div>
-                    <span style={{ fontSize: "14px" }}>
-                      {widget.primary_color}
-                    </span>
+                      className="color-swatch"
+                      style={{ background: widget.primary_color }}
+                    />
+                    <span className="color-hex">{widget.primary_color}</span>
                   </div>
                 </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    Domains
-                  </div>
-                  <div style={{ fontSize: "14px" }}>
+                <div className="detail-item full-width">
+                  <span className="detail-label">Visibility Control</span>
+                  <span className="detail-value">
                     {widget.allowed_domains?.length
-                      ? widget.allowed_domains.join(", ")
-                      : "All domains"}
-                  </div>
+                      ? `Active on: ${widget.allowed_domains.join(", ")}`
+                      : "Public (All Domains)"}
+                  </span>
                 </div>
               </div>
 
-              <div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Embed Code
+              <div className="embed-section">
+                <div className="embed-header">
+                  <Globe size={14} className="text-muted" />
+                  <span className="embed-label">Installation Code</span>
                 </div>
-                <div style={{ position: "relative" }}>
-                  <pre className="code-block" style={{ paddingRight: "80px" }}>
-                    {`<script
-  src="${typeof window !== "undefined" ? window.location.origin : ""}/widget.js"
-  data-widget-key="${widget.widget_key}"
-></script>`}
+                <div className="embed-code-wrapper">
+                  <pre className="embed-code">
+                    {`<script\n  src="${typeof window !== "undefined" ? window.location.origin : ""}/widget.js"\n  data-widget-key="${widget.widget_key}"\n></script>`}
                   </pre>
                   <button
-                    className="btn btn-secondary"
-                    style={{ position: "absolute", top: "12px", right: "12px" }}
+                    className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
                     onClick={() => copyEmbedCode(widget)}
                   >
                     {copiedKey === widget.widget_key ? (
-                      <>
-                        <Check size={14} />
-                        Copied
-                      </>
+                      <Check size={16} />
                     ) : (
-                      <>
-                        <Copy size={14} />
-                        Copy
-                      </>
+                      <Copy size={16} />
                     )}
                   </button>
                 </div>
@@ -370,27 +273,35 @@ export default function IntegrationsPage() {
 
       {/* Widget Modal */}
       {isModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-overlay animate-fade-in"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div className="modal-glass" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2 className="modal-title">
-                {editingWidget ? "Edit Widget" : "Create Widget"}
-              </h2>
+              <div className="modal-header-text">
+                <h2 className="modal-title">
+                  {editingWidget ? "Modify Widget" : "New Integration"}
+                </h2>
+                <p className="modal-subtitle">
+                  Configure your chatbot's external appearance
+                </p>
+              </div>
               <button
-                className="modal-close"
+                className="modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
               >
-                <X size={24} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="modal-form">
               <div className="form-group">
-                <label className="form-label">Widget Name</label>
+                <label className="form-label">Internal Widget Name</label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="e.g., Portfolio Widget"
+                  placeholder="e.g., Personal Portfolio"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
@@ -400,120 +311,113 @@ export default function IntegrationsPage() {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Welcome Message</label>
+                <label className="form-label">Greeting Message</label>
                 <textarea
-                  className="form-textarea"
-                  placeholder="Hi! How can I help you?"
+                  className="form-textarea mini"
+                  placeholder="Hi! How can I help you learn about my experience?"
                   value={formData.welcomeMessage}
                   onChange={(e) =>
                     setFormData({ ...formData, welcomeMessage: e.target.value })
                   }
-                  style={{ minHeight: "80px" }}
                 />
               </div>
 
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "16px",
-                }}
-              >
-                <div className="form-group">
-                  <label className="form-label">Position</label>
-                  <select
-                    className="form-select"
-                    value={formData.position}
-                    onChange={(e) =>
-                      setFormData({ ...formData, position: e.target.value })
-                    }
-                  >
-                    <option value="bottom-right">Bottom Right</option>
-                    <option value="bottom-left">Bottom Left</option>
-                  </select>
+              <div className="form-row">
+                <div className="form-group flex-1">
+                  <label className="form-label">Screen Position</label>
+                  <div className="select-wrapper">
+                    <select
+                      className="form-select"
+                      value={formData.position}
+                      onChange={(e) =>
+                        setFormData({ ...formData, position: e.target.value })
+                      }
+                    >
+                      <option value="bottom-right">Bottom Right</option>
+                      <option value="bottom-left">Bottom Left</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Theme</label>
-                  <select
-                    className="form-select"
-                    value={formData.theme}
-                    onChange={(e) =>
-                      setFormData({ ...formData, theme: e.target.value })
-                    }
-                  >
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="auto">Auto</option>
-                  </select>
+                <div className="form-group flex-1">
+                  <label className="form-label">Visual Theme</label>
+                  <div className="select-wrapper">
+                    <select
+                      className="form-select"
+                      value={formData.theme}
+                      onChange={(e) =>
+                        setFormData({ ...formData, theme: e.target.value })
+                      }
+                    >
+                      <option value="dark">Dark Theme</option>
+                      <option value="light">Light Theme</option>
+                      <option value="auto">System Adaptive</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Primary Color</label>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <input
-                    type="color"
-                    value={formData.primaryColor}
-                    onChange={(e) =>
-                      setFormData({ ...formData, primaryColor: e.target.value })
-                    }
-                    style={{
-                      width: "48px",
-                      height: "48px",
-                      border: "none",
-                      borderRadius: "var(--radius)",
-                      cursor: "pointer",
-                    }}
-                  />
+                <label className="form-label">Brand Accent Color</label>
+                <div className="color-input-container">
+                  <div className="color-field">
+                    <input
+                      type="color"
+                      className="color-picker-input"
+                      value={formData.primaryColor}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          primaryColor: e.target.value,
+                        })
+                      }
+                    />
+                    <div
+                      className="color-preview-box"
+                      style={{ background: formData.primaryColor }}
+                    />
+                  </div>
                   <input
                     type="text"
-                    className="form-input"
+                    className="form-input color-text-input"
                     value={formData.primaryColor}
                     onChange={(e) =>
                       setFormData({ ...formData, primaryColor: e.target.value })
                     }
-                    style={{ flex: 1 }}
                   />
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Allowed Domains (optional)</label>
+                <label className="form-label">
+                  Whitelisted Domains (Security)
+                </label>
                 <input
                   type="text"
                   className="form-input"
-                  placeholder="example.com, mysite.com"
+                  placeholder="portfolio.com, blog.me"
                   value={formData.allowedDomains}
                   onChange={(e) =>
                     setFormData({ ...formData, allowedDomains: e.target.value })
                   }
                 />
-                <p
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
-                    marginTop: "6px",
-                  }}
-                >
-                  Leave empty to allow all domains
+                <p className="field-hint">
+                  Commas separated. Leave blank to allow embedding anywhere.
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
+              <div className="modal-footer">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setIsModalOpen(false)}
-                  style={{ flex: 1 }}
                 >
-                  Cancel
+                  Discard
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="btn btn-primary submit-btn"
                   disabled={submitting}
-                  style={{ flex: 1 }}
                 >
                   {submitting ? (
                     <>
@@ -521,9 +425,9 @@ export default function IntegrationsPage() {
                       Saving...
                     </>
                   ) : editingWidget ? (
-                    "Save Changes"
+                    "Update Widget"
                   ) : (
-                    "Create Widget"
+                    "Deploy Widget"
                   )}
                 </button>
               </div>
@@ -531,6 +435,377 @@ export default function IntegrationsPage() {
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .content-container {
+          max-width: 1200px;
+        }
+        .integrations-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .create-widget-btn {
+          height: 48px;
+          min-width: 180px;
+        }
+        .text-gradient {
+          background: linear-gradient(to bottom, #fff, #94a3b8);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .empty-integrations-card {
+          padding: 80px 40px;
+          text-align: center;
+        }
+        .empty-icon-glow {
+          width: 80px;
+          height: 80px;
+          background: rgba(16, 185, 129, 0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 24px;
+          color: var(--success);
+          box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+        }
+        .empty-title {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 12px;
+        }
+        .empty-desc {
+          color: var(--text-secondary);
+          max-width: 400px;
+          margin: 0 auto 32px;
+          font-size: 16px;
+        }
+
+        .widgets-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .widget-card {
+          padding: 32px;
+          border: 1px solid var(--border-color);
+        }
+        .widget-card-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 32px;
+        }
+
+        .widget-identity {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        .widget-status-dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: var(--success);
+          margin-top: 6px;
+        }
+        .widget-status-dot.pulsing {
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+          }
+          70% {
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+          }
+        }
+
+        .widget-name {
+          font-size: 20px;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 4px;
+        }
+        .widget-key-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: var(--text-muted);
+        }
+        .widget-key {
+          background: var(--bg-tertiary);
+          padding: 2px 8px;
+          border-radius: 6px;
+          color: var(--text-secondary);
+          font-family: monospace;
+        }
+
+        .widget-actions {
+          display: flex;
+          gap: 8px;
+        }
+        .action-btn-ghost {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          cursor: pointer;
+          transition: all 0.2s;
+          color: var(--text-secondary);
+        }
+        .action-btn-ghost:hover {
+          border-color: var(--border-hover);
+          color: var(--text-primary);
+        }
+        .action-btn-ghost.danger:hover {
+          background: rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.2);
+          color: var(--error);
+        }
+
+        .widget-details-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 24px;
+          margin-bottom: 40px;
+          padding: 24px;
+          background: rgba(255, 255, 255, 0.015);
+          border-radius: 16px;
+          border: 1px solid var(--border-color);
+        }
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .detail-item.full-width {
+          grid-column: 1 / -1;
+        }
+        .detail-label {
+          font-size: 11px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+        .detail-value {
+          font-size: 15px;
+          font-weight: 500;
+          color: var(--text-primary);
+        }
+
+        .color-preview {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .color-swatch {
+          width: 16px;
+          height: 16px;
+          border-radius: 4px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .color-hex {
+          font-size: 14px;
+          color: var(--text-primary);
+          font-family: monospace;
+        }
+
+        .embed-section {
+          background: var(--bg-tertiary);
+          border-radius: 16px;
+          border: 1px solid var(--border-color);
+          overflow: hidden;
+        }
+        .embed-header {
+          padding: 12px 20px;
+          background: rgba(255, 255, 255, 0.03);
+          border-bottom: 1px solid var(--border-color);
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .embed-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--text-secondary);
+        }
+
+        .embed-code-wrapper {
+          position: relative;
+          padding: 24px;
+        }
+        .embed-code {
+          margin: 0;
+          font-size: 13px;
+          line-height: 1.6;
+          color: var(--accent-primary);
+          font-family: "JetBrains Mono", monospace;
+          white-space: pre-wrap;
+          overflow-wrap: break-word;
+        }
+        .copy-btn {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          background: var(--bg-primary);
+          border: 1px solid var(--border-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-secondary);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .copy-btn:hover {
+          border-color: var(--accent-primary);
+          color: var(--text-primary);
+        }
+        .copy-btn.copied {
+          background: var(--success);
+          border-color: var(--success);
+          color: white;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.85);
+          backdrop-filter: blur(12px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+          padding: 24px;
+        }
+        .modal-glass {
+          background: #0f172a;
+          border: 1px solid var(--border-color);
+          width: 100%;
+          max-width: 600px;
+          border-radius: 24px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+        }
+        .modal-header {
+          padding: 32px 32px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+        }
+        .modal-title {
+          font-size: 22px;
+          font-weight: 800;
+        }
+        .modal-subtitle {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin-top: 4px;
+        }
+        .modal-close-btn {
+          background: var(--bg-tertiary);
+          border: none;
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .modal-close-btn:hover {
+          background: var(--border-color);
+          color: var(--text-primary);
+        }
+
+        .modal-form {
+          padding: 32px;
+        }
+        .form-row {
+          display: flex;
+          gap: 20px;
+        }
+        .flex-1 {
+          flex: 1;
+        }
+        .form-textarea.mini {
+          min-height: 100px;
+          resize: vertical;
+        }
+        .field-hint {
+          font-size: 12px;
+          color: var(--text-muted);
+          margin-top: 8px;
+        }
+
+        .color-input-container {
+          display: flex;
+          gap: 12px;
+        }
+        .color-field {
+          position: relative;
+          width: 52px;
+          height: 52px;
+          border-radius: var(--radius);
+          overflow: hidden;
+          border: 1px solid var(--border-color);
+        }
+        .color-picker-input {
+          position: absolute;
+          inset: -10px;
+          width: 100px;
+          height: 100px;
+          cursor: pointer;
+          opacity: 0;
+        }
+        .color-preview-box {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .color-text-input {
+          flex: 1;
+          font-family: monospace;
+          font-size: 15px;
+        }
+
+        .modal-footer {
+          display: flex;
+          gap: 16px;
+          margin-top: 40px;
+        }
+        .modal-footer .btn {
+          flex: 1;
+          height: 52px;
+          font-weight: 700;
+        }
+        .submit-btn {
+          box-shadow: var(--accent-glow);
+        }
+
+        .text-capitalize {
+          text-transform: capitalize;
+        }
+      `}</style>
     </div>
   );
 }

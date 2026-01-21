@@ -11,6 +11,8 @@ import {
   Linkedin,
   Twitter,
   Globe,
+  Phone,
+  Mail,
   CheckCircle,
 } from "lucide-react";
 
@@ -170,37 +172,23 @@ export default function PersonaPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "400px",
-        }}
-      >
-        <Loader2 size={32} className="animate-spin" />
+      <div className="flex items-center justify-center min-vh-400">
+        <Loader2 size={32} className="animate-spin text-accent" />
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in">
-      <div
-        className="page-header"
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
-        <div>
-          <h1 className="page-title">AI Persona</h1>
+    <div className="animate-fade-in content-container">
+      <div className="page-header persona-header">
+        <div className="header-text">
+          <h1 className="page-title text-gradient">AI Persona</h1>
           <p className="page-subtitle">
             Configure how your chatbot speaks and what it can share
           </p>
         </div>
         <button
-          className="btn btn-primary"
+          className={`btn ${saved ? "btn-success" : "btn-primary"} save-btn`}
           onClick={handleSave}
           disabled={saving}
         >
@@ -223,640 +211,539 @@ export default function PersonaPage() {
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-        {/* Identity Section */}
-        <div className="card">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                background: "var(--accent-gradient)",
-                borderRadius: "var(--radius)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <User size={20} color="white" />
+      <div className="persona-grid">
+        {/* Left Column - Configuration */}
+        <div className="persona-main-col">
+          {/* Identity Section */}
+          <section className="card glass-hover mb-24">
+            <div className="section-header">
+              <div className="section-icon-wrapper">
+                <User size={20} />
+              </div>
+              <div>
+                <h2 className="section-title">Identity</h2>
+                <p className="section-subtitle">
+                  Who is this chatbot representing?
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
-                Identity
-              </h2>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                }}
-              >
-                Who is this chatbot representing?
-              </p>
-            </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Your Name</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder="e.g., Areef Syed"
-              value={config.owner_name}
-              onChange={(e) =>
-                setConfig({ ...config, owner_name: e.target.value })
-              }
-            />
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--text-secondary)",
-                marginTop: "6px",
-              }}
-            >
-              The bot will speak in first person using this name
-            </p>
-          </div>
-        </div>
-
-        {/* Tone Section */}
-        <div className="card">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                background: "var(--accent-gradient)",
-                borderRadius: "var(--radius)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <MessageCircle size={20} color="white" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
-                Communication Style
-              </h2>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                }}
-              >
-                How should your bot talk?
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-              gap: "12px",
-              marginBottom: "24px",
-            }}
-          >
-            {TONE_OPTIONS.map((tone) => (
-              <button
-                key={tone.value}
-                type="button"
-                onClick={() =>
-                  setConfig({ ...config, communication_style: tone.value })
-                }
-                style={{
-                  padding: "16px",
-                  borderRadius: "var(--radius)",
-                  border:
-                    config.communication_style === tone.value
-                      ? "2px solid var(--accent)"
-                      : "1px solid var(--border-color)",
-                  background:
-                    config.communication_style === tone.value
-                      ? "var(--bg-tertiary)"
-                      : "var(--bg-secondary)",
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "all 0.2s ease",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "20px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  {tone.emoji}
-                </div>
-                <div
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    marginBottom: "4px",
-                    color: "var(--text-primary)",
-                  }}
-                >
-                  {tone.label}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  {tone.description}
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Personality Traits */}
-          <div className="form-group" style={{ marginBottom: "24px" }}>
-            <label className="form-label">Personality Traits</label>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+            <div className="form-group">
+              <label className="form-label">Your Name</label>
               <input
                 type="text"
                 className="form-input"
-                placeholder="Add a trait..."
-                value={traitInput}
-                onChange={(e) => setTraitInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    addTrait(traitInput);
-                  }
-                }}
-                style={{ flex: 1 }}
+                placeholder="e.g., Areef Syed"
+                value={config.owner_name}
+                onChange={(e) =>
+                  setConfig({ ...config, owner_name: e.target.value })
+                }
               />
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => addTrait(traitInput)}
-              >
-                Add
-              </button>
+              <p className="input-hint">
+                The bot will speak in first person using this name
+              </p>
             </div>
+          </section>
 
-            {/* Current traits */}
-            {config.personality_traits.length > 0 && (
+          {/* Tone Section */}
+          <section className="card glass-hover mb-24">
+            <div className="section-header">
               <div
+                className="section-icon-wrapper"
                 style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "8px",
-                  marginBottom: "16px",
+                  background: "rgba(99, 102, 241, 0.1)",
+                  color: "var(--accent-secondary)",
                 }}
               >
-                {config.personality_traits.map((trait) => (
-                  <span
-                    key={trait}
-                    style={{
-                      padding: "6px 12px",
-                      background: "var(--accent)",
-                      color: "white",
-                      borderRadius: "20px",
-                      fontSize: "13px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                    }}
-                  >
-                    {trait}
-                    <button
-                      type="button"
-                      onClick={() => removeTrait(trait)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "white",
-                        cursor: "pointer",
-                        padding: 0,
-                        fontSize: "16px",
-                        lineHeight: 1,
-                      }}
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
+                <MessageCircle size={20} />
               </div>
-            )}
-
-            {/* Suggestions */}
-            <div>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  marginBottom: "8px",
-                }}
-              >
-                Suggestions:
-              </p>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                {TRAIT_SUGGESTIONS.filter(
-                  (t) => !config.personality_traits.includes(t),
-                ).map((trait) => (
-                  <button
-                    key={trait}
-                    type="button"
-                    onClick={() => addTrait(trait)}
-                    style={{
-                      padding: "4px 10px",
-                      background: "var(--bg-tertiary)",
-                      border: "1px solid var(--border-color)",
-                      borderRadius: "12px",
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    + {trait}
-                  </button>
-                ))}
+              <div>
+                <h2 className="section-title">Communication Style</h2>
+                <p className="section-subtitle">How should your bot talk?</p>
               </div>
             </div>
-          </div>
 
-          {/* Custom Instructions */}
-          <div className="form-group">
-            <label className="form-label">Custom Instructions</label>
-            <textarea
-              className="form-textarea"
-              placeholder="e.g., Always mention my open source contributions. Don't discuss previous employers by name. Emphasize my remote work experience."
-              value={config.custom_instructions}
-              onChange={(e) =>
-                setConfig({ ...config, custom_instructions: e.target.value })
-              }
-              style={{ minHeight: "100px" }}
-            />
-            <p
-              style={{
-                fontSize: "12px",
-                color: "var(--text-secondary)",
-                marginTop: "6px",
-              }}
-            >
-              Specific guidance for how the bot should (or shouldn't) respond
-            </p>
-          </div>
-        </div>
-
-        {/* Links & Contact Section */}
-        <div className="card">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                background: "var(--accent-gradient)",
-                borderRadius: "var(--radius)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Link2 size={20} color="white" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
-                Links & Contact
-              </h2>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                }}
-              >
-                External links and contact info the bot can share
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <input
-                type="email"
-                className="form-input"
-                placeholder="me@example.com"
-                value={config.external_links.email || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      email: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Phone Number (optional)</label>
-              <input
-                type="tel"
-                className="form-input"
-                placeholder="+1 (555) 000-0000"
-                value={config.external_links.phone || ""}
-                onChange={(e) => {
-                  // Simple US-centric formatting: (XXX) XXX-XXXX
-                  let input = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                  let formatted = input;
-
-                  if (input.length > 0) {
-                    if (input.length <= 3) {
-                      formatted = input;
-                    } else if (input.length <= 6) {
-                      formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
-                    } else if (input.length <= 10) {
-                      formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6)}`;
-                    } else {
-                      // If key starts with country code (e.g. 1), handle it
-                      formatted = `+${input.slice(0, input.length - 10)} (${input.slice(input.length - 10, input.length - 7)}) ${input.slice(input.length - 7, input.length - 4)}-${input.slice(input.length - 4)}`;
-                    }
+            <div className="tone-grid">
+              {TONE_OPTIONS.map((tone) => (
+                <button
+                  key={tone.value}
+                  type="button"
+                  onClick={() =>
+                    setConfig({ ...config, communication_style: tone.value })
                   }
-
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      phone: formatted,
-                    },
-                  });
-                }}
-              />
+                  className={`tone-card ${config.communication_style === tone.value ? "active" : ""}`}
+                >
+                  <div className="tone-emoji">{tone.emoji}</div>
+                  <div className="tone-info">
+                    <div className="tone-label">{tone.label}</div>
+                    <div className="tone-desc">{tone.description}</div>
+                  </div>
+                </button>
+              ))}
             </div>
 
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Github size={16} /> GitHub
-              </label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://github.com/username"
-                value={config.external_links.github || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      github: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Linkedin size={16} /> LinkedIn
-              </label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://linkedin.com/in/username"
-                value={config.external_links.linkedin || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      linkedin: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Twitter size={16} /> Twitter / X
-              </label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://twitter.com/username"
-                value={config.external_links.twitter || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      twitter: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-
-            <div className="form-group">
-              <label
-                className="form-label"
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Globe size={16} /> Personal Website
-              </label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://yoursite.com"
-                value={config.external_links.website || ""}
-                onChange={(e) =>
-                  setConfig({
-                    ...config,
-                    external_links: {
-                      ...config.external_links,
-                      website: e.target.value,
-                    },
-                  })
-                }
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Permissions Section */}
-        <div className="card">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                background: "var(--accent-gradient)",
-                borderRadius: "var(--radius)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <CheckCircle size={20} color="white" />
-            </div>
-            <div>
-              <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
-                Bot Permissions
-              </h2>
-              <p
-                style={{
-                  fontSize: "14px",
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                }}
-              >
-                What is the bot allowed to share or discuss?
-              </p>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "12px",
-            }}
-          >
-            {[
-              {
-                key: "can_share_github",
-                label: "Share GitHub profile",
-                description:
-                  "Link to your GitHub when discussing code/projects",
-              },
-              {
-                key: "can_share_linkedin",
-                label: "Share LinkedIn profile",
-                description: "Link to LinkedIn for professional inquiries",
-              },
-              {
-                key: "can_share_twitter",
-                label: "Share Twitter/X profile",
-                description: "Link to your social media presence",
-              },
-              {
-                key: "can_share_email",
-                label: "Share email address",
-                description: "Provide contact email when asked",
-              },
-              {
-                key: "can_discuss_salary",
-                label: "Discuss compensation",
-                description: "Talk about salary expectations if asked",
-              },
-              {
-                key: "can_schedule_calls",
-                label: "Offer to schedule calls",
-                description: "Suggest scheduling a call or meeting",
-              },
-            ].map((permission) => (
-              <label
-                key={permission.key}
-                style={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  gap: "12px",
-                  padding: "16px",
-                  background: "var(--bg-secondary)",
-                  borderRadius: "var(--radius)",
-                  border: "1px solid var(--border-color)",
-                  cursor: "pointer",
-                }}
-              >
+            {/* Personality Traits */}
+            <div className="form-group mb-24">
+              <label className="form-label">Personality Traits</label>
+              <div className="flex gap-8 mb-12">
                 <input
-                  type="checkbox"
-                  checked={
-                    config.access_permissions[
-                      permission.key as keyof typeof config.access_permissions
-                    ]
-                  }
-                  onChange={(e) =>
-                    setConfig({
-                      ...config,
-                      access_permissions: {
-                        ...config.access_permissions,
-                        [permission.key]: e.target.checked,
-                      },
-                    })
-                  }
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    marginTop: "2px",
-                    accentColor: "var(--accent)",
+                  type="text"
+                  className="form-input"
+                  placeholder="Add a trait..."
+                  value={traitInput}
+                  onChange={(e) => setTraitInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addTrait(traitInput);
+                    }
                   }}
                 />
-                <div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      color: "var(--text-primary)",
-                      marginBottom: "4px",
-                    }}
-                  >
-                    {permission.label}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-secondary)",
-                    }}
-                  >
-                    {permission.description}
-                  </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => addTrait(traitInput)}
+                >
+                  Add
+                </button>
+              </div>
+
+              {config.personality_traits.length > 0 && (
+                <div className="traits-list mb-16">
+                  {config.personality_traits.map((trait) => (
+                    <span key={trait} className="trait-tag active">
+                      {trait}
+                      <button
+                        type="button"
+                        onClick={() => removeTrait(trait)}
+                        className="remove-tag"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
                 </div>
-              </label>
-            ))}
-          </div>
+              )}
+
+              <div className="trait-suggestions">
+                <span className="suggestion-label">Suggestions:</span>
+                <div className="suggestions-list">
+                  {TRAIT_SUGGESTIONS.filter(
+                    (t) => !config.personality_traits.includes(t),
+                  ).map((trait) => (
+                    <button
+                      key={trait}
+                      type="button"
+                      onClick={() => addTrait(trait)}
+                      className="trait-tag suggestion"
+                    >
+                      + {trait}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Instructions */}
+            <div className="form-group">
+              <label className="form-label">Custom Instructions</label>
+              <textarea
+                className="form-textarea"
+                placeholder="e.g., Always mention my open source contributions..."
+                value={config.custom_instructions}
+                onChange={(e) =>
+                  setConfig({ ...config, custom_instructions: e.target.value })
+                }
+              />
+              <p className="input-hint">
+                Specific guidance for the bot's responses
+              </p>
+            </div>
+          </section>
+        </div>
+
+        {/* Right Column - Links & Permissions */}
+        <div className="persona-side-col">
+          {/* Links Section */}
+          <section className="card glass-hover mb-24">
+            <div className="section-header">
+              <div
+                className="section-icon-wrapper"
+                style={{
+                  background: "rgba(245, 158, 11, 0.1)",
+                  color: "var(--warning)",
+                }}
+              >
+                <Link2 size={20} />
+              </div>
+              <div>
+                <h2 className="section-title">Links & Contact</h2>
+              </div>
+            </div>
+
+            <div className="links-form">
+              {[
+                {
+                  key: "email",
+                  label: "Email",
+                  icon: Mail,
+                  type: "email",
+                  placeholder: "me@example.com",
+                },
+                {
+                  key: "phone",
+                  label: "Phone",
+                  icon: Phone,
+                  type: "tel",
+                  placeholder: "+1 (234) 567-8900",
+                },
+                {
+                  key: "github",
+                  label: "GitHub",
+                  icon: Github,
+                  type: "url",
+                  placeholder: "github.com/username",
+                },
+                {
+                  key: "linkedin",
+                  label: "LinkedIn",
+                  icon: Linkedin,
+                  type: "url",
+                  placeholder: "linkedin.com/in/username",
+                },
+                {
+                  key: "twitter",
+                  label: "Twitter",
+                  icon: Twitter,
+                  type: "url",
+                  placeholder: "twitter.com/username",
+                },
+                {
+                  key: "website",
+                  label: "Website",
+                  icon: Globe,
+                  type: "url",
+                  placeholder: "yoursite.com",
+                },
+              ].map((field) => (
+                <div key={field.key} className="form-group">
+                  <label className="form-label flex items-center gap-8">
+                    <field.icon size={14} /> {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    className="form-input"
+                    placeholder={field.placeholder}
+                    value={(config.external_links as any)[field.key] || ""}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        external_links: {
+                          ...config.external_links,
+                          [field.key]: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Permissions Section */}
+          <section className="card glass-hover">
+            <div className="section-header">
+              <div
+                className="section-icon-wrapper"
+                style={{
+                  background: "rgba(16, 185, 129, 0.1)",
+                  color: "var(--success)",
+                }}
+              >
+                <CheckCircle size={20} />
+              </div>
+              <div>
+                <h2 className="section-title">Permissions</h2>
+              </div>
+            </div>
+
+            <div className="permissions-list">
+              {[
+                { key: "can_share_github", label: "Share GitHub" },
+                { key: "can_share_linkedin", label: "Share LinkedIn" },
+                { key: "can_share_twitter", label: "Share Twitter" },
+                { key: "can_share_email", label: "Share Email" },
+                { key: "can_discuss_salary", label: "Discuss Salary" },
+                { key: "can_schedule_calls", label: "Schedule Calls" },
+              ].map((perm) => (
+                <label key={perm.key} className="permission-item">
+                  <div className="permission-info">
+                    <span className="permission-label">{perm.label}</span>
+                  </div>
+                  <div
+                    className={`custom-checkbox ${(config.access_permissions as any)[perm.key] ? "checked" : ""}`}
+                    onClick={() =>
+                      setConfig({
+                        ...config,
+                        access_permissions: {
+                          ...config.access_permissions,
+                          [perm.key]: !(config.access_permissions as any)[
+                            perm.key
+                          ],
+                        },
+                      })
+                    }
+                  >
+                    <div className="checkbox-knob"></div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </section>
         </div>
       </div>
+
+      <style jsx>{`
+        .content-container {
+          max-width: 1400px;
+        }
+        .persona-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .text-gradient {
+          background: linear-gradient(to bottom, #fff, #94a3b8);
+          -webkit-background-clip: text;
+          background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+        .persona-grid {
+          display: grid;
+          grid-template-columns: 1fr 400px;
+          gap: 24px;
+        }
+        @media (max-width: 1200px) {
+          .persona-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+        .section-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        .section-icon-wrapper {
+          width: 44px;
+          height: 44px;
+          background: rgba(59, 130, 246, 0.1);
+          border-radius: var(--radius);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--accent-primary);
+        }
+        .section-title {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0;
+        }
+        .section-subtitle {
+          font-size: 14px;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .tone-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 12px;
+          margin-bottom: 32px;
+        }
+        .tone-card {
+          padding: 20px;
+          border-radius: var(--radius);
+          background: var(--bg-tertiary);
+          border: 2px solid transparent;
+          cursor: pointer;
+          text-align: left;
+          transition: all 0.3s ease;
+          display: flex;
+          gap: 16px;
+        }
+        .tone-card:hover {
+          border-color: var(--border-hover);
+        }
+        .tone-card.active {
+          background: rgba(59, 130, 246, 0.05);
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+        .tone-emoji {
+          font-size: 24px;
+        }
+        .tone-label {
+          font-size: 15px;
+          font-weight: 700;
+          color: var(--text-primary);
+          margin-bottom: 2px;
+        }
+        .tone-desc {
+          font-size: 12px;
+          color: var(--text-secondary);
+          line-height: 1.4;
+        }
+
+        .trait-tag {
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-size: 13px;
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          transition: all 0.2s;
+        }
+        .trait-tag.active {
+          background: var(--accent-gradient);
+          color: white;
+          box-shadow: var(--accent-glow);
+        }
+        .trait-tag.suggestion {
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          color: var(--text-secondary);
+          cursor: pointer;
+        }
+        .trait-tag.suggestion:hover {
+          border-color: var(--accent-primary);
+          color: var(--text-primary);
+        }
+        .traits-list,
+        .suggestions-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .suggestion-label {
+          display: block;
+          font-size: 12px;
+          color: var(--text-muted);
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+        .remove-tag {
+          background: none;
+          border: none;
+          color: white;
+          cursor: pointer;
+          font-size: 18px;
+          line-height: 1;
+          padding: 0;
+          opacity: 0.7;
+        }
+        .remove-tag:hover {
+          opacity: 1;
+        }
+        .input-hint {
+          font-size: 12px;
+          color: var(--text-muted);
+          margin-top: 8px;
+        }
+
+        .permission-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px 0;
+          border-bottom: 1px solid var(--border-color);
+          cursor: pointer;
+        }
+        .permission-item:last-child {
+          border: none;
+        }
+        .permission-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+
+        .custom-checkbox {
+          width: 44px;
+          height: 24px;
+          background: var(--bg-tertiary);
+          border-radius: 12px;
+          position: relative;
+          transition: all 0.3s;
+          border: 1px solid var(--border-color);
+        }
+        .custom-checkbox.checked {
+          background: var(--accent-primary);
+          border-color: var(--accent-primary);
+        }
+        .checkbox-knob {
+          width: 18px;
+          height: 18px;
+          background: white;
+          border-radius: 50%;
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          transition: transform 0.3s;
+        }
+        .custom-checkbox.checked .checkbox-knob {
+          transform: translateX(20px);
+        }
+
+        .mb-24 {
+          margin-bottom: 24px;
+        }
+        .flex {
+          display: flex;
+        }
+        .items-center {
+          align-items: center;
+        }
+        .gap-8 {
+          gap: 8px;
+        }
+        .gap-12 {
+          gap: 12px;
+        }
+        .mb-12 {
+          margin-bottom: 12px;
+        }
+        .mb-16 {
+          margin-bottom: 16px;
+        }
+        .save-btn {
+          min-width: 160px;
+          height: 48px;
+        }
+        .btn-success {
+          background: var(--success);
+          color: white;
+        }
+
+        /* Kill all underlines in Links & Contact section */
+        .links-form :global(*),
+        .links-form :global(*:hover),
+        .links-form :global(input),
+        .links-form :global(label),
+        .links-form :global(svg) {
+          text-decoration: none !important;
+          text-decoration-line: none !important;
+          border-bottom: none !important;
+          box-shadow: none !important;
+        }
+
+        .links-form .form-input:focus {
+          border-color: var(--accent-primary);
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+        }
+      `}</style>
     </div>
   );
 }
