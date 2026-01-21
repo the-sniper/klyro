@@ -8,11 +8,13 @@ import {
   MessageSquare,
   Code2,
   Sparkles,
+  User,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/knowledge", label: "Knowledge Base", icon: Database },
+  { href: "/admin/persona", label: "Persona", icon: User },
   { href: "/admin/test-chat", label: "Test Chat", icon: MessageSquare },
   { href: "/admin/integrations", label: "Integrations", icon: Code2 },
 ];

@@ -58,11 +58,16 @@ create table widgets (
   -- Persona configuration for more natural AI responses
   owner_name text, -- The portfolio owner's name for first-person references
   personality_traits text[] default '{}', -- e.g., ['friendly', 'technical', 'enthusiastic']
-  communication_style text default 'friendly' check (communication_style in ('formal', 'casual', 'friendly', 'professional')),
+  communication_style text default 'friendly' check (communication_style in ('formal', 'casual', 'friendly', 'professional', 'enthusiastic', 'calm')),
   custom_instructions text, -- Additional persona instructions from the user
+  -- External links the bot can share
+  external_links jsonb default '{}', -- {"github": "...", "linkedin": "...", "twitter": "...", "website": "..."}
+  -- Permissions for what the bot can discuss/share
+  access_permissions jsonb default '{"can_share_github": true, "can_share_linkedin": true, "can_share_twitter": true, "can_share_email": true, "can_discuss_salary": false, "can_schedule_calls": true}',
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
 
 -- Create indexes for performance
 create index idx_document_chunks_document_id on document_chunks(document_id);

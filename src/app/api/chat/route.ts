@@ -100,6 +100,8 @@ export async function POST(request: NextRequest) {
       personalityTraits: widget.personality_traits || [],
       communicationStyle: widget.communication_style || 'friendly',
       customInstructions: widget.custom_instructions || undefined,
+      external_links: widget.external_links || undefined,
+      access_permissions: widget.access_permissions || undefined,
       conversationHistory,
     };
     

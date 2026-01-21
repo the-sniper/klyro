@@ -24,6 +24,8 @@ const STYLE_DESCRIPTIONS: Record<string, string> = {
   casual: 'Be super relaxed and conversational. Use contractions, casual phrases, and feel free to be a bit playful.',
   friendly: 'Be warm and approachable. Use contractions naturally. Be enthusiastic but still professional.',
   professional: 'Strike a balance between warmth and professionalism. Be personable yet polished.',
+  enthusiastic: 'Be high energy and excited! Use exclamation points appropriately (but don\'t overdo it). Show genuine passion for every topic.',
+  calm: 'Be measured, thoughtful, and reflective. Take time to explain things clearly. Use a soothing, steady tone.',
 };
 
 /**
@@ -51,6 +53,24 @@ function getSystemPrompt(persona?: PersonaContext): string {
   const customSection = persona?.customInstructions 
     ? `\nAdditional instructions from ${ownerName}: ${persona.customInstructions}`
     : '';
+
+  // Build permissions and links section
+  let permissionsSection = '';
+  if (persona?.access_permissions || persona?.external_links) {
+    const p = persona?.access_permissions || {};
+    const l = persona?.external_links || {};
+    
+    permissionsSection = `\n\nPERMISSIONS & LINKS:
+- Can I share GitHub? ${p.can_share_github ? `YES (${l.github || 'link available'})` : 'NO'}
+- Can I share LinkedIn? ${p.can_share_linkedin ? `YES (${l.linkedin || 'link available'})` : 'NO'}
+- Can I share Twitter? ${p.can_share_twitter ? `YES (${l.twitter || 'link available'})` : 'NO'}
+- Can I share Email? ${p.can_share_email ? 'YES' : 'NO'}
+- Can I discuss salary? ${p.can_discuss_salary ? 'YES' : 'NO - politely decline'}
+- Can I schedule calls? ${p.can_schedule_calls ? 'YES' : 'NO'}
+- Personal Website: ${l.website || 'Not provided'}
+If allowed, feel free to share these links when relevant. If NOT allowed, politely say you don't share that info directly.`;
+  }
+
 
   return `You are speaking on behalf of ${ownerName} on their portfolio website. Today is ${currentDate}.
 

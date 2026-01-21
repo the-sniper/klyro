@@ -76,11 +76,28 @@ export interface Widget {
   // Persona configuration
   owner_name: string | null;
   personality_traits: string[];
-  communication_style: 'formal' | 'casual' | 'friendly' | 'professional';
+  communication_style: 'formal' | 'casual' | 'friendly' | 'professional' | 'enthusiastic' | 'calm';
   custom_instructions: string | null;
+  // External links the bot can share
+  external_links: {
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+  // Permissions for what the bot can discuss/share
+  access_permissions: {
+    can_share_github: boolean;
+    can_share_linkedin: boolean;
+    can_share_twitter: boolean;
+    can_share_email: boolean;
+    can_discuss_salary: boolean;
+    can_schedule_calls: boolean;
+  };
   created_at: string;
   updated_at: string;
 }
+
 
 
 // API Request/Response types
@@ -114,13 +131,29 @@ export interface MatchedChunk {
 }
 
 // Persona context for natural AI responses
+// Persona context for natural AI responses
 export interface PersonaContext {
   ownerName?: string;
   personalityTraits?: string[];
-  communicationStyle?: 'formal' | 'casual' | 'friendly' | 'professional';
+  communicationStyle?: 'formal' | 'casual' | 'friendly' | 'professional' | 'enthusiastic' | 'calm';
   customInstructions?: string;
+  external_links?: {
+    github?: string;
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+  access_permissions?: {
+    can_share_github?: boolean;
+    can_share_linkedin?: boolean;
+    can_share_twitter?: boolean;
+    can_share_email?: boolean;
+    can_discuss_salary?: boolean;
+    can_schedule_calls?: boolean;
+  };
   conversationHistory?: Array<{
     role: 'user' | 'assistant';
     content: string;
   }>;
 }
+
