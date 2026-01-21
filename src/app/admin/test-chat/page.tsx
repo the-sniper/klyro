@@ -31,6 +31,7 @@ export default function TestChatPage() {
   const [loading, setLoading] = useState(false);
   const [strictMode, setStrictMode] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch a valid widget key on mount
@@ -51,7 +52,44 @@ export default function TestChatPage() {
       }
     }
     fetchWidgetKey();
+
+    // Load persisted chat
+    const savedMessages = localStorage.getItem("test-chat-messages");
+    const savedSessionId = localStorage.getItem("test-chat-session-id");
+    if (savedMessages) {
+      try {
+        setMessages(JSON.parse(savedMessages));
+      } catch (e) {
+        console.error("Failed to parse saved messages", e);
+      }
+    }
+    if (savedSessionId) {
+      setSessionId(savedSessionId);
+    }
+    setIsLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem("test-chat-messages", JSON.stringify(messages));
+    if (sessionId) {
+      localStorage.setItem("test-chat-session-id", sessionId);
+    } else {
+      localStorage.removeItem("test-chat-session-id");
+    }
+  }, [messages, sessionId, isLoaded]);
+
+  const isLimitReached = messages.length >= 50;
+
+  useEffect(() => {
+    if (isLimitReached) {
+      // Small delay to let the user see the last message before reset
+      const timer = setTimeout(() => {
+        handleReset();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -63,7 +101,7 @@ export default function TestChatPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!input.trim() || loading) return;
+    if (!input.trim() || loading || isLimitReached) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -124,15 +162,18 @@ export default function TestChatPage() {
   }
 
   function handleReset() {
-    setMessages([
+    const defaultMessages: Message[] = [
       {
         id: "welcome",
         role: "assistant",
         content:
           "Hi! I'm your portfolio assistant. Ask me anything about your experience, skills, or projects. I'll answer based on your knowledge base.",
       },
-    ]);
+    ];
+    setMessages(defaultMessages);
     setSessionId(null);
+    localStorage.removeItem("test-chat-messages");
+    localStorage.removeItem("test-chat-session-id");
   }
 
   const suggestedPrompts = [
@@ -197,6 +238,18 @@ export default function TestChatPage() {
                 </div>
               </div>
             </div>
+            <div className="testing-badge">
+              <span className="testing-text">Testing Mode</span>
+              <span className="message-count">{messages.length}/50</span>
+            </div>
+          </div>
+
+          <div className="testing-notice">
+            <Info size={14} />
+            <span>
+              This chat is in testing. It will persist until reset or after 50
+              messages.
+            </span>
           </div>
 
           <div className="chat-messages-scroll" id="scroll-container">
@@ -217,6 +270,20 @@ export default function TestChatPage() {
                     <span />
                     <span />
                     <span />
+                  </div>
+                </div>
+              </div>
+            )}
+            {isLimitReached && (
+              <div className="limit-reached-message">
+                <div className="notice-card glass">
+                  <RotateCcw size={20} className="animate-spin-slow" />
+                  <div>
+                    <h4>Message Limit Reached</h4>
+                    <p>
+                      The conversation has reached 50 messages and will now
+                      reset.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -250,12 +317,12 @@ export default function TestChatPage() {
                   placeholder="Ask anything..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || isLimitReached}
                 />
                 <button
                   type="submit"
                   className="chat-send-btn-new"
-                  disabled={!input.trim() || loading}
+                  disabled={!input.trim() || loading || isLimitReached}
                 >
                   {loading ? (
                     <Loader2 size={20} className="animate-spin" />
@@ -395,6 +462,9 @@ export default function TestChatPage() {
           padding: 24px 32px;
           background: rgba(255, 255, 255, 0.02);
           border-bottom: 1px solid var(--border-color);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
         }
         .chat-bot-identity {
           display: flex;
@@ -605,6 +675,74 @@ export default function TestChatPage() {
           opacity: 0.5;
           cursor: not-allowed;
           filter: grayscale(1);
+        }
+
+        .testing-badge {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 6px 12px;
+          border-radius: 20px;
+          border: 1px solid var(--border-color);
+        }
+        .testing-text {
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--accent-primary);
+        }
+        .message-count {
+          font-size: 12px;
+          color: var(--text-muted);
+          font-variant-numeric: tabular-nums;
+        }
+
+        .testing-notice {
+          background: rgba(59, 130, 246, 0.1);
+          border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+          padding: 8px 32px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 12px;
+          color: var(--text-secondary);
+        }
+
+        .limit-reached-message {
+          display: flex;
+          justify-content: center;
+          padding: 20px 0;
+        }
+        .notice-card {
+          padding: 20px 32px;
+          border-radius: var(--radius-lg);
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          border: 1px solid rgba(59, 130, 246, 0.3);
+          background: rgba(59, 130, 246, 0.05) !important;
+        }
+        .notice-card h4 {
+          margin: 0 0 4px 0;
+          color: var(--text-primary);
+        }
+        .notice-card p {
+          margin: 0;
+          font-size: 14px;
+          color: var(--text-secondary);
+        }
+        .animate-spin-slow {
+          animation: spin 3s linear infinite;
+        }
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </div>
