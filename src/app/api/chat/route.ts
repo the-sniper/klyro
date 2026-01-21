@@ -74,11 +74,12 @@ export async function POST(request: NextRequest) {
         .from('chat_messages')
         .select('role, content')
         .eq('session_id', currentSessionId)
-        .order('created_at', { ascending: true })
-        .limit(8); // Last 4 exchanges
+        .order('created_at', { ascending: false })
+        .limit(8); // Last 8 messages
       
       if (recentMessages) {
-        conversationHistory = recentMessages.map(m => ({
+        // Reverse to maintain chronological order [oldest -> newest]
+        conversationHistory = recentMessages.reverse().map(m => ({
           role: m.role as 'user' | 'assistant',
           content: m.content
         }));
