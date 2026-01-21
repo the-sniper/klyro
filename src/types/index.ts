@@ -1,0 +1,108 @@
+// Document types
+export type DocumentSourceType = 'text' | 'url' | 'file';
+export type DocumentStatus = 'queued' | 'processing' | 'ready' | 'failed';
+export type DocumentCategory = 
+  | 'experience' 
+  | 'projects' 
+  | 'skills' 
+  | 'education' 
+  | 'availability' 
+  | 'contact' 
+  | 'general';
+
+export interface Document {
+  id: string;
+  name: string;
+  source_type: DocumentSourceType;
+  content: string | null;
+  source_url: string | null;
+  status: DocumentStatus;
+  error_message: string | null;
+  category: DocumentCategory | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DocumentChunk {
+  id: string;
+  document_id: string;
+  content: string;
+  embedding: number[] | null;
+  chunk_index: number;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+// Chat types
+export type MessageRole = 'user' | 'assistant';
+
+export interface ChatSession {
+  id: string;
+  widget_key: string;
+  visitor_id: string | null;
+  created_at: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  session_id: string;
+  role: MessageRole;
+  content: string;
+  sources: SourceReference[];
+  created_at: string;
+}
+
+export interface SourceReference {
+  document_id: string;
+  document_name: string;
+  chunk_content: string;
+  similarity: number;
+}
+
+// Widget types
+export type WidgetPosition = 'bottom-right' | 'bottom-left';
+export type WidgetTheme = 'light' | 'dark' | 'auto';
+
+export interface Widget {
+  id: string;
+  widget_key: string;
+  name: string;
+  position: WidgetPosition;
+  theme: WidgetTheme;
+  welcome_message: string;
+  allowed_domains: string[];
+  primary_color: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// API Request/Response types
+export interface ChatRequest {
+  message: string;
+  sessionId?: string;
+  widgetKey: string;
+}
+
+export interface ChatResponse {
+  response: string;
+  sources: SourceReference[];
+  sessionId: string;
+}
+
+export interface DocumentUploadRequest {
+  name: string;
+  sourceType: DocumentSourceType;
+  content?: string;
+  sourceUrl?: string;
+  category?: DocumentCategory;
+}
+
+// Matched chunk from vector search
+export interface MatchedChunk {
+  id: string;
+  document_id: string;
+  content: string;
+  similarity: number;
+  metadata: Record<string, unknown>;
+}
