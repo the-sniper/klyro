@@ -55,6 +55,11 @@ create table widgets (
   allowed_domains text[] default '{}',
   primary_color text default '#6366f1',
   is_active boolean default true,
+  -- Persona configuration for more natural AI responses
+  owner_name text, -- The portfolio owner's name for first-person references
+  personality_traits text[] default '{}', -- e.g., ['friendly', 'technical', 'enthusiastic']
+  communication_style text default 'friendly' check (communication_style in ('formal', 'casual', 'friendly', 'professional')),
+  custom_instructions text, -- Additional persona instructions from the user
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );

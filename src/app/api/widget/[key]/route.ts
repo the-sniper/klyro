@@ -64,6 +64,12 @@ export async function PUT(
     if (body.allowedDomains !== undefined) updateData.allowed_domains = body.allowedDomains;
     if (body.primaryColor !== undefined) updateData.primary_color = body.primaryColor;
     if (body.isActive !== undefined) updateData.is_active = body.isActive;
+    // Persona configuration
+    if (body.ownerName !== undefined) updateData.owner_name = body.ownerName || null;
+    if (body.personalityTraits !== undefined) updateData.personality_traits = body.personalityTraits;
+    if (body.communicationStyle !== undefined) updateData.communication_style = body.communicationStyle;
+    if (body.customInstructions !== undefined) updateData.custom_instructions = body.customInstructions || null;
+
     
     const { data, error } = await supabase
       .from('widgets')

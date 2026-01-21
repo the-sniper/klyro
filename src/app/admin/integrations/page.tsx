@@ -29,6 +29,11 @@ export default function IntegrationsPage() {
     theme: "dark",
     primaryColor: "#6366f1",
     allowedDomains: "",
+    // Persona configuration
+    ownerName: "",
+    personalityTraits: "",
+    communicationStyle: "friendly",
+    customInstructions: "",
   });
 
   useEffect(() => {
@@ -57,6 +62,11 @@ export default function IntegrationsPage() {
         theme: widget.theme,
         primaryColor: widget.primary_color,
         allowedDomains: widget.allowed_domains?.join(", ") || "",
+        // Persona configuration
+        ownerName: widget.owner_name || "",
+        personalityTraits: widget.personality_traits?.join(", ") || "",
+        communicationStyle: widget.communication_style || "friendly",
+        customInstructions: widget.custom_instructions || "",
       });
     } else {
       setEditingWidget(null);
@@ -67,6 +77,10 @@ export default function IntegrationsPage() {
         theme: "dark",
         primaryColor: "#6366f1",
         allowedDomains: "",
+        ownerName: "",
+        personalityTraits: "",
+        communicationStyle: "friendly",
+        customInstructions: "",
       });
     }
     setIsModalOpen(true);
@@ -87,6 +101,14 @@ export default function IntegrationsPage() {
           .split(",")
           .map((d) => d.trim())
           .filter(Boolean),
+        // Persona configuration
+        ownerName: formData.ownerName || null,
+        personalityTraits: formData.personalityTraits
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
+        communicationStyle: formData.communicationStyle,
+        customInstructions: formData.customInstructions || null,
       };
 
       if (editingWidget) {
@@ -498,6 +520,138 @@ export default function IntegrationsPage() {
                 >
                   Leave empty to allow all domains
                 </p>
+              </div>
+
+              {/* Persona Configuration Section */}
+              <div
+                style={{
+                  borderTop: "1px solid var(--border-color)",
+                  marginTop: "24px",
+                  paddingTop: "24px",
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    marginBottom: "16px",
+                    color: "var(--text-primary)",
+                  }}
+                >
+                  🎭 AI Persona Configuration
+                </h3>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--text-secondary)",
+                    marginBottom: "20px",
+                  }}
+                >
+                  Customize how your AI assistant speaks and behaves
+                </p>
+
+                <div className="form-group">
+                  <label className="form-label">Your Name</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g., John Smith"
+                    value={formData.ownerName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, ownerName: e.target.value })
+                    }
+                  />
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-secondary)",
+                      marginTop: "6px",
+                    }}
+                  >
+                    The AI will use this for first-person responses
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Communication Style</label>
+                  <select
+                    className="form-select"
+                    value={formData.communicationStyle}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        communicationStyle: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="friendly">
+                      Friendly — Warm and approachable
+                    </option>
+                    <option value="professional">
+                      Professional — Polished but personable
+                    </option>
+                    <option value="casual">
+                      Casual — Relaxed and conversational
+                    </option>
+                    <option value="formal">
+                      Formal — Precise and articulate
+                    </option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    Personality Traits (optional)
+                  </label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g., enthusiastic, technical, humble, creative"
+                    value={formData.personalityTraits}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        personalityTraits: e.target.value,
+                      })
+                    }
+                  />
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-secondary)",
+                      marginTop: "6px",
+                    }}
+                  >
+                    Comma-separated traits that define your personality
+                  </p>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    Custom Instructions (optional)
+                  </label>
+                  <textarea
+                    className="form-textarea"
+                    placeholder="e.g., Always mention my passion for open source. Avoid discussing compensation. Emphasize my remote work experience."
+                    value={formData.customInstructions}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        customInstructions: e.target.value,
+                      })
+                    }
+                    style={{ minHeight: "80px" }}
+                  />
+                  <p
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-secondary)",
+                      marginTop: "6px",
+                    }}
+                  >
+                    Additional guidance for how the AI should respond
+                  </p>
+                </div>
               </div>
 
               <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>

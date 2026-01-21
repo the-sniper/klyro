@@ -73,9 +73,15 @@ export interface Widget {
   allowed_domains: string[];
   primary_color: string;
   is_active: boolean;
+  // Persona configuration
+  owner_name: string | null;
+  personality_traits: string[];
+  communication_style: 'formal' | 'casual' | 'friendly' | 'professional';
+  custom_instructions: string | null;
   created_at: string;
   updated_at: string;
 }
+
 
 // API Request/Response types
 export interface ChatRequest {
@@ -105,4 +111,16 @@ export interface MatchedChunk {
   content: string;
   similarity: number;
   metadata: Record<string, unknown>;
+}
+
+// Persona context for natural AI responses
+export interface PersonaContext {
+  ownerName?: string;
+  personalityTraits?: string[];
+  communicationStyle?: 'formal' | 'casual' | 'friendly' | 'professional';
+  customInstructions?: string;
+  conversationHistory?: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+  }>;
 }

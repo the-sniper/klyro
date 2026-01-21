@@ -47,6 +47,11 @@ export async function POST(request: NextRequest) {
       welcomeMessage = 'Hi! How can I help you learn more about me?',
       allowedDomains = [],
       primaryColor = '#6366f1',
+      // Persona configuration
+      ownerName,
+      personalityTraits = [],
+      communicationStyle = 'friendly',
+      customInstructions,
     } = body;
     
     if (!name) {
@@ -68,6 +73,11 @@ export async function POST(request: NextRequest) {
         welcome_message: welcomeMessage,
         allowed_domains: allowedDomains,
         primary_color: primaryColor,
+        // Persona fields
+        owner_name: ownerName || null,
+        personality_traits: personalityTraits,
+        communication_style: communicationStyle,
+        custom_instructions: customInstructions || null,
       })
       .select()
       .single();

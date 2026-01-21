@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateResponse } from '@/lib/ai/rag';
 import { createServerClient } from '@/lib/supabase/client';
+import type { PersonaContext } from '@/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     
     const supabase = createServerClient();
     
-    // Validate widget exists and is active
+    // Validate widget exists and is active, fetch persona config
     const { data: widget, error: widgetError } = await supabase
       .from('widgets')
       .select('*')
@@ -66,6 +67,24 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Fetch recent conversation history for context continuity
+    let conversationHistory: PersonaContext['conversationHistory'] = [];
+    if (currentSessionId) {
+      const { data: recentMessages } = await supabase
+        .from('chat_messages')
+        .select('role, content')
+        .eq('session_id', currentSessionId)
+        .order('created_at', { ascending: true })
+        .limit(8); // Last 4 exchanges
+      
+      if (recentMessages) {
+        conversationHistory = recentMessages.map(m => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content
+        }));
+      }
+    }
+    
     // Save user message
     if (currentSessionId) {
       await supabase.from('chat_messages').insert({
@@ -75,8 +94,17 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Generate response using RAG with strictMode from request
-    const { response, sources } = await generateResponse(message, strictMode);
+    // Build persona context from widget configuration
+    const persona: PersonaContext = {
+      ownerName: widget.owner_name || undefined,
+      personalityTraits: widget.personality_traits || [],
+      communicationStyle: widget.communication_style || 'friendly',
+      customInstructions: widget.custom_instructions || undefined,
+      conversationHistory,
+    };
+    
+    // Generate response using RAG with persona context
+    const { response, sources } = await generateResponse(message, strictMode, persona);
     
     // Save assistant message
     if (currentSessionId) {

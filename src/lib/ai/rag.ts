@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { createServerClient } from '@/lib/supabase/client';
 import { generateEmbedding } from './embeddings';
-import type { MatchedChunk, SourceReference } from '@/types';
+import type { MatchedChunk, SourceReference, PersonaContext } from '@/types';
 
 let openaiClient: OpenAI | null = null;
 
@@ -16,22 +16,78 @@ function getOpenAI(): OpenAI {
   return openaiClient;
 }
 
-const SYSTEM_PROMPT = `You are an AI assistant representing a professional on their portfolio website. You answer questions about them based on the provided context.
+/**
+ * Communication style descriptions for the AI
+ */
+const STYLE_DESCRIPTIONS: Record<string, string> = {
+  formal: 'Use polished, professional language. Avoid slang and contractions. Be articulate and precise.',
+  casual: 'Be super relaxed and conversational. Use contractions, casual phrases, and feel free to be a bit playful.',
+  friendly: 'Be warm and approachable. Use contractions naturally. Be enthusiastic but still professional.',
+  professional: 'Strike a balance between warmth and professionalism. Be personable yet polished.',
+};
 
-Guidelines:
-- Answer questions using the provided context. You can infer basic information (like the person's name) from document titles, testimonials, or references within the context.
-- If someone is mentioned by name in testimonials (e.g., "I worked with Areef..."), that IS the portfolio owner's name.
-- Be professional, friendly, and concise.
-- When discussing experience or projects, be specific and highlight relevant skills.
-- If asked about availability or contact preferences, provide clear next steps.
-- Maintain a first-person perspective as if you are speaking on behalf of the person.
-- Only say you don't have information if the context truly has NOTHING relevant to the question.
+/**
+ * Generate a dynamic system prompt with persona awareness
+ */
+function getSystemPrompt(persona?: PersonaContext): string {
+  const now = new Date();
+  const currentDate = now.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  // Build persona-specific instructions
+  const ownerName = persona?.ownerName ? persona.ownerName : 'the portfolio owner';
+  const styleDesc = persona?.communicationStyle 
+    ? STYLE_DESCRIPTIONS[persona.communicationStyle] 
+    : STYLE_DESCRIPTIONS.friendly;
+  
+  const traitsSection = persona?.personalityTraits?.length 
+    ? `\nPersonality: You embody these traits: ${persona.personalityTraits.join(', ')}. Let these shine through naturally in your responses.`
+    : '';
+  
+  const customSection = persona?.customInstructions 
+    ? `\nAdditional instructions from ${ownerName}: ${persona.customInstructions}`
+    : '';
 
-If you genuinely cannot find ANY relevant information in the context, respond with something like:
-"I don't have specific information about that in my knowledge base. You can learn more by exploring the portfolio or reaching out directly."`;
+  return `You are speaking on behalf of ${ownerName} on their portfolio website. Today is ${currentDate}.
+
+PERSONA & VOICE:
+${styleDesc}${traitsSection}${customSection}
+
+CORE GUIDELINES:
+- Speak as if you ARE ${ownerName}, using first-person ("I", "my", "me") naturally.
+- Sound like a real person texting or chatting, not a formal document.
+- Be context-aware: if a date in the knowledge base has passed (e.g., "scheduled for June 2025"), treat it as completed. Say "I finished that project" not "It's scheduled for June 2025."
+- Show genuine enthusiasm when discussing projects and experiences.
+- If someone asks something you don't have info about, be honest: "I don't have that detail handy, but feel free to reach out!"
+- Keep responses conversational, not essay-length.
+- Pick up on conversational cues (if someone says "cool!" you might say "Right?! I was really excited about that one...")
+
+AVOID THESE AI GIVEAWAYS (very important):
+- NEVER use em dashes (—). Use commas, periods, or just restructure the sentence.
+- Don't start responses with "I" too often. Mix it up.
+- Avoid phrases like "I'd be happy to", "Certainly!", "Absolutely!", "Great question!"
+- Don't use "utilize" (say "use"), "leverage" (say "use"), "facilitate", "streamline"
+- Skip "In terms of...", "It's worth noting that...", "I should mention..."
+- No "passionate about" or "excited to share" - just show the enthusiasm naturally
+- Don't overuse exclamation points. One or two per response max.
+- Avoid bullet points unless really necessary. Write in paragraphs like a person would.
+
+ANSWERING QUESTIONS:
+- Use the provided context to give accurate answers.
+- You can infer the owner's name from testimonials, document titles, or context clues.
+- Connect different pieces of information when relevant.
+- Don't just list facts. Weave them into natural responses.
+
+You're representing a real person. Be authentic and let their personality come through.`;
+}
+
 
 const STRICT_MODE_PROMPT = `
-STRICT MODE ENABLED: Base your answers only on information found in or clearly implied by the provided context. If the question cannot be reasonably answered from the context, clearly state that you don't have that information.`;
+STRICT MODE: Only discuss what's clearly in or implied by the provided context. If you can't answer from the context, say so honestly.`;
 
 /**
  * Retrieve relevant document chunks using vector similarity search
@@ -62,26 +118,53 @@ export async function retrieveRelevantChunks(
 }
 
 /**
- * Build context string from matched chunks
+ * Build context string from matched chunks with document metadata
  */
-export function buildContext(chunks: MatchedChunk[]): string {
+export function buildContext(chunks: MatchedChunk[], documentMap: Map<string, string>): string {
   if (chunks.length === 0) {
     return 'No relevant information found in the knowledge base.';
   }
   
   const contextParts = chunks.map((chunk, index) => {
-    return `[Source ${index + 1}]\n${chunk.content}`;
+    const docName = documentMap.get(chunk.document_id) || 'General';
+    return `[Source ${index + 1}: ${docName}]\n${chunk.content}`;
   });
   
   return contextParts.join('\n\n---\n\n');
 }
 
 /**
- * Generate a response using RAG pipeline
+ * Build conversation history for context continuity
+ */
+function buildConversationMessages(
+  history: PersonaContext['conversationHistory'],
+  context: string,
+  query: string
+): Array<{ role: 'user' | 'assistant'; content: string }> {
+  const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+  
+  // Add recent conversation history (last 4 exchanges max to manage token usage)
+  if (history && history.length > 0) {
+    const recentHistory = history.slice(-8); // Last 4 exchanges (8 messages)
+    messages.push(...recentHistory);
+  }
+  
+  // Add current query with context
+  messages.push({
+    role: 'user',
+    content: `Context from my knowledge base:\n${context}\n\n---\n\nQuestion: ${query}`
+  });
+  
+  return messages;
+}
+
+/**
+ * Generate a response using RAG pipeline with persona awareness
  */
 export async function generateResponse(
   query: string,
-  strictMode: boolean = true
+  strictMode: boolean = true,
+  persona?: PersonaContext
 ): Promise<{ response: string; sources: SourceReference[] }> {
   const supabase = createServerClient();
   const openai = getOpenAI();
@@ -90,38 +173,45 @@ export async function generateResponse(
   // tend to produce lower similarity scores, and we want to be inclusive of relevant content
   const chunks = await retrieveRelevantChunks(query, 5, 0.2);
   
-  // Get document names for sources
+  // Get document names for sources and context building
   const documentIds = [...new Set(chunks.map((c) => c.document_id))];
   const { data: documents } = await supabase
     .from('documents')
-    .select('id, name')
+    .select('id, name, category')
     .in('id', documentIds);
   
   const documentMap = new Map(documents?.map((d) => [d.id, d.name]) || []);
   
-  // Build context
-  const context = buildContext(chunks);
+  // Build context with document names
+  const context = buildContext(chunks, documentMap);
   
-  // Generate response
+  // Generate system prompt with persona
   const systemPrompt = strictMode 
-    ? SYSTEM_PROMPT + STRICT_MODE_PROMPT 
-    : SYSTEM_PROMPT;
+    ? getSystemPrompt(persona) + STRICT_MODE_PROMPT 
+    : getSystemPrompt(persona);
+  
+  // Build messages including conversation history
+  const conversationMessages = buildConversationMessages(
+    persona?.conversationHistory,
+    context,
+    query
+  );
   
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: systemPrompt },
-      { 
-        role: 'user', 
-        content: `Context from knowledge base:\n${context}\n\n---\n\nUser question: ${query}` 
-      },
+      ...conversationMessages.map(m => ({ 
+        role: m.role as 'user' | 'assistant', 
+        content: m.content 
+      })),
     ],
-    temperature: 0.7,
-    max_tokens: 500,
+    temperature: 0.75, // Slightly higher for more natural variation
+    max_tokens: 600,   // Allow slightly longer responses for natural flow
   });
   
   const response = completion.choices[0]?.message?.content || 
-    'I apologize, but I was unable to generate a response. Please try again.';
+    "Hmm, I hit a snag there. Mind trying again?";
   
   // Build source references
   const sources: SourceReference[] = chunks.map((chunk) => ({
