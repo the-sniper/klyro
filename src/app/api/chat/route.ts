@@ -104,6 +104,14 @@ export async function POST(request: NextRequest) {
       access_permissions: widget.access_permissions || undefined,
       conversationHistory,
     };
+
+    console.log('DEBUG: Chat Persona Context:', {
+      widgetKey,
+      ownerName: persona.ownerName,
+      hasExternalLinks: !!persona.external_links,
+      links: persona.external_links,
+      permissions: persona.access_permissions
+    });
     
     // Generate response using RAG with persona context
     const { response, sources } = await generateResponse(message, strictMode, persona);

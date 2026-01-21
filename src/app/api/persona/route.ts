@@ -12,13 +12,19 @@ export async function GET() {
       .select('*')
       .order('created_at', { ascending: true })
       .limit(1)
-      .single();
+      .maybeSingle(); // Use maybeSingle to avoid error if no rows
     
-    if (error && error.code !== 'PGRST116') {
+    console.log('DEBUG: Fetched Widget for Persona:', {
+      hasWidget: !!widget,
+      widgetName: widget?.name,
+      externalLinks: widget?.external_links
+    });
+
+    if (error) {
       throw error;
     }
     
-    // Return persona config
+    // Return persona config or defaults
     const config = {
       owner_name: widget?.owner_name || '',
       communication_style: widget?.communication_style || 'friendly',
@@ -51,21 +57,43 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const supabase = createServerClient();
     
-    // Update all widgets with the new persona config
-    const { error } = await supabase
+    // Check if any widget exists
+    const { count, error: countError } = await supabase
       .from('widgets')
-      .update({
-        owner_name: body.owner_name || null,
-        communication_style: body.communication_style || 'friendly',
-        personality_traits: body.personality_traits || [],
-        custom_instructions: body.custom_instructions || null,
-        external_links: body.external_links || {},
-        access_permissions: body.access_permissions || {},
-      })
-      .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all widgets
+      .select('*', { count: 'exact', head: true });
+      
+    if (countError) throw countError;
     
-    if (error) {
-      throw error;
+    const updateData = {
+      owner_name: body.owner_name || null,
+      communication_style: body.communication_style || 'friendly',
+      personality_traits: body.personality_traits || [],
+      custom_instructions: body.custom_instructions || null,
+      external_links: body.external_links || {},
+      access_permissions: body.access_permissions || {},
+    };
+
+    if (count === 0) {
+      // Create a default widget to hold settings if none exist
+      // We'll call it "Default Persona"
+      const { error: insertError } = await supabase
+        .from('widgets')
+        .insert({
+          widget_key: Math.random().toString(36).substring(2, 14),
+          name: 'Default Persona',
+          is_active: true,
+          ...updateData
+        });
+        
+      if (insertError) throw insertError;
+    } else {
+      // Update all existing widgets
+      const { error: updateError } = await supabase
+        .from('widgets')
+        .update(updateData)
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all widgets
+      
+      if (updateError) throw updateError;
     }
     
     return NextResponse.json({ success: true });

@@ -84,6 +84,8 @@ export interface Widget {
     linkedin?: string;
     twitter?: string;
     website?: string;
+    email?: string;
+    phone?: string;
   };
   // Permissions for what the bot can discuss/share
   access_permissions: {
@@ -142,6 +144,8 @@ export interface PersonaContext {
     linkedin?: string;
     twitter?: string;
     website?: string;
+    email?: string;
+    phone?: string;
   };
   access_permissions?: {
     can_share_github?: boolean;

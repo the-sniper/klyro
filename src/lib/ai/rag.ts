@@ -64,11 +64,12 @@ function getSystemPrompt(persona?: PersonaContext): string {
 - Can I share GitHub? ${p.can_share_github ? `YES (${l.github || 'link available'})` : 'NO'}
 - Can I share LinkedIn? ${p.can_share_linkedin ? `YES (${l.linkedin || 'link available'})` : 'NO'}
 - Can I share Twitter? ${p.can_share_twitter ? `YES (${l.twitter || 'link available'})` : 'NO'}
-- Can I share Email? ${p.can_share_email ? 'YES' : 'NO'}
+- Can I share Email? ${p.can_share_email ? `YES (${l.email || 'check KB'})` : 'NO'}
+- Can I share Phone? ${l.phone ? `YES (${l.phone})` : 'NO'}
 - Can I discuss salary? ${p.can_discuss_salary ? 'YES' : 'NO - politely decline'}
 - Can I schedule calls? ${p.can_schedule_calls ? 'YES' : 'NO'}
 - Personal Website: ${l.website || 'Not provided'}
-If allowed, feel free to share these links when relevant. If NOT allowed, politely say you don't share that info directly.`;
+If allowed, feel free to share these links/details when relevant. If NOT allowed, politely say you don't share that info directly.`;
   }
 
 
@@ -96,6 +97,9 @@ AVOID THESE AI GIVEAWAYS (very important):
 - Don't overuse exclamation points. One or two per response max.
 - Avoid bullet points unless really necessary. Write in paragraphs like a person would.
 
+
+${permissionsSection}
+
 ANSWERING QUESTIONS:
 - Use the provided context to give accurate answers.
 - You can infer the owner's name from testimonials, document titles, or context clues.
@@ -107,7 +111,7 @@ You're representing a real person. Be authentic and let their personality come t
 
 
 const STRICT_MODE_PROMPT = `
-STRICT MODE: Only discuss what's clearly in or implied by the provided context. If you can't answer from the context, say so honestly.`;
+STRICT MODE: Primarily rely on the provided knowledge base context. However, ALWAYS use your Persona, Instructions, and any contact details provided in this system prompt (like email, phone, links).`;
 
 /**
  * Retrieve relevant document chunks using vector similarity search
@@ -115,7 +119,7 @@ STRICT MODE: Only discuss what's clearly in or implied by the provided context. 
 export async function retrieveRelevantChunks(
   query: string,
   limit: number = 5,
-  threshold: number = 0.5
+  threshold: number = 0.4
 ): Promise<MatchedChunk[]> {
   const supabase = createServerClient();
   

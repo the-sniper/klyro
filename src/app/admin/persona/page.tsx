@@ -24,6 +24,8 @@ interface PersonaConfig {
     linkedin?: string;
     twitter?: string;
     website?: string;
+    email?: string;
+    phone?: string;
   };
   access_permissions: {
     can_share_github: boolean;
@@ -516,7 +518,7 @@ export default function PersonaPage() {
           </div>
         </div>
 
-        {/* External Links Section */}
+        {/* Links & Contact Section */}
         <div className="card">
           <div
             style={{
@@ -541,7 +543,7 @@ export default function PersonaPage() {
             </div>
             <div>
               <h2 style={{ fontSize: "18px", fontWeight: 600, margin: 0 }}>
-                External Links
+                Links & Contact
               </h2>
               <p
                 style={{
@@ -550,7 +552,7 @@ export default function PersonaPage() {
                   margin: 0,
                 }}
               >
-                Links the bot can share when relevant
+                External links and contact info the bot can share
               </p>
             </div>
           </div>
@@ -562,6 +564,61 @@ export default function PersonaPage() {
               gap: "16px",
             }}
           >
+            <div className="form-group">
+              <label className="form-label">Email Address</label>
+              <input
+                type="email"
+                className="form-input"
+                placeholder="me@example.com"
+                value={config.external_links.email || ""}
+                onChange={(e) =>
+                  setConfig({
+                    ...config,
+                    external_links: {
+                      ...config.external_links,
+                      email: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Phone Number (optional)</label>
+              <input
+                type="tel"
+                className="form-input"
+                placeholder="+1 (555) 000-0000"
+                value={config.external_links.phone || ""}
+                onChange={(e) => {
+                  // Simple US-centric formatting: (XXX) XXX-XXXX
+                  let input = e.target.value.replace(/\D/g, ""); // Remove non-digits
+                  let formatted = input;
+
+                  if (input.length > 0) {
+                    if (input.length <= 3) {
+                      formatted = input;
+                    } else if (input.length <= 6) {
+                      formatted = `(${input.slice(0, 3)}) ${input.slice(3)}`;
+                    } else if (input.length <= 10) {
+                      formatted = `(${input.slice(0, 3)}) ${input.slice(3, 6)}-${input.slice(6)}`;
+                    } else {
+                      // If key starts with country code (e.g. 1), handle it
+                      formatted = `+${input.slice(0, input.length - 10)} (${input.slice(input.length - 10, input.length - 7)}) ${input.slice(input.length - 7, input.length - 4)}-${input.slice(input.length - 4)}`;
+                    }
+                  }
+
+                  setConfig({
+                    ...config,
+                    external_links: {
+                      ...config.external_links,
+                      phone: formatted,
+                    },
+                  });
+                }}
+              />
+            </div>
+
             <div className="form-group">
               <label
                 className="form-label"

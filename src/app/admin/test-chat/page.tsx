@@ -33,6 +33,26 @@ export default function TestChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Fetch a valid widget key on mount
+  const [activeWidgetKey, setActiveWidgetKey] = useState<string>("default");
+
+  useEffect(() => {
+    async function fetchWidgetKey() {
+      try {
+        const res = await fetch("/api/widget");
+        if (res.ok) {
+          const widgets = await res.json();
+          if (widgets && widgets.length > 0) {
+            setActiveWidgetKey(widgets[0].widget_key);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch widget key", e);
+      }
+    }
+    fetchWidgetKey();
+  }, []);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -61,7 +81,7 @@ export default function TestChatPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: userMessage.content,
-          widgetKey: "default",
+          widgetKey: activeWidgetKey,
           sessionId,
           strictMode,
         }),
