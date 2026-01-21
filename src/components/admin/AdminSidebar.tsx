@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Database,
@@ -9,7 +9,9 @@ import {
   Code2,
   Sparkles,
   Fingerprint,
+  LogOut,
 } from "lucide-react";
+import { getSupabase } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -21,6 +23,18 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = getSupabase();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      router.push("/login");
+      router.refresh(); // Clear any server components cache
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <aside className="admin-sidebar glass">
@@ -49,6 +63,23 @@ export function AdminSidebar() {
           );
         })}
       </nav>
+
+      <div style={{ marginTop: "auto", paddingTop: "24px" }}>
+        <button
+          onClick={handleLogout}
+          className="sidebar-link w-full"
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            width: "100%",
+          }}
+        >
+          <LogOut size={22} />
+          <span>Logout</span>
+        </button>
+      </div>
     </aside>
   );
 }
