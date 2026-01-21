@@ -154,145 +154,152 @@ export default function KnowledgeBasePage() {
   }
 
   return (
-    <div className="animate-fade-in content-container">
-      <div className="page-header knowledge-header">
-        <div className="header-text">
-          <h1 className="page-title text-gradient">Knowledge Base</h1>
-          <p className="page-subtitle">
-            Manage the documents that power your chatbot's intelligence
-          </p>
+    <>
+      <div className="animate-fade-in content-container">
+        <div className="page-header knowledge-header">
+          <div className="header-text">
+            <h1 className="page-title text-gradient">Knowledge Base</h1>
+            <p className="page-subtitle">
+              Manage the documents that power your chatbot's intelligence
+            </p>
+          </div>
+          <button
+            className="btn btn-primary add-doc-btn"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <Plus size={18} />
+            <span>Add Document</span>
+          </button>
         </div>
-        <button
-          className="btn btn-primary add-doc-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          <Plus size={18} />
-          <span>Add Document</span>
-        </button>
+
+        {documents.length === 0 ? (
+          <div className="card glass-hover empty-knowledge-card">
+            <div className="empty-state">
+              <div className="empty-icon-glow">
+                <FileText size={48} />
+              </div>
+              <h3 className="empty-title">Your knowledge base is empty</h3>
+              <p className="empty-desc">
+                Train your chatbot by adding documents, text snippets, or
+                website URLs.
+              </p>
+              <button
+                className="btn btn-primary"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <Plus size={18} />
+                Add Your First Document
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="card glass knowledge-table-card">
+            <div className="table-wrapper">
+              <table className="premium-table">
+                <thead>
+                  <tr>
+                    <th>Document Name</th>
+                    <th>Source</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Last Sync</th>
+                    <th className="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {documents.map((doc) => {
+                    const status =
+                      statusConfig[doc.status as keyof typeof statusConfig] ||
+                      statusConfig.queued;
+                    const StatusIcon = status.icon;
+
+                    return (
+                      <tr key={doc.id} className="table-row-hover">
+                        <td>
+                          <div className="doc-identity">
+                            <div
+                              className={`doc-icon-wrapper ${doc.source_type}`}
+                            >
+                              {doc.source_type === "url" ? (
+                                <Globe size={18} />
+                              ) : (
+                                <FileText size={18} />
+                              )}
+                            </div>
+                            <span className="doc-name">{doc.name}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="source-tag text-capitalize">
+                            {doc.source_type}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="category-label text-capitalize">
+                            {doc.category || "General"}
+                          </span>
+                        </td>
+                        <td>
+                          <div className={`status-pill ${status.className}`}>
+                            <StatusIcon
+                              size={12}
+                              className={
+                                doc.status === "processing"
+                                  ? "animate-spin"
+                                  : ""
+                              }
+                            />
+                            <span>{status.label}</span>
+                          </div>
+                        </td>
+                        <td className="text-muted">
+                          {new Date(doc.updated_at).toLocaleDateString(
+                            undefined,
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            },
+                          )}
+                        </td>
+                        <td className="text-right">
+                          <div className="actions-flex">
+                            <button
+                              className="action-btn-ghost info"
+                              onClick={() => handleReprocess(doc.id)}
+                              title="Reprocess Document"
+                            >
+                              <RefreshCw size={16} />
+                            </button>
+                            <button
+                              className="action-btn-ghost danger"
+                              onClick={() => handleDelete(doc.id)}
+                              title="Delete Document"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
-      {documents.length === 0 ? (
-        <div className="card glass-hover empty-knowledge-card">
-          <div className="empty-state">
-            <div className="empty-icon-glow">
-              <FileText size={48} />
-            </div>
-            <h3 className="empty-title">Your knowledge base is empty</h3>
-            <p className="empty-desc">
-              Train your chatbot by adding documents, text snippets, or website
-              URLs.
-            </p>
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              <Plus size={18} />
-              Add Your First Document
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="card glass knowledge-table-card">
-          <div className="table-wrapper">
-            <table className="premium-table">
-              <thead>
-                <tr>
-                  <th>Document Name</th>
-                  <th>Source</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Last Sync</th>
-                  <th className="text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {documents.map((doc) => {
-                  const status =
-                    statusConfig[doc.status as keyof typeof statusConfig] ||
-                    statusConfig.queued;
-                  const StatusIcon = status.icon;
-
-                  return (
-                    <tr key={doc.id} className="table-row-hover">
-                      <td>
-                        <div className="doc-identity">
-                          <div
-                            className={`doc-icon-wrapper ${doc.source_type}`}
-                          >
-                            {doc.source_type === "url" ? (
-                              <Globe size={18} />
-                            ) : (
-                              <FileText size={18} />
-                            )}
-                          </div>
-                          <span className="doc-name">{doc.name}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <span className="source-tag text-capitalize">
-                          {doc.source_type}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="category-label text-capitalize">
-                          {doc.category || "General"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className={`status-pill ${status.className}`}>
-                          <StatusIcon
-                            size={12}
-                            className={
-                              doc.status === "processing" ? "animate-spin" : ""
-                            }
-                          />
-                          <span>{status.label}</span>
-                        </div>
-                      </td>
-                      <td className="text-muted">
-                        {new Date(doc.updated_at).toLocaleDateString(
-                          undefined,
-                          {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          },
-                        )}
-                      </td>
-                      <td className="text-right">
-                        <div className="actions-flex">
-                          <button
-                            className="action-btn-ghost info"
-                            onClick={() => handleReprocess(doc.id)}
-                            title="Reprocess Document"
-                          >
-                            <RefreshCw size={16} />
-                          </button>
-                          <button
-                            className="action-btn-ghost danger"
-                            onClick={() => handleDelete(doc.id)}
-                            title="Delete Document"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Add Document Modal */}
+      {/* Add Document Modal moved outside for stable positioning */}
       {isModalOpen && (
         <div
-          className="modal-overlay animate-fade-in"
+          className="modal-overlay animate-overlay"
           onClick={() => setIsModalOpen(false)}
         >
-          <div className="modal-glass" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-glass animate-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div className="modal-header-text">
                 <h2 className="modal-title">Add Knowledge</h2>
@@ -698,8 +705,8 @@ export default function KnowledgeBasePage() {
         .modal-overlay {
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.8);
-          backdrop-filter: blur(8px);
+          background: rgba(0, 0, 0, 0.7);
+          backdrop-filter: blur(12px);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -710,11 +717,13 @@ export default function KnowledgeBasePage() {
           background: #0f172a;
           border: 1px solid var(--border-color);
           width: 100%;
-          max-width: 640px;
+          max-width: 600px;
           border-radius: 24px;
           display: flex;
           flex-direction: column;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+          max-height: 90vh;
+          overflow-y: auto;
+          box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
         }
         .modal-header {
           padding: 32px 32px 0;
@@ -920,6 +929,6 @@ export default function KnowledgeBasePage() {
           color: var(--text-muted);
         }
       `}</style>
-    </div>
+    </>
   );
 }

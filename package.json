@@ -10,7 +10,8 @@
     "build:widget": "node widget/build.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.78.0",
     "clsx": "^2.1.0",
     "lucide-react": "^0.460.0",
     "mammoth": "^1.11.0",

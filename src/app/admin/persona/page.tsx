@@ -14,6 +14,12 @@ import {
   Phone,
   Mail,
   CheckCircle,
+  Smile,
+  Briefcase,
+  Coffee,
+  Award,
+  Zap,
+  Feather,
 } from "lucide-react";
 
 interface PersonaConfig {
@@ -44,37 +50,37 @@ const TONE_OPTIONS = [
     value: "friendly",
     label: "Friendly",
     description: "Warm, approachable, uses casual language",
-    emoji: "😊",
+    icon: Smile,
   },
   {
     value: "professional",
     label: "Professional",
     description: "Polished but personable, balanced tone",
-    emoji: "💼",
+    icon: Briefcase,
   },
   {
     value: "casual",
     label: "Casual",
     description: "Super relaxed, like texting a friend",
-    emoji: "✌️",
+    icon: Coffee,
   },
   {
     value: "formal",
     label: "Formal",
     description: "Precise, articulate, no slang",
-    emoji: "🎩",
+    icon: Award,
   },
   {
     value: "enthusiastic",
     label: "Enthusiastic",
     description: "High energy, excited about everything",
-    emoji: "🚀",
+    icon: Zap,
   },
   {
     value: "calm",
     label: "Calm & Thoughtful",
     description: "Measured, reflective, takes time to explain",
-    emoji: "🧘",
+    icon: Feather,
   },
 ];
 
@@ -273,7 +279,9 @@ export default function PersonaPage() {
                   }
                   className={`tone-card ${config.communication_style === tone.value ? "active" : ""}`}
                 >
-                  <div className="tone-emoji">{tone.emoji}</div>
+                  <div className="tone-icon-wrapper">
+                    <tone.icon size={24} />
+                  </div>
                   <div className="tone-info">
                     <div className="tone-label">{tone.label}</div>
                     <div className="tone-desc">{tone.description}</div>
@@ -580,8 +588,16 @@ export default function PersonaPage() {
           border-color: var(--accent-primary);
           box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
         }
-        .tone-emoji {
-          font-size: 24px;
+        .tone-icon-wrapper {
+          color: var(--text-secondary);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.3s ease;
+        }
+        .tone-card.active .tone-icon-wrapper {
+          color: var(--accent-primary);
+          transform: scale(1.1);
         }
         .tone-label {
           font-size: 15px;
