@@ -4,14 +4,19 @@ import {
   listDocuments, 
   processDocument 
 } from '@/lib/db/documents';
+import { requireAuth } from '@/lib/supabase/server';
 import type { DocumentSourceType, DocumentCategory } from '@/types';
 
-// List all documents
+// List all documents for the current user
 export async function GET() {
   try {
-    const documents = await listDocuments();
+    const user = await requireAuth();
+    const documents = await listDocuments(user.id);
     return NextResponse.json(documents);
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error listing documents:', error);
     return NextResponse.json(
       { error: 'Failed to list documents' },
@@ -67,6 +72,9 @@ async function extractTextFromFile(file: File): Promise<string> {
 // Create a new document
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user first
+    const user = await requireAuth();
+    
     const contentType = request.headers.get('content-type') || '';
     
     let name: string;
@@ -146,10 +154,11 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Create the document
+    // Create the document with user_id
     const document = await createDocument(
       name,
       sourceType,
+      user.id,
       content,
       sourceUrl,
       category
@@ -163,6 +172,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(document, { status: 201 });
     
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error creating document:', error);
     return NextResponse.json(
       { error: 'Failed to create document' },

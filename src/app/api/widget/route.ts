@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
+import { requireAuth } from '@/lib/supabase/server';
 import { nanoid } from 'nanoid';
 
 // Simple nanoid implementation for widget key generation
@@ -12,14 +13,16 @@ function generateWidgetKey(): string {
   return result;
 }
 
-// List all widgets
+// List all widgets for the current user
 export async function GET() {
   try {
+    const user = await requireAuth();
     const supabase = createServerClient();
     
     const { data, error } = await supabase
       .from('widgets')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -28,6 +31,9 @@ export async function GET() {
     
     return NextResponse.json(data);
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error listing widgets:', error);
     return NextResponse.json(
       { error: 'Failed to list widgets' },
@@ -36,9 +42,10 @@ export async function GET() {
   }
 }
 
-// Create a new widget
+// Create a new widget for the current user
 export async function POST(request: NextRequest) {
   try {
+    const user = await requireAuth();
     const body = await request.json();
     const { 
       name, 
@@ -78,6 +85,8 @@ export async function POST(request: NextRequest) {
         personality_traits: personalityTraits,
         communication_style: communicationStyle,
         custom_instructions: customInstructions || null,
+        // Associate with current user
+        user_id: user.id,
       })
       .select()
       .single();
@@ -88,6 +97,9 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error creating widget:', error);
     return NextResponse.json(
       { error: 'Failed to create widget' },

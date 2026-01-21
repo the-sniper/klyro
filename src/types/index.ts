@@ -67,6 +67,7 @@ export interface Widget {
   id: string;
   widget_key: string;
   name: string;
+  user_id: string | null; // Owner of this widget
   position: WidgetPosition;
   theme: WidgetTheme;
   welcome_message: string;
@@ -135,6 +136,7 @@ export interface MatchedChunk {
 // Persona context for natural AI responses
 // Persona context for natural AI responses
 export interface PersonaContext {
+  userId?: string; // User ID for multi-tenancy filtering
   ownerName?: string;
   personalityTraits?: string[];
   communicationStyle?: 'formal' | 'casual' | 'friendly' | 'professional' | 'enthusiastic' | 'calm';

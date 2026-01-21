@@ -1,17 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteDocument, processDocument } from '@/lib/db/documents';
 import { createServerClient } from '@/lib/supabase/client';
+import { requireAuth } from '@/lib/supabase/server';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// Get a single document
+// Get a single document (only if owned by current user)
 export async function GET(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
+    const user = await requireAuth();
     const { id } = await params;
     const supabase = createServerClient();
     
@@ -19,6 +21,7 @@ export async function GET(
       .from('documents')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
     
     if (error || !data) {
@@ -30,6 +33,9 @@ export async function GET(
     
     return NextResponse.json(data);
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error fetching document:', error);
     return NextResponse.json(
       { error: 'Failed to fetch document' },
@@ -38,16 +44,20 @@ export async function GET(
   }
 }
 
-// Delete a document
+// Delete a document (only if owned by current user)
 export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
+    const user = await requireAuth();
     const { id } = await params;
-    await deleteDocument(id);
+    await deleteDocument(id, user.id);
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error deleting document:', error);
     return NextResponse.json(
       { error: 'Failed to delete document' },
@@ -56,14 +66,31 @@ export async function DELETE(
   }
 }
 
-// Reprocess a document
+// Reprocess a document (only if owned by current user)
 export async function PATCH(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
+    const user = await requireAuth();
     const { id } = await params;
     const body = await request.json();
+    
+    // Verify ownership before reprocessing
+    const supabase = createServerClient();
+    const { data: doc } = await supabase
+      .from('documents')
+      .select('id')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!doc) {
+      return NextResponse.json(
+        { error: 'Document not found' },
+        { status: 404 }
+      );
+    }
     
     if (body.action === 'reprocess') {
       // Process document asynchronously
@@ -82,6 +109,9 @@ export async function PATCH(
       { status: 400 }
     );
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error updating document:', error);
     return NextResponse.json(
       { error: 'Failed to update document' },

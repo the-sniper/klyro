@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
+import { requireAuth } from '@/lib/supabase/server';
 
-// Get persona configuration (from the default widget for now)
+// Get persona configuration for the current user's widget
 export async function GET() {
   try {
+    const user = await requireAuth();
     const supabase = createServerClient();
     
-    // Get the first widget's persona config (or create default)
+    // Get the user's widget persona config (or return defaults if none exists)
     const { data: widget, error } = await supabase
       .from('widgets')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle(); // Use maybeSingle to avoid error if no rows
@@ -17,7 +20,8 @@ export async function GET() {
     console.log('DEBUG: Fetched Widget for Persona:', {
       hasWidget: !!widget,
       widgetName: widget?.name,
-      externalLinks: widget?.external_links
+      externalLinks: widget?.external_links,
+      userId: user.id
     });
 
     if (error) {
@@ -43,6 +47,9 @@ export async function GET() {
     
     return NextResponse.json(config);
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error fetching persona config:', error);
     return NextResponse.json(
       { error: 'Failed to fetch persona config' },
@@ -51,16 +58,18 @@ export async function GET() {
   }
 }
 
-// Update persona configuration
+// Update persona configuration for the current user
 export async function PUT(request: NextRequest) {
   try {
+    const user = await requireAuth();
     const body = await request.json();
     const supabase = createServerClient();
     
-    // Check if any widget exists
+    // Check if user has any widgets
     const { count, error: countError } = await supabase
       .from('widgets')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id);
       
     if (countError) throw countError;
     
@@ -74,30 +83,33 @@ export async function PUT(request: NextRequest) {
     };
 
     if (count === 0) {
-      // Create a default widget to hold settings if none exist
-      // We'll call it "Default Persona"
+      // Create a default widget for this user if none exist
       const { error: insertError } = await supabase
         .from('widgets')
         .insert({
           widget_key: Math.random().toString(36).substring(2, 14),
           name: 'Default Persona',
           is_active: true,
+          user_id: user.id,
           ...updateData
         });
         
       if (insertError) throw insertError;
     } else {
-      // Update all existing widgets
+      // Update only this user's widgets
       const { error: updateError } = await supabase
         .from('widgets')
         .update(updateData)
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Update all widgets
+        .eq('user_id', user.id);
       
       if (updateError) throw updateError;
     }
     
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error updating persona config:', error);
     return NextResponse.json(
       { error: 'Failed to update persona config' },

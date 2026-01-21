@@ -96,7 +96,9 @@ export async function POST(request: NextRequest) {
     }
     
     // Build persona context from widget configuration
+    // Include userId for multi-tenancy filtering in RAG
     const persona: PersonaContext = {
+      userId: widget.user_id || undefined, // Widget owner's user_id for document filtering
       ownerName: widget.owner_name || undefined,
       personalityTraits: widget.personality_traits || [],
       communicationStyle: widget.communication_style || 'friendly',
@@ -108,6 +110,7 @@ export async function POST(request: NextRequest) {
 
     console.log('DEBUG: Chat Persona Context:', {
       widgetKey,
+      userId: persona.userId,
       ownerName: persona.ownerName,
       hasExternalLinks: !!persona.external_links,
       links: persona.external_links,

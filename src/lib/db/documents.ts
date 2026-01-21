@@ -3,6 +3,14 @@ import { chunkDocument, generateEmbeddings } from '@/lib/ai/embeddings';
 import type { Document, DocumentSourceType, DocumentCategory } from '@/types';
 
 /**
+ * Get admin client for operations that need to bypass RLS
+ * (like processing documents in background jobs)
+ */
+function getAdminClient() {
+  return createServerClient();
+}
+
+/**
  * Fetch content from a URL
  */
 async function fetchUrlContent(url: string): Promise<string> {
@@ -26,9 +34,10 @@ async function fetchUrlContent(url: string): Promise<string> {
 
 /**
  * Process a document: chunk it and generate embeddings
+ * Uses admin client since this runs in background and needs to bypass RLS
  */
 export async function processDocument(documentId: string): Promise<void> {
-  const supabase = createServerClient();
+  const supabase = getAdminClient();
   
   try {
     // Update status to processing
@@ -125,11 +134,12 @@ export async function processDocument(documentId: string): Promise<void> {
 export async function createDocument(
   name: string,
   sourceType: DocumentSourceType,
+  userId: string,
   content?: string,
   sourceUrl?: string,
   category?: DocumentCategory
 ): Promise<Document> {
-  const supabase = createServerClient();
+  const supabase = getAdminClient();
   
   const { data, error } = await supabase
     .from('documents')
@@ -140,6 +150,7 @@ export async function createDocument(
       source_url: sourceUrl,
       category,
       status: 'queued',
+      user_id: userId,
     })
     .select()
     .single();
@@ -152,14 +163,15 @@ export async function createDocument(
 }
 
 /**
- * List all documents
+ * List all documents for a specific user
  */
-export async function listDocuments(): Promise<Document[]> {
-  const supabase = createServerClient();
+export async function listDocuments(userId: string): Promise<Document[]> {
+  const supabase = getAdminClient();
   
   const { data, error } = await supabase
     .from('documents')
     .select('*')
+    .eq('user_id', userId)
     .order('created_at', { ascending: false });
   
   if (error) {
@@ -170,15 +182,16 @@ export async function listDocuments(): Promise<Document[]> {
 }
 
 /**
- * Delete a document
+ * Delete a document (only if owned by the user)
  */
-export async function deleteDocument(documentId: string): Promise<void> {
-  const supabase = createServerClient();
+export async function deleteDocument(documentId: string, userId: string): Promise<void> {
+  const supabase = getAdminClient();
   
   const { error } = await supabase
     .from('documents')
     .delete()
-    .eq('id', documentId);
+    .eq('id', documentId)
+    .eq('user_id', userId);
   
   if (error) {
     throw error;

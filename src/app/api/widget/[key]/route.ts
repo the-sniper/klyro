@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
+import { requireAuth } from '@/lib/supabase/server';
 
 interface RouteParams {
   params: Promise<{ key: string }>;
 }
 
-// Get widget configuration by key
+// Get widget configuration by key (public - for chat widget to load)
 export async function GET(
   request: NextRequest,
   { params }: RouteParams
@@ -45,12 +46,13 @@ export async function GET(
   }
 }
 
-// Update widget configuration
+// Update widget configuration (requires ownership)
 export async function PUT(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
+    const user = await requireAuth();
     const { key } = await params;
     const body = await request.json();
     const supabase = createServerClient();
@@ -75,6 +77,7 @@ export async function PUT(
       .from('widgets')
       .update(updateData)
       .eq('widget_key', key)
+      .eq('user_id', user.id)
       .select()
       .single();
     
@@ -82,8 +85,18 @@ export async function PUT(
       throw error;
     }
     
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Widget not found or access denied' },
+        { status: 404 }
+      );
+    }
+    
     return NextResponse.json(data);
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error updating widget:', error);
     return NextResponse.json(
       { error: 'Failed to update widget' },
@@ -92,19 +105,21 @@ export async function PUT(
   }
 }
 
-// Delete widget
+// Delete widget (requires ownership)
 export async function DELETE(
   request: NextRequest,
   { params }: RouteParams
 ) {
   try {
+    const user = await requireAuth();
     const { key } = await params;
     const supabase = createServerClient();
     
     const { error } = await supabase
       .from('widgets')
       .delete()
-      .eq('widget_key', key);
+      .eq('widget_key', key)
+      .eq('user_id', user.id);
     
     if (error) {
       throw error;
@@ -112,6 +127,9 @@ export async function DELETE(
     
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error deleting widget:', error);
     return NextResponse.json(
       { error: 'Failed to delete widget' },

@@ -145,9 +145,14 @@ STRICT MODE: Primarily rely on the provided knowledge base context. However, ALW
 
 /**
  * Retrieve relevant document chunks using vector similarity search
+ * @param query - The search query
+ * @param userId - The user ID to filter documents by (for multi-tenancy)
+ * @param limit - Maximum number of chunks to return
+ * @param threshold - Minimum similarity threshold
  */
 export async function retrieveRelevantChunks(
   query: string,
+  userId?: string,
   limit: number = 5,
   threshold: number = 0.4
 ): Promise<MatchedChunk[]> {
@@ -156,11 +161,12 @@ export async function retrieveRelevantChunks(
   // Generate embedding for the query
   const queryEmbedding = await generateEmbedding(query);
   
-  // Perform vector similarity search
+  // Perform vector similarity search with user filtering
   const { data, error } = await supabase.rpc('match_document_chunks', {
     query_embedding: queryEmbedding,
     match_threshold: threshold,
     match_count: limit,
+    filter_user_id: userId || null,
   });
   
   if (error) {
@@ -273,8 +279,8 @@ export async function generateResponse(
   // 1. Contextual Query Expansion
   const optimizedQuery = await rewriteQuery(query, persona?.conversationHistory);
 
-  // 2. Retrieve relevant chunks using the optimized query
-  const chunks = await retrieveRelevantChunks(optimizedQuery, 5, 0.2);
+  // 2. Retrieve relevant chunks using the optimized query (filtered by user_id)
+  const chunks = await retrieveRelevantChunks(optimizedQuery, persona?.userId, 5, 0.2);
   
   // Get document names for sources and context building
   const documentIds = [...new Set(chunks.map((c) => c.document_id))];
