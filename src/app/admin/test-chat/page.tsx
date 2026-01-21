@@ -1,25 +1,21 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import {
   Send,
   RotateCcw,
   Bot,
-  User,
-  FileText,
   ToggleLeft,
   ToggleRight,
   Loader2,
+  Info,
 } from "lucide-react";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  sources?: Array<{
-    document_name: string;
-    similarity: number;
-  }>;
 }
 
 export default function TestChatPage() {
@@ -80,7 +76,6 @@ export default function TestChatPage() {
           id: (Date.now() + 1).toString(),
           role: "assistant",
           content: data.response,
-          sources: data.sources,
         };
 
         setMessages((prev) => [...prev, assistantMessage]);
@@ -144,18 +139,30 @@ export default function TestChatPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-          <button
-            className="btn btn-ghost"
-            onClick={() => setStrictMode(!strictMode)}
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
-          >
-            {strictMode ? (
-              <ToggleRight size={20} color="var(--accent-primary)" />
-            ) : (
-              <ToggleLeft size={20} />
-            )}
-            Strict Mode
-          </button>
+          <div className="strict-mode-toggle">
+            <button
+              className="btn btn-ghost"
+              onClick={() => setStrictMode(!strictMode)}
+              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            >
+              {strictMode ? (
+                <ToggleRight size={20} color="var(--accent-primary)" />
+              ) : (
+                <ToggleLeft size={20} />
+              )}
+              Strict Mode
+            </button>
+            <div className="tooltip-trigger">
+              <Info size={14} color="var(--text-muted)" />
+              <div className="tooltip">
+                <strong>Strict Mode</strong>
+                <p>
+                  When enabled, the AI only answers based on your knowledge base
+                  content. Disable to allow more flexible responses.
+                </p>
+              </div>
+            </div>
+          </div>
           <button className="btn btn-secondary" onClick={handleReset}>
             <RotateCcw size={16} />
             Reset
@@ -177,22 +184,9 @@ export default function TestChatPage() {
         <div className="chat-messages">
           {messages.map((msg) => (
             <div key={msg.id} className={`chat-message ${msg.role}`}>
-              {msg.content}
-
-              {msg.sources && msg.sources.length > 0 && (
-                <div className="sources-container">
-                  <div className="sources-title">Sources used:</div>
-                  {msg.sources.map((source, idx) => (
-                    <div key={idx} className="source-item">
-                      <FileText size={12} />
-                      <span>{source.document_name}</span>
-                      <span style={{ marginLeft: "auto", opacity: 0.6 }}>
-                        {Math.round(source.similarity * 100)}% match
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="message-content">
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              </div>
             </div>
           ))}
 

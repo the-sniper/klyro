@@ -5,7 +5,7 @@ import { createServerClient } from '@/lib/supabase/client';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { message, sessionId, widgetKey } = body;
+    const { message, sessionId, widgetKey, strictMode = true } = body;
     
     if (!message || !widgetKey) {
       return NextResponse.json(
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Generate response using RAG
-    const { response, sources } = await generateResponse(message, true);
+    // Generate response using RAG with strictMode from request
+    const { response, sources } = await generateResponse(message, strictMode);
     
     // Save assistant message
     if (currentSessionId) {

@@ -19,18 +19,19 @@ function getOpenAI(): OpenAI {
 const SYSTEM_PROMPT = `You are an AI assistant representing a professional on their portfolio website. You answer questions about them based on the provided context.
 
 Guidelines:
-- Only answer questions using the provided context. Do not make up information.
-- If the context doesn't contain enough information to answer the question, politely say so and suggest viewing specific sections of the portfolio or contacting directly.
+- Answer questions using the provided context. You can infer basic information (like the person's name) from document titles, testimonials, or references within the context.
+- If someone is mentioned by name in testimonials (e.g., "I worked with Areef..."), that IS the portfolio owner's name.
 - Be professional, friendly, and concise.
 - When discussing experience or projects, be specific and highlight relevant skills.
 - If asked about availability or contact preferences, provide clear next steps.
 - Maintain a first-person perspective as if you are speaking on behalf of the person.
+- Only say you don't have information if the context truly has NOTHING relevant to the question.
 
-If you cannot answer a question from the context, respond with something like:
+If you genuinely cannot find ANY relevant information in the context, respond with something like:
 "I don't have specific information about that in my knowledge base. You can learn more by exploring the portfolio or reaching out directly."`;
 
 const STRICT_MODE_PROMPT = `
-STRICT MODE ENABLED: You MUST only respond with information found in the provided context. If the question cannot be answered from the context, clearly state that you don't have that information and suggest contacting directly.`;
+STRICT MODE ENABLED: Base your answers only on information found in or clearly implied by the provided context. If the question cannot be reasonably answered from the context, clearly state that you don't have that information.`;
 
 /**
  * Retrieve relevant document chunks using vector similarity search
@@ -85,8 +86,9 @@ export async function generateResponse(
   const supabase = createServerClient();
   const openai = getOpenAI();
   
-  // Retrieve relevant chunks
-  const chunks = await retrieveRelevantChunks(query, 5, 0.4);
+  // Retrieve relevant chunks - using lower threshold (0.2) because OpenAI embeddings
+  // tend to produce lower similarity scores, and we want to be inclusive of relevant content
+  const chunks = await retrieveRelevantChunks(query, 5, 0.2);
   
   // Get document names for sources
   const documentIds = [...new Set(chunks.map((c) => c.document_id))];

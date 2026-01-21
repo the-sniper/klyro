@@ -21,7 +21,8 @@ export default function KnowledgeBasePage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [sourceType, setSourceType] = useState<"text" | "url">("text");
+  const [sourceType, setSourceType] = useState<"file" | "text" | "url">("file");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -51,29 +52,56 @@ export default function KnowledgeBasePage() {
     setSubmitting(true);
 
     try {
-      const payload = {
-        name: formData.name,
-        sourceType,
-        content: sourceType === "text" ? formData.content : undefined,
-        sourceUrl: sourceType === "url" ? formData.sourceUrl : undefined,
-        category: formData.category,
-      };
+      if (sourceType === "file" && selectedFile) {
+        // Handle file upload with FormData
+        const formDataObj = new FormData();
+        formDataObj.append("file", selectedFile);
+        formDataObj.append("name", formData.name);
+        formDataObj.append("sourceType", "file");
+        formDataObj.append("category", formData.category);
 
-      const res = await fetch("/api/documents", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        setIsModalOpen(false);
-        setFormData({
-          name: "",
-          content: "",
-          sourceUrl: "",
-          category: "general",
+        const res = await fetch("/api/documents", {
+          method: "POST",
+          body: formDataObj,
         });
-        fetchDocuments();
+
+        if (res.ok) {
+          setIsModalOpen(false);
+          setFormData({
+            name: "",
+            content: "",
+            sourceUrl: "",
+            category: "general",
+          });
+          setSelectedFile(null);
+          fetchDocuments();
+        }
+      } else {
+        // Handle text/url with JSON
+        const payload = {
+          name: formData.name,
+          sourceType,
+          content: sourceType === "text" ? formData.content : undefined,
+          sourceUrl: sourceType === "url" ? formData.sourceUrl : undefined,
+          category: formData.category,
+        };
+
+        const res = await fetch("/api/documents", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          setIsModalOpen(false);
+          setFormData({
+            name: "",
+            content: "",
+            sourceUrl: "",
+            category: "general",
+          });
+          fetchDocuments();
+        }
       }
     } catch (error) {
       console.error("Failed to create document:", error);
@@ -296,6 +324,14 @@ export default function KnowledgeBasePage() {
                 <div className="toggle-group">
                   <button
                     type="button"
+                    className={`toggle-btn ${sourceType === "file" ? "active" : ""}`}
+                    onClick={() => setSourceType("file")}
+                  >
+                    <Upload size={16} style={{ marginRight: "8px" }} />
+                    File
+                  </button>
+                  <button
+                    type="button"
                     className={`toggle-btn ${sourceType === "text" ? "active" : ""}`}
                     onClick={() => setSourceType("text")}
                   >
@@ -345,7 +381,118 @@ export default function KnowledgeBasePage() {
                 </select>
               </div>
 
-              {sourceType === "text" ? (
+              {sourceType === "file" && (
+                <div className="form-group">
+                  <label className="form-label">Upload File</label>
+                  <div
+                    className="file-upload-area"
+                    onClick={() =>
+                      document.getElementById("file-input")?.click()
+                    }
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.add("drag-over");
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove("drag-over");
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.currentTarget.classList.remove("drag-over");
+                      const file = e.dataTransfer.files[0];
+                      if (file) {
+                        setSelectedFile(file);
+                        if (!formData.name) {
+                          setFormData({
+                            ...formData,
+                            name: file.name.replace(/\.[^/.]+$/, ""),
+                          });
+                        }
+                      }
+                    }}
+                    style={{
+                      border: "2px dashed var(--border-primary)",
+                      borderRadius: "var(--radius)",
+                      padding: "32px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      background: selectedFile
+                        ? "var(--bg-tertiary)"
+                        : "transparent",
+                    }}
+                  >
+                    <input
+                      id="file-input"
+                      type="file"
+                      accept=".txt,.pdf,.md,.doc,.docx"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setSelectedFile(file);
+                          if (!formData.name) {
+                            setFormData({
+                              ...formData,
+                              name: file.name.replace(/\.[^/.]+$/, ""),
+                            });
+                          }
+                        }
+                      }}
+                    />
+                    {selectedFile ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "12px",
+                        }}
+                      >
+                        <FileText size={24} />
+                        <span style={{ fontWeight: 500 }}>
+                          {selectedFile.name}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedFile(null);
+                          }}
+                          style={{ padding: "4px" }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload
+                          size={32}
+                          style={{ marginBottom: "12px", opacity: 0.5 }}
+                        />
+                        <p
+                          style={{ margin: 0, color: "var(--text-secondary)" }}
+                        >
+                          Drag and drop a file, or click to browse
+                        </p>
+                        <p
+                          style={{
+                            margin: "8px 0 0",
+                            fontSize: "12px",
+                            color: "var(--text-tertiary)",
+                          }}
+                        >
+                          Supports .txt, .pdf, .md, .doc, .docx
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {sourceType === "text" && (
                 <div className="form-group">
                   <label className="form-label">Content</label>
                   <textarea
@@ -359,7 +506,9 @@ export default function KnowledgeBasePage() {
                     style={{ minHeight: "150px" }}
                   />
                 </div>
-              ) : (
+              )}
+
+              {sourceType === "url" && (
                 <div className="form-group">
                   <label className="form-label">URL</label>
                   <input
