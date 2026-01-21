@@ -1,5 +1,5 @@
--- Create a public profiles table that mirrors auth.users
-create table public.profiles (
+-- Create a public users table that mirrors auth.users
+create table public.users (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
   full_name text,
@@ -8,27 +8,27 @@ create table public.profiles (
   updated_at timestamptz default now()
 );
 
--- Enable RLS on profiles
-alter table public.profiles enable row level security;
+-- Enable RLS on users
+alter table public.users enable row level security;
 
--- Create policies for profiles
-create policy "Public profiles are viewable by everyone"
-  on public.profiles for select
+-- Create policies for users
+create policy "Public users are viewable by everyone"
+  on public.users for select
   using ( true );
 
 create policy "Users can insert their own profile"
-  on public.profiles for insert
+  on public.users for insert
   with check ( auth.uid() = id );
 
 create policy "Users can update own profile"
-  on public.profiles for update
+  on public.users for update
   using ( auth.uid() = id );
 
 -- Function to handle new user signup
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
+  insert into public.users (id, email, full_name, avatar_url)
   values (
     new.id,
     new.email,
@@ -39,18 +39,18 @@ begin
 end;
 $$ language plpgsql security definer;
 
--- Trigger to automatically create profile on signup
+-- Trigger to automatically create user entry on signup
 create or replace trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
 -- Add user_id to widgets table
 alter table public.widgets 
-  add column user_id uuid references public.profiles(id) on delete cascade;
+  add column user_id uuid references public.users(id) on delete cascade;
 
 -- Add user_id to documents table
 alter table public.documents 
-  add column user_id uuid references public.profiles(id) on delete cascade;
+  add column user_id uuid references public.users(id) on delete cascade;
 
 -- Enable RLS on widgets and documents
 alter table public.widgets enable row level security;
