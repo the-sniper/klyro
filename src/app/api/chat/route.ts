@@ -59,8 +59,26 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Create or get session
-    let currentSessionId = sessionId;
+    // Create or validate session
+    let currentSessionId = null;
+    
+    // If sessionId provided, verify it exists
+    if (sessionId) {
+      const { data: existingSession } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .eq('id', sessionId)
+        .eq('widget_key', widgetKey)
+        .single();
+      
+      if (existingSession) {
+        currentSessionId = sessionId;
+      } else {
+        console.log('Invalid sessionId provided, creating new session');
+      }
+    }
+    
+    // Create new session if needed
     if (!currentSessionId) {
       const { data: session, error: sessionError } = await supabase
         .from('chat_sessions')
@@ -68,7 +86,7 @@ export async function POST(request: NextRequest) {
           widget_key: widgetKey,
           visitor_id: request.headers.get('x-forwarded-for') || 'unknown',
         })
-        .select()
+        .select('id')
         .single();
       
       if (sessionError) {
