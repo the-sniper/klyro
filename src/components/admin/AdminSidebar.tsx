@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -9,7 +10,6 @@ import {
   Code2,
   Fingerprint,
   LogOut,
-  Sparkles,
   User,
 } from "lucide-react";
 
@@ -38,10 +38,13 @@ export function AdminSidebar() {
   return (
     <aside className="admin-sidebar glass">
       <Link href="/admin" className="sidebar-logo">
-        <div className="sidebar-logo-icon">
-          <Sparkles size={24} />
-        </div>
-        <span className="sidebar-logo-text">Klyro</span>
+        <Image
+          src="/logo.svg"
+          alt="Klyro Logo"
+          width={120}
+          height={60}
+          className="sidebar-logo-image"
+        />
       </Link>
 
       <nav className="sidebar-nav">

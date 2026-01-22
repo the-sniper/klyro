@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, User, Loader2, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
@@ -48,9 +49,14 @@ export default function SignupPage() {
 
       <div className="glass auth-card">
         <div className="auth-header">
-          <div className="auth-icon">
-            <User size={32} />
-          </div>
+          <Image
+            src="/logo.svg"
+            alt="Klyro Logo"
+            width={140}
+            height={48}
+            className="auth-logo"
+            style={{ margin: "0 auto 24px" }}
+          />
           <h1 className="auth-title">Create Account</h1>
           <p className="auth-subtitle">Get started with Klyro today</p>
         </div>
