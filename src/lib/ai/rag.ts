@@ -294,7 +294,15 @@ function buildConversationMessages(
  * This ensures vector search finds relevant results for brief follow-up questions.
  */
 async function rewriteQuery(query: string, history: PersonaContext['conversationHistory']): Promise<string> {
-  if (!history || history.length === 0) return query;
+  // Always validate the original query first
+  if (!query || typeof query !== 'string' || query.trim().length === 0) {
+    console.error('[RAG] Invalid query received:', query);
+    return 'hello'; // Fallback to a safe default
+  }
+  
+  const safeQuery = query.trim();
+  
+  if (!history || history.length === 0) return safeQuery;
 
   try {
     const openai = getOpenAI();
@@ -312,7 +320,7 @@ async function rewriteQuery(query: string, history: PersonaContext['conversation
         },
         { 
           role: 'user', 
-          content: `History Snippet:\n${historyText}\n\nFollow-up Question: ${query}\n\nStandalone Query:` 
+          content: `History Snippet:\n${historyText}\n\nFollow-up Question: ${safeQuery}\n\nStandalone Query:` 
         }
       ],
       temperature: 0,
@@ -320,11 +328,18 @@ async function rewriteQuery(query: string, history: PersonaContext['conversation
     });
 
     const rewritten = completion.choices[0]?.message?.content?.trim();
-    console.log(`[RAG] Rewrote query: "${query}" -> "${rewritten}"`);
-    return rewritten || query;
+    
+    // Validate the rewritten query before returning
+    if (rewritten && rewritten.length > 0) {
+      console.log(`[RAG] Rewrote query: "${safeQuery}" -> "${rewritten}"`);
+      return rewritten;
+    }
+    
+    console.log(`[RAG] Rewrite returned empty, using original: "${safeQuery}"`);
+    return safeQuery;
   } catch (error) {
     console.error('Query rewrite failed:', error);
-    return query;
+    return safeQuery;
   }
 }
 
@@ -339,8 +354,20 @@ export async function generateResponse(
   const supabase = createServerClient();
   const openai = getOpenAI();
   
+  console.log('[RAG] generateResponse called with query:', { 
+    query, 
+    queryType: typeof query, 
+    queryLength: query?.length 
+  });
+  
   // 1. Contextual Query Expansion
   const optimizedQuery = await rewriteQuery(query, persona?.conversationHistory);
+  
+  console.log('[RAG] Optimized query for embedding:', { 
+    optimizedQuery, 
+    optimizedQueryType: typeof optimizedQuery, 
+    optimizedQueryLength: optimizedQuery?.length 
+  });
 
   // 2. Retrieve relevant chunks using the optimized query (filtered by user_id)
   const chunks = await retrieveRelevantChunks(optimizedQuery, persona?.userId, 5, 0.2);

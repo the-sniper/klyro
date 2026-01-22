@@ -57,10 +57,22 @@ export function chunkDocument(content: string): string[] {
  * Generate embedding for a text using OpenAI
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
+  // Validate input - OpenAI requires a non-empty string
+  if (!text || typeof text !== 'string') {
+    console.error('[Embeddings] Invalid input received:', { text, type: typeof text });
+    throw new Error('Invalid input: text must be a non-empty string');
+  }
+  
+  const cleanedText = text.trim();
+  if (cleanedText.length === 0) {
+    console.error('[Embeddings] Empty text after trimming');
+    throw new Error('Invalid input: text cannot be empty');
+  }
+  
   const openai = getOpenAI();
   const response = await openai.embeddings.create({
     model: 'text-embedding-3-small',
-    input: text,
+    input: cleanedText,
   });
   
   return response.data[0].embedding;
@@ -68,9 +80,19 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
 /**
  * Generate embeddings for multiple texts in batch
+ * Note: Empty/invalid texts should be filtered out BEFORE calling this function
  */
 export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
-  if (texts.length === 0) return [];
+  if (!texts || texts.length === 0) return [];
+  
+  // Validate all texts are non-empty strings
+  const invalidIndex = texts.findIndex(t => !t || typeof t !== 'string' || t.trim().length === 0);
+  if (invalidIndex !== -1) {
+    console.error(`[Embeddings] Invalid text at index ${invalidIndex}:`, texts[invalidIndex]);
+    throw new Error(`Invalid input: text at index ${invalidIndex} is empty or invalid`);
+  }
+  
+  console.log(`[Embeddings] Generating embeddings for ${texts.length} chunks`);
   
   const openai = getOpenAI();
   const response = await openai.embeddings.create({

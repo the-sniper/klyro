@@ -80,8 +80,15 @@ export async function processDocument(documentId: string): Promise<void> {
       .delete()
       .eq('document_id', documentId);
     
-    // Chunk the document
-    const chunks = chunkDocument(content);
+    // Chunk the document and filter out empty chunks
+    const rawChunks = chunkDocument(content);
+    const chunks = rawChunks.filter(chunk => chunk && chunk.trim().length > 0);
+    
+    if (chunks.length === 0) {
+      throw new Error('Document produced no valid chunks');
+    }
+    
+    console.log(`[Documents] Processing ${chunks.length} chunks (${rawChunks.length - chunks.length} empty chunks filtered)`);
     
     // Generate embeddings for all chunks
     const embeddings = await generateEmbeddings(chunks);
