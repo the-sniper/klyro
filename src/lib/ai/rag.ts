@@ -69,6 +69,23 @@ const TOOLS: ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'fetch_repository_details',
+      description: 'Fetch the detailed README content for a specific repository. Use this when the user asks for more details about a specific project, its features, tech stack, or how it works.',
+      parameters: {
+        type: 'object',
+        properties: {
+          repo_name: {
+            type: 'string',
+            description: 'The name of the repository (e.g., "klyro")',
+          },
+        },
+        required: ['repo_name'],
+      },
+    },
+  },
 ];
 
 /**
@@ -160,53 +177,56 @@ CORE GUIDELINES:
 - Sound conversational and helpful, not like a formal document.
 - Be context-aware: if a date in the knowledge base has passed, treat it as completed.
 - Show genuine enthusiasm when discussing projects and experiences.
-- If someone asks something you don't have info about, be honest: "I don't have that detail, but you can reach out to ${ownerName} directly!"
+- **INTEGRITY FIRST: If someone asks something you don't have info about in the provided context or tools, BE HONEST: "I don't have that specific detail, but you can reach out to ${ownerName} directly!"**
+- **NEVER invent project names, companies, skills, or experiences. If you can't find a project in the GitHub list or Knowledge Base, it doesn't exist for the purpose of this conversation.**
+- **Do NOT assume that words in the owner's name are part of their project names unless explicitly stated.**
 - Keep responses conversational, not essay-length.
-- Pick up on conversational cues (if someone says "cool!" you might say "Right?! That was an exciting project...")
+- Pick up on conversational cues.
 
 AVOID THESE AI GIVEAWAYS (very important):
-- ABSOLUTELY NEVER use em dashes (—). This is a strict requirement. Use commas, periods, or just restructure the sentence. Any response containing an em dash is considered a failure.
-- Don't start responses with "I" too often. Mix it up.
+- ABSOLUTELY NEVER use em dashes (—). This is a strict requirement.
+- Don't start responses with "I" too often.
 - Avoid phrases like "I'd be happy to", "Certainly!", "Absolutely!", "Great question!"
-- Don't use "utilize" (say "use"), "leverage" (say "use"), "facilitate", "streamline"
+- Don't use "utilize", "leverage", "facilitate", "streamline".
 - Skip "In terms of...", "It's worth noting that...", "I should mention..."
-- No "passionate about" or "excited to share" - just show the enthusiasm naturally
-- Don't overuse exclamation points. One or two per response max.
-- Avoid bullet points unless really necessary. Write in paragraphs like a person would.
+- No "passionate about" or "excited to share" - show enthusiasm naturally.
+- Don't overuse exclamation points (max 1-2 per response).
+- Avoid bullet points unless necessary. Write in paragraphs.
 
 
 ${permissionsSection}
 
-ANSWERING QUESTIONS:
-- Use the provided context to give accurate answers.
-- You can infer the owner's name from testimonials, document titles, or context clues.
-- Connect different pieces of information when relevant.
-- Don't just list facts. Weave them into natural responses.
+STRICT INFORMATION ADHERENCE:
+- Only answer based on the "SUPPLEMENTAL KNOWLEDGE BASE CONTEXT", "AVAILABLE URL SOURCES", "TOOL RESULTS", or "CONTACT INFO" provided in this system prompt.
+- If a user asks "What else have you done?" and you have no more items in your context, say you've shared all the details you have access to.
+- Do not make up roles, responsibilities, or technologies.
 
 LINK FORMATTING (very important):
 - When sharing URLs, use proper markdown: [link text](https://url.com) with NO SPACE between ] and (.
-- Example: "Check out my [GitHub](https://github.com/username)" NOT "my [GitHub] (https://...)"
 - For emails, just write them plainly: email@example.com
 - For phone numbers, write them plainly: +1 234-567-8901
-- When listing multiple contact options, use bullet points for readability:
-  Example:
-  "Here's how you can reach me:
-  • LinkedIn: [Areef Syed](https://linkedin.com/in/...)
-  • GitHub: [the-sniper](https://github.com/...)
-  • Email: email@example.com
-  • Phone: +1 234-567-8901"
+- When listing multiple contact options, use bullet points for readability.
 
-CONVERSATIONAL CONTINUITY:
-- ALWAYS prioritize information you just mentioned in the chat history over generic snippets from the knowledge base.
-- If the user asks a follow-up ("tech?", "tell me more", "how?"), refer back to the specific project or experience you were just talking about.
-- If you just described a project from GitHub, and the user asks for more details, talk about that specific project. Don't revert to talking about yourself generally.
+CONVERSATIONAL CONTINUITY & PROGRESSION:
+- ALWAYS prioritize information you just mentioned in the chat history over generic snippets from the knowledge base when expanding on a topic.
+- **HOWEVER, if the user asks for "other", "another", or "something else", they want NEW information. In this case, ignore what you just talked about and find a different project, skill, or experience from your context that hasn't been mentioned yet.**
+- If you have already described all available projects or skills, explicitly state: "That covers all the [projects/skills] I have details on right now."
+- Use history to resolve pronouns ("it", "this", "that") to the specific subject discussed.
 
-You're representing a real person. Be authentic and let their personality come through.`;
+MISSING INFO PROTOCOL:
+- If asked about projects/GitHub but 'external_links.github' is missing from your system context, say: "I haven't been connected to a GitHub profile yet to show my latest projects. You can add one in the Klyro settings!"
+- If asked about a URL or fresh content but it's not in the "AVAILABLE URL SOURCES", say: "That URL isn't in my allowed sources. Feel free to add it to my knowledge base!"
+
+You're representing a real person. Be authentic and stay 100% true to the facts provided.`;
 }
 
 
 const STRICT_MODE_PROMPT = `
-STRICT MODE: Primarily rely on the provided knowledge base context. However, ALWAYS use your Persona, Instructions, and any contact details provided in this system prompt (like email, phone, links).`;
+STRICT MODE ENABLED: 
+1. Your first priority is the integrity of information. 
+2. If the answer is not contained within the provided context or tool results, you MUST state that you don't have that information.
+3. NEVER guess or extrapolate details about projects, skills, or history.
+4. Do not offer opinions or creative content unless explicitly asked for a personal take based on known facts.`;
 
 /**
  * Retrieve relevant document chunks using vector similarity search
@@ -325,7 +345,8 @@ CRITICAL RULES:
 2. If the user asks for "info", "details", "contact", "about them", "about you", "what do you do?", or "what's your deal?", they want the PORTFOLIO OWNER's background, work, or contact info.
 3. Resolve demonstrative pronouns like "this project", "that one", "it", or "that" to the specific project, experience, or skill mentioned in the immediately preceding messages.
 4. Only interpret pronouns as referring to an external entity if the context makes it absolutely clear they're asking about that specific external thing (e.g., "how much does AirLog cost?").
-5. For brief follow-ups (e.g., "tech stack?", "tell me more"), rewrite it to include the specific subject discussed in the immediately preceding message.
+5. **CONVERSATIONAL PROGRESSION: If the user asks for "other", "another", "something else", or "besides [Subject]", your rewritten query MUST include "excluding [Subject]" or "different from [Subject]" to ensure vector search finds NEW information.**
+6. For brief follow-ups (e.g., "tech stack?", "tell me more"), rewrite it to include the specific subject discussed in the immediately preceding message.
 
 Output ONLY the rewritten query.` 
         },
@@ -470,6 +491,14 @@ export async function generateResponse(
   // Determine if tools should be used (GitHub, website, or URL documents available)
   const useTools = !!(persona?.external_links?.github || availableUrls.length > 0);
 
+  // If user is asking about projects/github but it's not configured, add a hint for the AI
+  if (!persona?.external_links?.github && (query.toLowerCase().includes('project') || query.toLowerCase().includes('github') || query.toLowerCase().includes('build'))) {
+    messages.push({
+      role: 'user',
+      content: "[SYSTEM NOTE: GitHub is NOT configured for this widget. Do not hallucinate projects. Inform the user that GitHub needs to be connected in the Klyro settings.]"
+    });
+  }
+
   let completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
@@ -506,6 +535,31 @@ export async function generateResponse(
             tool_call_id: toolCall.id,
             role: 'tool',
             content: "GitHub URL not configured.",
+          });
+        }
+      } else if (toolCall.function.name === 'fetch_repository_details') {
+        const args = JSON.parse(toolCall.function.arguments);
+        const { repo_name } = args;
+        
+        const githubUrl = persona?.external_links?.github;
+        if (githubUrl && repo_name) {
+          const { fetchRepoReadme } = await import('../external/github');
+          const readme = await fetchRepoReadme(githubUrl, repo_name);
+          
+          const toolResult = readme 
+            ? `README content for ${repo_name}:\n\n${readme.slice(0, 15000)}` // Limit size just in case
+            : `Could not find a README for the repository "${repo_name}".`;
+            
+          messages.push({
+            tool_call_id: toolCall.id,
+            role: 'tool',
+            content: toolResult,
+          });
+        } else {
+          messages.push({
+            tool_call_id: toolCall.id,
+            role: 'tool',
+            content: !githubUrl ? "GitHub URL not configured." : "Repository name not provided.",
           });
         }
       } else if (toolCall.function.name === 'fetch_url_content') {
