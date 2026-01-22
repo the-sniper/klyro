@@ -190,7 +190,6 @@ export default function IntegrationsPage() {
               <div key={widget.id} className="card glass widget-card">
                 <div className="widget-card-header">
                   <div className="widget-identity">
-                    <div className="widget-status-dot pulsing" />
                     <div className="widget-meta">
                       <h3 className="widget-name">{widget.name}</h3>
                       <div className="widget-key-wrapper">
@@ -528,28 +527,7 @@ export default function IntegrationsPage() {
         .widget-identity {
           display: flex;
           gap: 16px;
-          align-items: flex-start;
-        }
-        .widget-status-dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-          background: var(--success);
-          margin-top: 6px;
-        }
-        .widget-status-dot.pulsing {
-          animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-          0% {
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-          }
-          70% {
-            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-          }
-          100% {
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-          }
+          align-items: center;
         }
 
         .widget-name {

@@ -79,22 +79,50 @@ function getSystemPrompt(persona?: PersonaContext): string {
     ? `\nAdditional instructions from ${ownerName}: ${persona.customInstructions}`
     : '';
 
-  // Build permissions and links section
+  // Build permissions and links section - only include links that are actually configured
   let permissionsSection = '';
   if (persona?.access_permissions || persona?.external_links) {
     const p = persona?.access_permissions || {};
     const l = persona?.external_links || {};
     
-    permissionsSection = `\n\nPERMISSIONS & LINKS:
-- Can I share GitHub? ${p.can_share_github ? `YES (${l.github || 'link available'})` : 'NO'}
-- Can I share LinkedIn? ${p.can_share_linkedin ? `YES (${l.linkedin || 'link available'})` : 'NO'}
-- Can I share Twitter? ${p.can_share_twitter ? `YES (${l.twitter || 'link available'})` : 'NO'}
-- Can I share Email? ${p.can_share_email ? `YES (${l.email || 'check KB'})` : 'NO'}
-- Can I share Phone? ${l.phone ? `YES (${l.phone})` : 'NO'}
-- Can I discuss salary? ${p.can_discuss_salary ? 'YES' : 'NO - politely decline'}
-- Can I schedule calls? ${p.can_schedule_calls ? 'YES' : 'NO'}
-- Personal Website: ${l.website || 'Not provided'}
-If allowed, feel free to share these links/details when relevant. If NOT allowed, politely say you don't share that info directly.`;
+    const linkItems: string[] = [];
+    
+    // Only add items that have actual links configured
+    if (p.can_share_github && l.github) {
+      linkItems.push(`- GitHub: ${l.github}`);
+    }
+    if (p.can_share_linkedin && l.linkedin) {
+      linkItems.push(`- LinkedIn: ${l.linkedin}`);
+    }
+    if (p.can_share_twitter && l.twitter) {
+      linkItems.push(`- Twitter/X: ${l.twitter}`);
+    }
+    if (p.can_share_email && l.email) {
+      linkItems.push(`- Email: ${l.email}`);
+    }
+    if (l.phone) {
+      linkItems.push(`- Phone: ${l.phone}`);
+    }
+    if (l.website) {
+      linkItems.push(`- Website: ${l.website}`);
+    }
+    
+    // Build the section only if there are any links to share
+    if (linkItems.length > 0) {
+      permissionsSection = `\n\nCONTACT INFO YOU CAN SHARE:
+${linkItems.join('\n')}
+
+When sharing links, format them naturally in your response. Only share what's listed above.`;
+    }
+    
+    // Add restrictions
+    const restrictions: string[] = [];
+    if (!p.can_discuss_salary) restrictions.push('salary expectations');
+    if (!p.can_schedule_calls) restrictions.push('scheduling calls directly');
+    
+    if (restrictions.length > 0) {
+      permissionsSection += `\n\nDO NOT discuss: ${restrictions.join(', ')}. Politely decline if asked.`;
+    }
   }
 
 
@@ -113,7 +141,7 @@ CORE GUIDELINES:
 - Pick up on conversational cues (if someone says "cool!" you might say "Right?! I was really excited about that one...")
 
 AVOID THESE AI GIVEAWAYS (very important):
-- NEVER use em dashes (—). Use commas, periods, or just restructure the sentence.
+- ABSOLUTELY NEVER use em dashes (—). This is a strict requirement. Use commas, periods, or just restructure the sentence. Any response containing an em dash is considered a failure.
 - Don't start responses with "I" too often. Mix it up.
 - Avoid phrases like "I'd be happy to", "Certainly!", "Absolutely!", "Great question!"
 - Don't use "utilize" (say "use"), "leverage" (say "use"), "facilitate", "streamline"
@@ -130,6 +158,12 @@ ANSWERING QUESTIONS:
 - You can infer the owner's name from testimonials, document titles, or context clues.
 - Connect different pieces of information when relevant.
 - Don't just list facts. Weave them into natural responses.
+
+LINK FORMATTING (very important):
+- When sharing URLs, use proper markdown: [link text](https://url.com) with NO SPACE between ] and (.
+- Example: "Check out my [GitHub](https://github.com/username)" NOT "my [GitHub] (https://...)"
+- For emails, just write them plainly: email@example.com
+- For phone numbers, write them plainly: +1 234-567-8901
 
 CONVERSATIONAL CONTINUITY:
 - ALWAYS prioritize information you just mentioned in the chat history over generic snippets from the knowledge base.
@@ -361,8 +395,10 @@ export async function generateResponse(
     });
   }
   
-  const response = completion.choices[0]?.message?.content || 
-    "Hmm, I hit a snag there. Mind trying again?";
+  const finalResponse = (completion.choices[0]?.message?.content || 
+    "Hmm, I hit a snag there. Mind trying again?")
+    .replace(/\u2014/g, ', ') // Replace em-dashes with comma+space
+    .replace(/\u2013/g, '-'); // Replace en-dashes with hyphens
   
   // Build source references
   const sources: SourceReference[] = chunks.map((chunk) => ({
@@ -372,5 +408,5 @@ export async function generateResponse(
     similarity: chunk.similarity,
   }));
   
-  return { response, sources };
+  return { response: finalResponse, sources };
 }

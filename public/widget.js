@@ -1,7 +1,8 @@
 (function () {
   "use strict";
 
-  console.log("[Chatfolio] Widget script loaded");
+  const WIDGET_VERSION = "2.1.0"; // Version for cache debugging
+  console.log("[Chatfolio] Widget script loaded, version:", WIDGET_VERSION);
 
   // Get widget configuration from script tag
   const currentScript = document.currentScript;
@@ -208,9 +209,28 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    
+
     .chatfolio-input:focus {
       border-color: var(--primary-color);
+    }
+
+    .chatfolio-message a {
+      color: inherit;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .chatfolio-message a:hover {
+      opacity: 0.8;
+    }
+
+    .chatfolio-message.assistant a {
+      color: var(--primary-color);
+    }
+
+    .chatfolio-message strong {
+      font-weight: 600;
     }
     
     .chatfolio-send {
@@ -372,6 +392,7 @@
     // Create container
     const container = document.createElement("div");
     container.className = `chatfolio-widget ${theme}`;
+    container.style.setProperty("--primary-color", config.primaryColor);
     container.innerHTML = `
       <button class="chatfolio-button ${config.position}" style="background: ${config.primaryColor}">
         ${chatIcon}
@@ -470,7 +491,7 @@
         .map(
           (msg) => `
         <div class="chatfolio-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
-          ${escapeHtml(msg.content)}
+          ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
         </div>
       `,
         )
@@ -489,6 +510,77 @@
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
       sendBtn.disabled = isLoading;
     }
+  }
+
+  function formatMessage(text) {
+    if (!text) return "";
+
+    console.log(
+      "[Chatfolio] formatMessage called with:",
+      text.substring(0, 100),
+    );
+
+    // Remove em-dashes and en-dashes first
+    let content = text.replace(/\u2014/g, ", ").replace(/\u2013/g, "-");
+
+    // Process markdown BEFORE escaping HTML (otherwise brackets get escaped)
+    // Step 1: Extract and protect markdown links (allow optional space between ] and ()
+    const linkPlaceholders = [];
+    content = content.replace(
+      /\[([^\]]+)\]\s*\(([^)]+)\)/g,
+      (match, linkText, url) => {
+        console.log("[Chatfolio] Found markdown link:", linkText, url);
+        const placeholder = `__LINK_${linkPlaceholders.length}__`;
+        linkPlaceholders.push({ text: linkText, url: url });
+        return placeholder;
+      },
+    );
+
+    // Step 2: Extract and protect raw URLs
+    const urlPlaceholders = [];
+    content = content.replace(/(https?:\/\/[^\s<\]]+)/g, (match, url) => {
+      // Don't double-process URLs that were part of markdown links
+      if (match.includes("__LINK_")) return match;
+      console.log("[Chatfolio] Found raw URL:", url);
+      const placeholder = `__URL_${urlPlaceholders.length}__`;
+      urlPlaceholders.push(url);
+      return placeholder;
+    });
+
+    // Step 3: Now escape HTML on the remaining content
+    let html = escapeHtml(content);
+
+    // Step 4: Restore markdown links as actual <a> tags
+    linkPlaceholders.forEach((link, i) => {
+      const safeText = escapeHtml(link.text);
+      const safeUrl = link.url.replace(/"/g, "&quot;");
+      html = html.replace(
+        `__LINK_${i}__`,
+        `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeText}</a>`,
+      );
+    });
+
+    // Step 5: Restore raw URLs as clickable links
+    urlPlaceholders.forEach((url, i) => {
+      const safeUrl = url.replace(/"/g, "&quot;");
+      html = html.replace(
+        `__URL_${i}__`,
+        `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`,
+      );
+    });
+
+    // Markdown: Bold **text**
+    html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+
+    // Markdown: Italic *text*
+    html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+    // Newlines to <br>
+    html = html.replace(/\n/g, "<br>");
+
+    console.log("[Chatfolio] formatMessage result:", html.substring(0, 100));
+
+    return html;
   }
 
   function escapeHtml(text) {

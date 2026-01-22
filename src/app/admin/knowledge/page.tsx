@@ -501,10 +501,12 @@ export default function KnowledgeBasePage() {
                 <div className="form-group">
                   <label className="form-label">Website URL</label>
                   <div className="url-input-wrapper">
-                    <Globe size={18} className="url-icon" />
+                    <div className="url-icon-container">
+                      <Globe size={18} className="url-icon" />
+                    </div>
                     <input
                       type="url"
-                      className="form-input url-input"
+                      className="url-input"
                       placeholder="https://example.com/about"
                       value={formData.sourceUrl}
                       onChange={(e) =>
@@ -907,17 +909,50 @@ export default function KnowledgeBasePage() {
           resize: vertical;
         }
         .url-input-wrapper {
-          position: relative;
+          display: flex;
+          align-items: stretch;
+          background: var(--bg-tertiary);
+          border: 1px solid var(--border-color);
+          border-radius: var(--radius);
+          transition: all 0.2s;
+          overflow: hidden;
+          width: 100%;
+          height: 48px;
         }
-        .url-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
+        .url-input-wrapper:hover {
+          border-color: var(--border-hover);
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .url-input-wrapper:focus-within {
+          border-color: var(--accent-primary);
+          background: var(--bg-secondary);
+          box-shadow:
+            0 0 0 4px rgba(59, 130, 246, 0.15),
+            0 0 20px rgba(59, 130, 246, 0.1);
+          transform: translateY(-1px);
+        }
+        .url-icon-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding-left: 14px;
           color: var(--text-muted);
+          pointer-events: none;
+        }
+        .url-input-wrapper:focus-within .url-icon-container {
+          color: var(--accent-primary);
         }
         .url-input {
-          padding-left: 48px;
+          flex: 1;
+          background: transparent !important;
+          border: none !important;
+          padding: 0 14px;
+          color: var(--text-primary);
+          font-size: 15px;
+          font-family: inherit;
+          outline: none;
+          height: 100%;
+          width: 100%;
         }
 
         .modal-footer {
