@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
       personalityTraits = [],
       communicationStyle = 'friendly',
       customInstructions,
+      launcherMode = 'icon',
+      launcherText = '',
     } = body;
     
     if (!name) {
@@ -85,6 +87,8 @@ export async function POST(request: NextRequest) {
         personality_traits: personalityTraits,
         communication_style: communicationStyle,
         custom_instructions: customInstructions || null,
+        launcher_mode: launcherMode,
+        launcher_text: launcherText || null,
         // Associate with current user
         user_id: user.id,
       })

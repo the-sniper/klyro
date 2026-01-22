@@ -142,6 +142,22 @@
       width: 28px;
       height: 28px;
       fill: white;
+      flex-shrink: 0;
+    }
+
+    .klyro-button.text-mode {
+      width: auto;
+      height: 48px;
+      border-radius: 24px;
+      padding: 0 20px;
+      gap: 10px;
+    }
+
+    .klyro-button.text-mode .klyro-button-text {
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      white-space: nowrap;
     }
     
     .klyro-panel {
@@ -358,15 +374,17 @@
     }
 
     .klyro-branding {
-      padding: 8px 16px;
+      padding: 10px 16px;
       text-align: center;
-      font-size: 11px;
-      opacity: 0.7;
-      transition: opacity 0.2s;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
     }
 
     .klyro-branding:hover {
       opacity: 1;
+      transform: translateY(-1px);
     }
 
     .klyro-branding a {
@@ -374,16 +392,25 @@
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
     }
 
     .klyro-branding a:hover {
-      text-decoration: underline;
+      opacity: 1;
+    }
+
+    .klyro-branding .brand-name {
+      color: #3b82f6; /* Klyro Brand Electric Blue */
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
 
     .klyro-branding svg {
-      width: 12px;
-      height: 12px;
+      width: 14px;
+      height: 14px;
+      color: #3b82f6; /* Klyro Brand Electric Blue */
     }
     
     .klyro-input {
@@ -507,7 +534,7 @@
 
     .klyro-widget.light .klyro-branding {
       background: #ffffff;
-      color: #64748b;
+      color: #475569;
       border-top: 1px solid #e2e8f0;
     }
 
@@ -567,13 +594,18 @@
     }
     
     .klyro-widget.dark .klyro-input::placeholder {
-      color: #64748b;
+      color: #94a3b8;
     }
 
     .klyro-widget.dark .klyro-branding {
       background: #1e293b;
-      color: #64748b;
+      color: #94a3b8;
       border-top: 1px solid #334155;
+    }
+
+    .klyro-widget.dark .klyro-branding .brand-name,
+    .klyro-widget.dark .klyro-branding svg {
+      color: #60a5fa;
     }
 
     .klyro-widget.dark .klyro-empty-state {
@@ -771,16 +803,20 @@
     const container = document.createElement("div");
     container.className = `klyro-widget ${theme}`;
     container.style.setProperty("--primary-color", config.primaryColor);
+
+    const isTextMode = config.launcherMode === "text" && config.launcherText;
+
     container.innerHTML = `
-      <button class="klyro-button ${config.position}" style="background: ${config.primaryColor}">
+      <button class="klyro-button ${config.position} ${isTextMode ? "text-mode" : ""}" style="background: ${config.primaryColor}">
         ${chatIcon}
+        ${isTextMode ? `<span class="klyro-button-text">${escapeHtml(config.launcherText)}</span>` : ""}
       </button>
       <div class="klyro-panel ${config.position}">
         <div class="klyro-header" style="background: ${config.primaryColor}">
           <div class="klyro-header-icon">${botIcon}</div>
           <div class="klyro-header-text">
             <h3>${escapeHtml(config.headerTitle || "Chat Assistant")}</h3>
-            <p>Copilot Assistant</p>
+            <p>Your personal guide to this site</p>
           </div>
           <div class="klyro-header-actions">
             <button class="klyro-header-btn download-btn" title="Download Transcript">
@@ -799,7 +835,7 @@
         <div class="klyro-branding">
           <a href="https://klyro-pro.vercel.app" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            Powered by Klyro
+            <span>Powered by <span class="brand-name">Klyro</span></span>
           </a>
         </div>
         <div class="klyro-popover-overlay">
@@ -837,10 +873,21 @@
     button.addEventListener("click", () => {
       isOpen = !isOpen;
       panel.classList.toggle("open", isOpen);
-      button.innerHTML = isOpen ? closeIcon : chatIcon;
+
+      const isTextMode = config.launcherMode === "text" && config.launcherText;
+
       if (isOpen) {
+        button.innerHTML = closeIcon;
+        button.classList.remove("text-mode");
         input.focus();
         renderMessages(); // Fresh render when opening
+      } else {
+        button.innerHTML =
+          chatIcon +
+          (isTextMode
+            ? `<span class="klyro-button-text">${escapeHtml(config.launcherText)}</span>`
+            : "");
+        if (isTextMode) button.classList.add("text-mode");
       }
     });
 

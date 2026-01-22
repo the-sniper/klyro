@@ -23,6 +23,8 @@ export default function KnowledgeBasePage() {
   const [submitting, setSubmitting] = useState(false);
   const [sourceType, setSourceType] = useState<"file" | "text" | "url">("file");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -152,6 +154,21 @@ export default function KnowledgeBasePage() {
     }
   }
 
+  async function handleResetKnowledge() {
+    setResetting(true);
+    try {
+      const res = await fetch("/api/documents", { method: "DELETE" });
+      if (res.ok) {
+        setIsResetModalOpen(false);
+        fetchDocuments();
+      }
+    } catch (error) {
+      console.error("Failed to reset knowledge base:", error);
+    } finally {
+      setResetting(false);
+    }
+  }
+
   const statusConfig = {
     ready: { icon: CheckCircle, label: "Ready", className: "badge-success" },
     processing: {
@@ -181,13 +198,24 @@ export default function KnowledgeBasePage() {
               Manage the documents that power your chatbot's intelligence
             </p>
           </div>
-          <button
-            className="btn btn-primary add-doc-btn"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <Plus size={18} />
-            <span>Add Document</span>
-          </button>
+          <div className="header-actions">
+            {documents.length > 0 && (
+              <button
+                className="btn btn-ghost danger reset-kb-btn"
+                onClick={() => setIsResetModalOpen(true)}
+              >
+                <Trash2 size={18} />
+                <span>Reset Knowledge</span>
+              </button>
+            )}
+            <button
+              className="btn btn-primary add-doc-btn"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus size={18} />
+              <span>Add Document</span>
+            </button>
+          </div>
         </div>
 
         {documents.length === 0 ? (
@@ -548,6 +576,73 @@ export default function KnowledgeBasePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Knowledge Base Confirmation Modal */}
+      {isResetModalOpen && (
+        <div
+          className="modal-overlay animate-overlay"
+          onClick={() => setIsResetModalOpen(false)}
+        >
+          <div
+            className="modal-glass animate-modal reset-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div className="modal-header-text">
+                <h2 className="modal-title text-error">Clear Knowledge Base</h2>
+                <p className="modal-subtitle">This action cannot be undone</p>
+              </div>
+              <button
+                className="modal-close-btn"
+                onClick={() => setIsResetModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="warning-box">
+                <div className="warning-icon-wrapper">
+                  <AlertCircle size={32} />
+                </div>
+                <p className="warning-text">
+                  Are you sure you want to clear your entire knowledge base?
+                  Your AI will lose all the platform-specific knowledge it has
+                  learned. <strong>This is an irreversible change.</strong>
+                </p>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setIsResetModalOpen(false)}
+              >
+                Cancel, Keep Knowledge
+              </button>
+              <button
+                type="button"
+                className="btn btn-error reset-confirm-btn"
+                onClick={handleResetKnowledge}
+                disabled={resetting}
+              >
+                {resetting ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Clearing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={20} className="btn-icon" />
+                    <span>Reset Knowledge Base</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -980,6 +1075,106 @@ export default function KnowledgeBasePage() {
         }
         .text-muted {
           color: var(--text-muted);
+        }
+
+        .header-actions {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+
+        .reset-modal {
+          max-width: 580px;
+          width: 100%;
+        }
+
+        .modal-body {
+          padding: 0 32px;
+        }
+
+        .modal-footer {
+          padding: 0 32px 32px;
+          display: flex;
+          gap: 16px;
+          margin-top: 32px;
+        }
+
+        .warning-box {
+          background: rgba(239, 68, 68, 0.05);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          border-radius: 20px;
+          padding: 24px;
+          display: flex;
+          gap: 20px;
+          align-items: center;
+          margin-top: 8px;
+        }
+
+        .warning-icon-wrapper {
+          flex-shrink: 0;
+          width: 52px;
+          height: 52px;
+          background: rgba(239, 68, 68, 0.1);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--error);
+        }
+
+        .btn-icon {
+          flex-shrink: 0;
+        }
+
+        .warning-text {
+          font-size: 15px;
+          line-height: 1.6;
+          color: var(--text-secondary);
+          margin: 0;
+          flex: 1;
+        }
+
+        .warning-text strong {
+          color: var(--error);
+          font-weight: 700;
+        }
+
+        .btn-error {
+          background: var(--error);
+          color: white;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+          white-space: nowrap;
+        }
+
+        .btn-secondary {
+          white-space: nowrap;
+        }
+
+        .btn-error:hover:not(:disabled) {
+          background: #dc2626;
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-error:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        .btn-ghost.danger {
+          color: var(--text-muted);
+        }
+
+        .btn-ghost.danger:hover {
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--error);
+        }
+
+        .text-error {
+          color: var(--error);
+        }
+
+        .mb-32 {
+          margin-bottom: 32px;
         }
       `}</style>
     </>

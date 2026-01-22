@@ -80,6 +80,9 @@ export interface Widget {
   personality_traits: string[];
   communication_style: 'formal' | 'casual' | 'friendly' | 'professional' | 'enthusiastic' | 'calm';
   custom_instructions: string | null;
+  // Launcher configuration
+  launcher_mode: 'icon' | 'text';
+  launcher_text: string | null;
   // External links the bot can share
   external_links: {
     github?: string;

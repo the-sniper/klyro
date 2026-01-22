@@ -44,6 +44,8 @@ export async function GET(
       welcomeMessage: data.welcome_message,
       headerTitle: data.header_title || 'Chat Assistant',
       primaryColor: data.primary_color,
+      launcherMode: data.launcher_mode || 'icon',
+      launcherText: data.launcher_text || '',
     }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching widget:', error);
@@ -81,6 +83,8 @@ export async function PUT(
     if (body.personalityTraits !== undefined) updateData.personality_traits = body.personalityTraits;
     if (body.communicationStyle !== undefined) updateData.communication_style = body.communicationStyle;
     if (body.customInstructions !== undefined) updateData.custom_instructions = body.custom_instructions || null;
+    if (body.launcherMode !== undefined) updateData.launcher_mode = body.launcherMode;
+    if (body.launcherText !== undefined) updateData.launcher_text = body.launcherText || null;
 
     
     const { data, error } = await supabase

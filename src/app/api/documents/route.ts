@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { 
   createDocument, 
   listDocuments, 
-  processDocument 
+  processDocument,
+  clearAllDocuments
 } from '@/lib/db/documents';
 import { requireAuth } from '@/lib/supabase/server';
 import type { DocumentSourceType, DocumentCategory } from '@/types';
@@ -179,6 +180,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: 'Failed to create document' },
       { status: 500 }
+    );
+  }
+}
+
+// Delete all documents for the current user
+export async function DELETE() {
+  try {
+    const user = await requireAuth();
+    await clearAllDocuments(user.id);
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("Error clearing documents:", error);
+    return NextResponse.json(
+      { error: "Failed to clear knowledge base" },
+      { status: 500 },
     );
   }
 }

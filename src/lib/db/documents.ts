@@ -204,3 +204,19 @@ export async function deleteDocument(documentId: string, userId: string): Promis
     throw error;
   }
 }
+
+/**
+ * Delete all documents for a specific user
+ */
+export async function clearAllDocuments(userId: string): Promise<void> {
+  const supabase = getAdminClient();
+
+  const { error } = await supabase
+    .from("documents")
+    .delete()
+    .eq("user_id", userId);
+
+  if (error) {
+    throw error;
+  }
+}

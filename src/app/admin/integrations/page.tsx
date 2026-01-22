@@ -30,6 +30,8 @@ export default function IntegrationsPage() {
     theme: "dark",
     primaryColor: "#6366f1",
     allowedDomains: "",
+    launcherMode: "icon",
+    launcherText: "Chat with me",
   });
 
   useEffect(() => {
@@ -65,6 +67,8 @@ export default function IntegrationsPage() {
         theme: widget.theme,
         primaryColor: widget.primary_color,
         allowedDomains: widget.allowed_domains?.join(", ") || "",
+        launcherMode: widget.launcher_mode || "icon",
+        launcherText: widget.launcher_text || "Chat with me",
       });
     } else {
       setEditingWidget(null);
@@ -76,6 +80,8 @@ export default function IntegrationsPage() {
         theme: "dark",
         primaryColor: "#6366f1",
         allowedDomains: "",
+        launcherMode: "icon",
+        launcherText: "Chat with me",
       });
     }
     setIsModalOpen(true);
@@ -97,6 +103,8 @@ export default function IntegrationsPage() {
           .split(",")
           .map((d) => d.trim())
           .filter(Boolean),
+        launcherMode: formData.launcherMode,
+        launcherText: formData.launcherText,
       };
 
       if (editingWidget) {
@@ -233,6 +241,14 @@ export default function IntegrationsPage() {
                     <span className="detail-label">Position</span>
                     <span className="detail-value text-capitalize">
                       {widget.position.replace("-", " ")}
+                    </span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="detail-label">Launcher</span>
+                    <span className="detail-value text-capitalize">
+                      {widget.launcher_mode === "text"
+                        ? `Text: ${widget.launcher_text}`
+                        : "Icon Only"}
                     </span>
                   </div>
                   <div className="detail-item">
@@ -416,6 +432,47 @@ export default function IntegrationsPage() {
                     }
                   />
                 </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group flex-1">
+                  <label className="form-label">Launcher Display</label>
+                  <div className="select-wrapper">
+                    <select
+                      className="form-select"
+                      value={formData.launcherMode}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          launcherMode: e.target.value,
+                        })
+                      }
+                    >
+                      <option value="icon">Icon Only</option>
+                      <option value="text">Icon with Text</option>
+                    </select>
+                  </div>
+                </div>
+
+                {formData.launcherMode === "text" && (
+                  <div className="form-group flex-1">
+                    <label className="form-label">Launcher Text</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="e.g., Ask anything"
+                      maxLength={20}
+                      value={formData.launcherText}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          launcherText: e.target.value.slice(0, 20),
+                        })
+                      }
+                    />
+                    <p className="field-hint">Max 20 characters.</p>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">

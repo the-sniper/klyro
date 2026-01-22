@@ -99,6 +99,28 @@ const TRAIT_SUGGESTIONS = [
   "learner",
 ];
 
+function formatPhoneNumber(value: string) {
+  // Extract only digits
+  const phoneNumber = value.replace(/\D/g, "");
+
+  // Return early if no digits
+  if (!phoneNumber) return "";
+
+  // Handle US format: (XXX) XXX-XXXX
+  if (phoneNumber.length <= 10) {
+    if (phoneNumber.length < 4) return phoneNumber;
+    if (phoneNumber.length < 7)
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  }
+
+  // Handle international format: +X (XXX) XXX-XXXX
+  const countryCode = phoneNumber.slice(0, phoneNumber.length - 10);
+  const mainNumber = phoneNumber.slice(phoneNumber.length - 10);
+
+  return `+${countryCode} (${mainNumber.slice(0, 3)}) ${mainNumber.slice(3, 6)}-${mainNumber.slice(6, 10)}`;
+}
+
 export default function PersonaPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -443,15 +465,19 @@ export default function PersonaPage() {
                     className="form-input"
                     placeholder={field.placeholder}
                     value={(config.external_links as any)[field.key] || ""}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      if (field.key === "phone") {
+                        val = formatPhoneNumber(val);
+                      }
                       setConfig({
                         ...config,
                         external_links: {
                           ...config.external_links,
-                          [field.key]: e.target.value,
+                          [field.key]: val,
                         },
-                      })
-                    }
+                      });
+                    }}
                   />
                 </div>
               ))}
