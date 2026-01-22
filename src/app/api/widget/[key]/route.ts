@@ -42,6 +42,7 @@ export async function GET(
       position: data.position,
       theme: data.theme,
       welcomeMessage: data.welcome_message,
+      headerTitle: data.header_title || 'Chat Assistant',
       primaryColor: data.primary_color,
     }, { headers: corsHeaders });
   } catch (error) {
@@ -72,6 +73,7 @@ export async function PUT(
     if (body.welcomeMessage !== undefined) updateData.welcome_message = body.welcomeMessage;
     if (body.allowedDomains !== undefined) updateData.allowed_domains = body.allowedDomains;
     if (body.primaryColor !== undefined) updateData.primary_color = body.primaryColor;
+    if (body.headerTitle !== undefined) updateData.header_title = body.headerTitle;
     if (body.isActive !== undefined) updateData.is_active = body.isActive;
     // Persona configuration
     if (body.ownerName !== undefined) updateData.owner_name = body.ownerName || null;

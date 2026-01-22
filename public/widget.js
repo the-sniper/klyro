@@ -380,7 +380,7 @@
         <div class="chatfolio-header" style="background: ${config.primaryColor}">
           <div class="chatfolio-header-icon">${botIcon}</div>
           <div class="chatfolio-header-text">
-            <h3>Chat Assistant</h3>
+            <h3>${escapeHtml(config.headerTitle || "Chat Assistant")}</h3>
             <p>Ask me anything</p>
           </div>
         </div>

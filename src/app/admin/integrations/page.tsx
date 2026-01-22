@@ -24,6 +24,7 @@ export default function IntegrationsPage() {
 
   const [formData, setFormData] = useState({
     name: "",
+    headerTitle: "Chat Assistant",
     welcomeMessage: "Hi! How can I help you learn more about me?",
     position: "bottom-right",
     theme: "dark",
@@ -52,6 +53,7 @@ export default function IntegrationsPage() {
       setEditingWidget(widget);
       setFormData({
         name: widget.name,
+        headerTitle: widget.header_title || "Chat Assistant",
         welcomeMessage: widget.welcome_message,
         position: widget.position,
         theme: widget.theme,
@@ -62,6 +64,7 @@ export default function IntegrationsPage() {
       setEditingWidget(null);
       setFormData({
         name: "",
+        headerTitle: "Chat Assistant",
         welcomeMessage: "Hi! How can I help you learn more about me?",
         position: "bottom-right",
         theme: "dark",
@@ -79,6 +82,7 @@ export default function IntegrationsPage() {
     try {
       const payload = {
         name: formData.name,
+        headerTitle: formData.headerTitle,
         welcomeMessage: formData.welcomeMessage,
         position: formData.position,
         theme: formData.theme,
@@ -313,6 +317,22 @@ export default function IntegrationsPage() {
                   }
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Chat Header Title</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g., Chat Assistant, Ask Me Anything"
+                  value={formData.headerTitle}
+                  onChange={(e) =>
+                    setFormData({ ...formData, headerTitle: e.target.value })
+                  }
+                />
+                <p className="field-hint">
+                  The title displayed in the chat widget header.
+                </p>
               </div>
 
               <div className="form-group">
