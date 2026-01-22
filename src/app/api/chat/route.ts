@@ -62,24 +62,40 @@ export async function POST(request: NextRequest) {
     // Create or validate session
     let currentSessionId = null;
     
+    console.log('[CHAT] Incoming request:', {
+      widgetKey,
+      incomingSessionId: sessionId || 'none',
+      hasMessage: !!message,
+      strictMode
+    });
+    
     // If sessionId provided, verify it exists
     if (sessionId) {
-      const { data: existingSession } = await supabase
+      console.log('[CHAT] Validating provided sessionId:', sessionId);
+      const { data: existingSession, error: sessionLookupError } = await supabase
         .from('chat_sessions')
         .select('id')
         .eq('id', sessionId)
         .eq('widget_key', widgetKey)
         .single();
       
+      if (sessionLookupError) {
+        console.log('[CHAT] Session lookup error:', sessionLookupError.message);
+      }
+      
       if (existingSession) {
         currentSessionId = sessionId;
+        console.log('[CHAT] Session validated, using existing:', currentSessionId);
       } else {
-        console.log('Invalid sessionId provided, creating new session');
+        console.log('[CHAT] Invalid sessionId provided, will create new session');
       }
+    } else {
+      console.log('[CHAT] No sessionId provided, will create new session');
     }
     
     // Create new session if needed
     if (!currentSessionId) {
+      console.log('[CHAT] Creating new session for widget:', widgetKey);
       const { data: session, error: sessionError } = await supabase
         .from('chat_sessions')
         .insert({
@@ -90,11 +106,14 @@ export async function POST(request: NextRequest) {
         .single();
       
       if (sessionError) {
-        console.error('Session creation error:', sessionError);
+        console.error('[CHAT] Session creation FAILED:', sessionError);
       } else {
         currentSessionId = session.id;
+        console.log('[CHAT] New session created:', currentSessionId);
       }
     }
+    
+    console.log('[CHAT] Final sessionId for this request:', currentSessionId || 'NONE');
     
     // Fetch recent conversation history for context continuity
     let conversationHistory: PersonaContext['conversationHistory'] = [];
@@ -158,6 +177,12 @@ export async function POST(request: NextRequest) {
         sources,
       });
     }
+    
+    console.log('[CHAT] Sending response:', {
+      sessionIdReturned: currentSessionId || 'NONE',
+      responseLength: response.length,
+      sourcesCount: sources?.length || 0
+    });
     
     return jsonResponse({
       response,

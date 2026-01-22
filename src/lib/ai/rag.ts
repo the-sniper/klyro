@@ -314,11 +314,13 @@ export async function generateResponse(
     })),
   ];
 
+  // Determine if tools should be used
+  const useTools = !!persona?.external_links?.github;
+
   let completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages,
-    tools: persona?.external_links?.github ? TOOLS : undefined,
-    tool_choice: 'auto',
+    ...(useTools && { tools: TOOLS, tool_choice: 'auto' as const }),
     temperature: 0.75,
     max_tokens: 600,
   });
