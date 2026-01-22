@@ -23,7 +23,7 @@ export async function fetchLatestRepos(githubInput: string, limit: number = 5): 
     const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=${limit}`, {
       headers: {
         'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'Chatfolio-App',
+        'User-Agent': 'Klyro-App',
         // Optional: Add GITHUB_TOKEN if you have one to avoid rate limiting
         ...(process.env.GITHUB_TOKEN ? { 'Authorization': `token ${process.env.GITHUB_TOKEN}` } : {})
       }

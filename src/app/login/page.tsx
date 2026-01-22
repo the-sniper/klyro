@@ -50,7 +50,7 @@ export default function LoginPage() {
             <Lock size={32} />
           </div>
           <h1 className="auth-title">Welcome Back</h1>
-          <p className="auth-subtitle">Sign in to your Chatfolio dashboard</p>
+          <p className="auth-subtitle">Sign in to your Klyro dashboard</p>
         </div>
 
         <form onSubmit={handleLogin} className="auth-form">

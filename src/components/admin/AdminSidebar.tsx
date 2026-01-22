@@ -41,7 +41,7 @@ export function AdminSidebar() {
         <div className="sidebar-logo-icon">
           <Sparkles size={24} />
         </div>
-        <span className="sidebar-logo-text">Chatfolio</span>
+        <span className="sidebar-logo-text">Klyro</span>
       </Link>
 
       <nav className="sidebar-nav">

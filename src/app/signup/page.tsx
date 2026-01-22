@@ -52,7 +52,7 @@ export default function SignupPage() {
             <User size={32} />
           </div>
           <h1 className="auth-title">Create Account</h1>
-          <p className="auth-subtitle">Get started with Chatfolio today</p>
+          <p className="auth-subtitle">Get started with Klyro today</p>
         </div>
 
         <form onSubmit={handleSignup} className="auth-form">

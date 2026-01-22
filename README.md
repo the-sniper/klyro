@@ -1,4 +1,4 @@
-# Chatfolio - AI Portfolio Chatbot
+# Klyro - AI Portfolio Chatbot
 
 An embeddable AI chatbot platform for portfolio websites. Let visitors ask questions about your experience, projects, and skills with accurate, context-aware responses.
 
@@ -31,7 +31,7 @@ An embeddable AI chatbot platform for portfolio websites. Let visitors ask quest
 ## Project Structure
 
 ```
-chatfolio/
+klyro/
 ├── src/
 │   ├── app/
 │   │   ├── admin/         # Main admin dashboard (tabbed navigation)
@@ -94,7 +94,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd chatfolio
+cd klyro
 
 # Install dependencies
 npm install

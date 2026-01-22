@@ -2,16 +2,16 @@
   "use strict";
 
   const WIDGET_VERSION = "2.2.6"; // Version for cache debugging
-  console.log("[Chatfolio] Widget script loaded, version:", WIDGET_VERSION);
+  console.log("[Klyro] Widget script loaded, version:", WIDGET_VERSION);
 
   // Get widget configuration from script tag
   const currentScript = document.currentScript;
   const widgetKey = currentScript?.getAttribute("data-widget-key");
 
-  console.log("[Chatfolio] Widget key:", widgetKey);
+  console.log("[Klyro] Widget key:", widgetKey);
 
   if (!widgetKey) {
-    console.error("Chatfolio: Missing data-widget-key attribute");
+    console.error("Klyro: Missing data-widget-key attribute");
     return;
   }
 
@@ -19,7 +19,7 @@
   const API_BASE = currentScript?.src.replace("/widget.js", "") || "";
 
   // Storage key for persistence
-  const STORAGE_KEY = `chatfolio_${widgetKey}`;
+  const STORAGE_KEY = `klyro_${widgetKey}`;
 
   // State
   let config = null;
@@ -37,14 +37,14 @@
         messages = data.messages || [];
         sessionId = data.sessionId || null;
         console.log(
-          "[Chatfolio] Loaded persisted chat:",
+          "[Klyro] Loaded persisted chat:",
           messages.length,
           "messages",
         );
         return true;
       }
     } catch (err) {
-      console.error("[Chatfolio] Failed to load persisted chat:", err);
+      console.error("[Klyro] Failed to load persisted chat:", err);
     }
     return false;
   }
@@ -59,7 +59,7 @@
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (err) {
-      console.error("[Chatfolio] Failed to persist chat:", err);
+      console.error("[Klyro] Failed to persist chat:", err);
     }
   }
 
@@ -68,7 +68,7 @@
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (err) {
-      console.error("[Chatfolio] Failed to clear persisted chat:", err);
+      console.error("[Klyro] Failed to clear persisted chat:", err);
     }
   }
 
@@ -102,14 +102,14 @@
 
   // Styles
   const styles = `
-    .chatfolio-widget * {
+    .klyro-widget * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     
-    .chatfolio-button {
+    .klyro-button {
       position: fixed;
       bottom: 20px;
       width: 60px;
@@ -125,26 +125,26 @@
       z-index: 9999;
     }
     
-    .chatfolio-button:hover {
+    .klyro-button:hover {
       transform: scale(1.05);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
     
-    .chatfolio-button.bottom-right {
+    .klyro-button.bottom-right {
       right: 20px;
     }
     
-    .chatfolio-button.bottom-left {
+    .klyro-button.bottom-left {
       left: 20px;
     }
     
-    .chatfolio-button svg {
+    .klyro-button svg {
       width: 28px;
       height: 28px;
       fill: white;
     }
     
-    .chatfolio-panel {
+    .klyro-panel {
       position: fixed;
       bottom: 100px;
       width: 380px;
@@ -156,22 +156,22 @@
       flex-direction: column;
       z-index: 9998;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-      animation: chatfolioSlideUp 0.3s ease;
+      animation: klyroSlideUp 0.3s ease;
     }
     
-    .chatfolio-panel.open {
+    .klyro-panel.open {
       display: flex;
     }
     
-    .chatfolio-panel.bottom-right {
+    .klyro-panel.bottom-right {
       right: 20px;
     }
     
-    .chatfolio-panel.bottom-left {
+    .klyro-panel.bottom-left {
       left: 20px;
     }
     
-    @keyframes chatfolioSlideUp {
+    @keyframes klyroSlideUp {
       from {
         opacity: 0;
         transform: translateY(20px);
@@ -182,14 +182,14 @@
       }
     }
     
-    .chatfolio-header {
+    .klyro-header {
       padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
     }
     
-    .chatfolio-header-icon {
+    .klyro-header-icon {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -199,32 +199,32 @@
       justify-content: center;
     }
     
-    .chatfolio-header-icon svg {
+    .klyro-header-icon svg {
       width: 24px;
       height: 24px;
       fill: white;
     }
     
-    .chatfolio-header-text h3 {
+    .klyro-header-text h3 {
       color: white;
       font-size: 16px;
       font-weight: 600;
       margin: 0;
     }
     
-    .chatfolio-header-text p {
+    .klyro-header-text p {
       color: rgba(255, 255, 255, 0.8);
       font-size: 12px;
       margin: 0;
     }
 
-    .chatfolio-header-actions {
+    .klyro-header-actions {
       display: flex;
       gap: 4px;
       margin-left: auto;
     }
 
-    .chatfolio-header-btn {
+    .klyro-header-btn {
       width: 32px;
       height: 32px;
       border-radius: 8px;
@@ -237,28 +237,28 @@
       transition: background 0.2s, transform 0.2s;
     }
 
-    .chatfolio-header-btn:hover {
+    .klyro-header-btn:hover {
       background: rgba(255, 255, 255, 0.25);
       transform: scale(1.05);
     }
 
-    .chatfolio-header-btn svg {
+    .klyro-header-btn svg {
       width: 16px;
       height: 16px;
       fill: white;
     }
 
-    .chatfolio-header-btn:disabled {
+    .klyro-header-btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
     }
 
-    .chatfolio-header-btn:disabled:hover {
+    .klyro-header-btn:disabled:hover {
       transform: none;
       background: rgba(255, 255, 255, 0.15);
     }
 
-    .chatfolio-empty-state {
+    .klyro-empty-state {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -268,7 +268,7 @@
       text-align: center;
     }
 
-    .chatfolio-empty-icon {
+    .klyro-empty-icon {
       width: 64px;
       height: 64px;
       border-radius: 50%;
@@ -279,18 +279,18 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
-    .chatfolio-empty-icon svg {
+    .klyro-empty-icon svg {
       width: 32px;
       height: 32px;
     }
 
-    .chatfolio-empty-state h4 {
+    .klyro-empty-state h4 {
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 4px;
     }
 
-    .chatfolio-empty-state p {
+    .klyro-empty-state p {
       font-size: 13px;
       opacity: 0.8;
       line-height: 1.5;
@@ -298,7 +298,7 @@
       max-width: 300px;
     }
     
-    .chatfolio-messages {
+    .klyro-messages {
       flex: 1;
       overflow-y: auto;
       padding: 16px;
@@ -307,7 +307,7 @@
       gap: 12px;
     }
     
-    .chatfolio-message {
+    .klyro-message {
       max-width: 85%;
       padding: 10px 14px;
       border-radius: 12px;
@@ -316,18 +316,18 @@
       word-break: break-word;
     }
     
-    .chatfolio-message.user {
+    .klyro-message.user {
       align-self: flex-end;
       color: white;
       border-bottom-right-radius: 4px;
     }
     
-    .chatfolio-message.assistant {
+    .klyro-message.assistant {
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
     
-    .chatfolio-typing {
+    .klyro-typing {
       display: flex;
       gap: 4px;
       padding: 14px 18px;
@@ -335,29 +335,29 @@
       border-radius: 12px;
     }
     
-    .chatfolio-typing span {
+    .klyro-typing span {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      animation: chatfolioBounce 1.4s infinite ease-in-out both;
+      animation: klyroBounce 1.4s infinite ease-in-out both;
     }
     
-    .chatfolio-typing span:nth-child(1) { animation-delay: -0.32s; }
-    .chatfolio-typing span:nth-child(2) { animation-delay: -0.16s; }
+    .klyro-typing span:nth-child(1) { animation-delay: -0.32s; }
+    .klyro-typing span:nth-child(2) { animation-delay: -0.16s; }
     
-    @keyframes chatfolioBounce {
+    @keyframes klyroBounce {
       0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
       40% { transform: scale(1); opacity: 1; }
     }
     
-    .chatfolio-input-area {
+    .klyro-input-area {
       padding: 12px 16px;
       display: flex;
       gap: 8px;
       border-top: 1px solid;
     }
     
-    .chatfolio-input {
+    .klyro-input {
       flex: 1;
       padding: 10px 14px;
       border-radius: 24px;
@@ -367,42 +367,42 @@
       transition: border-color 0.2s;
     }
 
-    .chatfolio-input:focus {
+    .klyro-input:focus {
       border-color: var(--primary-color);
     }
 
-    .chatfolio-message a {
+    .klyro-message a {
       color: inherit;
       text-decoration: underline;
       font-weight: 600;
       transition: opacity 0.2s;
     }
 
-    .chatfolio-message a:hover {
+    .klyro-message a:hover {
       opacity: 0.8;
     }
 
-    .chatfolio-message.assistant a {
+    .klyro-message.assistant a {
       color: var(--primary-color);
     }
 
-    .chatfolio-message strong {
+    .klyro-message strong {
       font-weight: 600;
     }
 
-    .chatfolio-message ul {
+    .klyro-message ul {
       margin: 8px 0;
       padding-left: 0;
       list-style: none;
     }
 
-    .chatfolio-message li {
+    .klyro-message li {
       position: relative;
       padding-left: 16px;
       margin-bottom: 6px;
     }
 
-    .chatfolio-message li::before {
+    .klyro-message li::before {
       content: "•";
       position: absolute;
       left: 0;
@@ -410,7 +410,7 @@
       font-weight: bold;
     }
     
-    .chatfolio-send {
+    .klyro-send {
       width: 40px;
       height: 40px;
       border-radius: 50%;
@@ -422,141 +422,141 @@
       transition: transform 0.2s;
     }
     
-    .chatfolio-send:hover:not(:disabled) {
+    .klyro-send:hover:not(:disabled) {
       transform: scale(1.05);
     }
     
-    .chatfolio-send:disabled {
+    .klyro-send:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
     
-    .chatfolio-send svg {
+    .klyro-send svg {
       width: 18px;
       height: 18px;
       fill: white;
     }
     
     /* Theme: Light */
-    .chatfolio-widget.light .chatfolio-panel {
+    .klyro-widget.light .klyro-panel {
       background: #ffffff;
     }
     
-    .chatfolio-widget.light .chatfolio-messages {
+    .klyro-widget.light .klyro-messages {
       background: #f8fafc;
     }
     
-    .chatfolio-widget.light .chatfolio-message.assistant {
+    .klyro-widget.light .klyro-message.assistant {
       background: #ffffff;
       color: #1e293b;
       border: 1px solid #e2e8f0;
     }
     
-    .chatfolio-widget.light .chatfolio-typing {
+    .klyro-widget.light .klyro-typing {
       background: #ffffff;
       border: 1px solid #e2e8f0;
     }
     
-    .chatfolio-widget.light .chatfolio-typing span {
+    .klyro-widget.light .klyro-typing span {
       background: #94a3b8;
     }
     
-    .chatfolio-widget.light .chatfolio-input-area {
+    .klyro-widget.light .klyro-input-area {
       background: #ffffff;
       border-color: #e2e8f0;
     }
     
-    .chatfolio-widget.light .chatfolio-input {
+    .klyro-widget.light .klyro-input {
       background: #f8fafc;
       border-color: #e2e8f0;
       color: #1e293b;
     }
     
-    .chatfolio-widget.light .chatfolio-input::placeholder {
+    .klyro-widget.light .klyro-input::placeholder {
       color: #94a3b8;
     }
 
-    .chatfolio-widget.light .chatfolio-empty-state {
+    .klyro-widget.light .klyro-empty-state {
       background: #f8fafc;
     }
 
-    .chatfolio-widget.light .chatfolio-empty-state h4 {
+    .klyro-widget.light .klyro-empty-state h4 {
       color: #1e293b;
     }
 
-    .chatfolio-widget.light .chatfolio-empty-state p {
+    .klyro-widget.light .klyro-empty-state p {
       color: #64748b;
     }
 
-    .chatfolio-widget.light .chatfolio-empty-icon {
+    .klyro-widget.light .klyro-empty-icon {
       background: rgba(0, 0, 0, 0.05);
     }
 
-    .chatfolio-widget.light .chatfolio-empty-icon svg {
+    .klyro-widget.light .klyro-empty-icon svg {
       fill: var(--primary-color);
     }
     
     /* Theme: Dark */
-    .chatfolio-widget.dark .chatfolio-panel {
+    .klyro-widget.dark .klyro-panel {
       background: #1e293b;
     }
     
-    .chatfolio-widget.dark .chatfolio-messages {
+    .klyro-widget.dark .klyro-messages {
       background: #0f172a;
     }
     
-    .chatfolio-widget.dark .chatfolio-message.assistant {
+    .klyro-widget.dark .klyro-message.assistant {
       background: #1e293b;
       color: #f1f5f9;
       border: 1px solid #334155;
     }
     
-    .chatfolio-widget.dark .chatfolio-typing {
+    .klyro-widget.dark .klyro-typing {
       background: #1e293b;
       border: 1px solid #334155;
     }
     
-    .chatfolio-widget.dark .chatfolio-typing span {
+    .klyro-widget.dark .klyro-typing span {
       background: #64748b;
     }
     
-    .chatfolio-widget.dark .chatfolio-input-area {
+    .klyro-widget.dark .klyro-input-area {
       background: #1e293b;
       border-color: #334155;
     }
     
-    .chatfolio-widget.dark .chatfolio-input {
+    .klyro-widget.dark .klyro-input {
       background: #0f172a;
       border-color: #334155;
       color: #f1f5f9;
     }
     
-    .chatfolio-widget.dark .chatfolio-input::placeholder {
+    .klyro-widget.dark .klyro-input::placeholder {
       color: #64748b;
     }
 
-    .chatfolio-widget.dark .chatfolio-empty-state {
+    .klyro-widget.dark .klyro-empty-state {
       background: #0f172a;
     }
 
-    .chatfolio-widget.dark .chatfolio-empty-state h4 {
+    .klyro-widget.dark .klyro-empty-state h4 {
       color: #f1f5f9;
     }
 
-    .chatfolio-widget.dark .chatfolio-empty-state p {
+    .klyro-widget.dark .klyro-empty-state p {
       color: #94a3b8;
     }
 
-    .chatfolio-widget.dark .chatfolio-empty-icon {
+    .klyro-widget.dark .klyro-empty-icon {
       background: rgba(255, 255, 255, 0.1);
     }
 
-    .chatfolio-widget.dark .chatfolio-empty-icon svg {
+    .klyro-widget.dark .klyro-empty-icon svg {
       fill: var(--primary-color);
     }
     
     @media (max-width: 480px) {
-      .chatfolio-panel {
+      .klyro-panel {
         width: calc(100vw - 32px);
         left: 16px !important;
         right: 16px !important;
@@ -566,7 +566,7 @@
       }
     }
 
-    .chatfolio-popover-overlay {
+    .klyro-popover-overlay {
       position: absolute;
       inset: 0;
       background: rgba(0, 0, 0, 0.4);
@@ -578,11 +578,11 @@
       padding: 20px;
     }
     
-    .chatfolio-popover-overlay.open {
+    .klyro-popover-overlay.open {
       display: flex;
     }
     
-    .chatfolio-popover {
+    .klyro-popover {
       background: #ffffff;
       width: 100%;
       max-width: 280px;
@@ -590,33 +590,33 @@
       border-radius: 16px;
       text-align: center;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      animation: chatfolioPopoverScale 0.2s ease-out;
+      animation: klyroPopoverScale 0.2s ease-out;
     }
 
-    @keyframes chatfolioPopoverScale {
+    @keyframes klyroPopoverScale {
       from { transform: scale(0.95); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
     
-    .chatfolio-popover h4 {
+    .klyro-popover h4 {
       font-size: 16px;
       font-weight: 700;
       margin-bottom: 8px;
     }
     
-    .chatfolio-popover p {
+    .klyro-popover p {
       font-size: 14px;
       color: #64748b;
       margin-bottom: 24px;
       line-height: 1.5;
     }
     
-    .chatfolio-popover-actions {
+    .klyro-popover-actions {
       display: flex;
       gap: 12px;
     }
     
-    .chatfolio-popover-btn {
+    .klyro-popover-btn {
       flex: 1;
       padding: 10px;
       border-radius: 8px;
@@ -627,43 +627,43 @@
       transition: all 0.2s;
     }
     
-    .chatfolio-popover-btn.cancel {
+    .klyro-popover-btn.cancel {
       background: #f1f5f9;
       color: #475569;
     }
 
-    .chatfolio-popover-btn.cancel:hover {
+    .klyro-popover-btn.cancel:hover {
       background: #e2e8f0;
     }
     
-    .chatfolio-popover-btn.confirm {
+    .klyro-popover-btn.confirm {
       background: var(--primary-color);
       color: white;
     }
 
-    .chatfolio-popover-btn.confirm:hover {
+    .klyro-popover-btn.confirm:hover {
       filter: brightness(1.1);
     }
 
-    .chatfolio-widget.dark .chatfolio-popover {
+    .klyro-widget.dark .klyro-popover {
       background: #1e293b;
       border: 1px solid #334155;
     }
 
-    .chatfolio-widget.dark .chatfolio-popover h4 {
+    .klyro-widget.dark .klyro-popover h4 {
       color: #f1f5f9;
     }
 
-    .chatfolio-widget.dark .chatfolio-popover p {
+    .klyro-widget.dark .klyro-popover p {
       color: #94a3b8;
     }
 
-    .chatfolio-widget.dark .chatfolio-popover-btn.cancel {
+    .klyro-widget.dark .klyro-popover-btn.cancel {
       background: #334155;
       color: #cbd5e1;
     }
 
-    .chatfolio-widget.dark .chatfolio-popover-btn.cancel:hover {
+    .klyro-widget.dark .klyro-popover-btn.cancel:hover {
       background: #475569;
     }
   `;
@@ -678,15 +678,15 @@
 
   // Initialize
   async function init() {
-    console.log("[Chatfolio] Initializing, API_BASE:", API_BASE);
+    console.log("[Klyro] Initializing, API_BASE:", API_BASE);
     try {
       const url = `${API_BASE}/api/widget/${widgetKey}`;
-      console.log("[Chatfolio] Fetching config from:", url);
+      console.log("[Klyro] Fetching config from:", url);
       const res = await fetch(url);
-      console.log("[Chatfolio] Response status:", res.status);
+      console.log("[Klyro] Response status:", res.status);
       if (!res.ok) throw new Error("Widget not found");
       config = await res.json();
-      console.log("[Chatfolio] Config loaded:", config);
+      console.log("[Klyro] Config loaded:", config);
 
       // Load chat before rendering
       loadPersistedChat();
@@ -699,20 +699,20 @@
         messages[0].role === "assistant" &&
         messages[0].content === config.welcomeMessage
       ) {
-        console.log("[Chatfolio] Removing legacy welcome message from history");
+        console.log("[Klyro] Removing legacy welcome message from history");
         messages.shift();
         persistChat();
       }
 
       render();
     } catch (err) {
-      console.error("Chatfolio: Failed to load widget", err);
+      console.error("Klyro: Failed to load widget", err);
     }
   }
 
   // Render widget
   function render() {
-    console.log("[Chatfolio] Rendering widget...");
+    console.log("[Klyro] Rendering widget...");
     // Add styles
     const styleEl = document.createElement("style");
     styleEl.textContent = styles;
@@ -728,40 +728,40 @@
 
     // Create container
     const container = document.createElement("div");
-    container.className = `chatfolio-widget ${theme}`;
+    container.className = `klyro-widget ${theme}`;
     container.style.setProperty("--primary-color", config.primaryColor);
     container.innerHTML = `
-      <button class="chatfolio-button ${config.position}" style="background: ${config.primaryColor}">
+      <button class="klyro-button ${config.position}" style="background: ${config.primaryColor}">
         ${chatIcon}
       </button>
-      <div class="chatfolio-panel ${config.position}">
-        <div class="chatfolio-header" style="background: ${config.primaryColor}">
-          <div class="chatfolio-header-icon">${botIcon}</div>
-          <div class="chatfolio-header-text">
+      <div class="klyro-panel ${config.position}">
+        <div class="klyro-header" style="background: ${config.primaryColor}">
+          <div class="klyro-header-icon">${botIcon}</div>
+          <div class="klyro-header-text">
             <h3>${escapeHtml(config.headerTitle || "Chat Assistant")}</h3>
             <p>Copilot Assistant</p>
           </div>
-          <div class="chatfolio-header-actions">
-            <button class="chatfolio-header-btn download-btn" title="Download Transcript">
+          <div class="klyro-header-actions">
+            <button class="klyro-header-btn download-btn" title="Download Transcript">
               ${downloadIcon}
             </button>
-            <button class="chatfolio-header-btn reset-btn" title="Reset Chat">
+            <button class="klyro-header-btn reset-btn" title="Reset Chat">
               ${resetIcon}
             </button>
           </div>
         </div>
-        <div class="chatfolio-messages"></div>
-        <div class="chatfolio-input-area">
-          <input type="text" class="chatfolio-input" placeholder="Type a message...">
-          <button class="chatfolio-send" style="background: ${config.primaryColor}">${sendIcon}</button>
+        <div class="klyro-messages"></div>
+        <div class="klyro-input-area">
+          <input type="text" class="klyro-input" placeholder="Type a message...">
+          <button class="klyro-send" style="background: ${config.primaryColor}">${sendIcon}</button>
         </div>
-        <div class="chatfolio-popover-overlay">
-          <div class="chatfolio-popover">
+        <div class="klyro-popover-overlay">
+          <div class="klyro-popover">
             <h4>Reset Chat?</h4>
             <p>This will clear your entire conversation history. This action cannot be undone.</p>
-            <div class="chatfolio-popover-actions">
-              <button class="chatfolio-popover-btn cancel">Cancel</button>
-              <button class="chatfolio-popover-btn confirm">Clear All</button>
+            <div class="klyro-popover-actions">
+              <button class="klyro-popover-btn cancel">Cancel</button>
+              <button class="klyro-popover-btn confirm">Clear All</button>
             </div>
           </div>
         </div>
@@ -771,15 +771,15 @@
     document.body.appendChild(container);
 
     // Elements
-    const button = container.querySelector(".chatfolio-button");
-    const panel = container.querySelector(".chatfolio-panel");
-    const messagesContainer = container.querySelector(".chatfolio-messages");
-    const input = container.querySelector(".chatfolio-input");
-    const sendBtn = container.querySelector(".chatfolio-send");
+    const button = container.querySelector(".klyro-button");
+    const panel = container.querySelector(".klyro-panel");
+    const messagesContainer = container.querySelector(".klyro-messages");
+    const input = container.querySelector(".klyro-input");
+    const sendBtn = container.querySelector(".klyro-send");
     const resetBtn = container.querySelector(".reset-btn");
     const downloadBtn = container.querySelector(".download-btn");
 
-    const popover = container.querySelector(".chatfolio-popover-overlay");
+    const popover = container.querySelector(".klyro-popover-overlay");
     const confirmResetBtn = popover.querySelector(".confirm");
     const cancelResetBtn = popover.querySelector(".cancel");
 
@@ -889,8 +889,8 @@
         // ... show empty state ...
         const firstName = (config.headerTitle || "Assistant").split(" ")[0];
         messagesContainer.innerHTML = `
-          <div class="chatfolio-empty-state">
-            <div class="chatfolio-empty-icon" style="background: ${config.primaryColor}20">
+          <div class="klyro-empty-state">
+            <div class="klyro-empty-icon" style="background: ${config.primaryColor}20">
               ${botIcon}
             </div>
             <h4>Hey! I'm ${escapeHtml(firstName)}'s copilot</h4>
@@ -901,7 +901,7 @@
         messagesContainer.innerHTML = displayMessages
           .map(
             (msg) => `
-          <div class="chatfolio-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
+          <div class="klyro-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
             ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
           </div>
         `,
@@ -911,7 +911,7 @@
 
       if (isLoading) {
         messagesContainer.innerHTML += `
-          <div class="chatfolio-typing">
+          <div class="klyro-typing">
             <span style="background: ${config.primaryColor}"></span>
             <span style="background: ${config.primaryColor}"></span>
             <span style="background: ${config.primaryColor}"></span>
@@ -928,7 +928,7 @@
     if (!text) return "";
 
     console.log(
-      "[Chatfolio] formatMessage called with:",
+      "[Klyro] formatMessage called with:",
       text.substring(0, 100),
     );
 
@@ -948,7 +948,7 @@
     content = content.replace(/(https?:\/\/[^\s<\]]+)/g, (match, url) => {
       // Don't double-process URLs that were part of markdown links
       if (match.includes("__LINK_")) return match;
-      console.log("[Chatfolio] Found raw URL:", url);
+      console.log("[Klyro] Found raw URL:", url);
       const placeholder = `__URL_${urlPlaceholders.length}__`;
       urlPlaceholders.push(url);
       return placeholder;
@@ -1015,7 +1015,7 @@
     // Clean up any remaining newlines
     html = html.replace(/\n/g, "");
 
-    console.log("[Chatfolio] formatMessage result:", html.substring(0, 100));
+    console.log("[Klyro] formatMessage result:", html.substring(0, 100));
 
     return html;
   }
