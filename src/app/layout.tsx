@@ -3,8 +3,8 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Klyro - AI Portfolio Assistant",
-  description: "An embeddable AI chatbot for your portfolio website",
+  title: "Klyro - AI Chat Assistant",
+  description: "An intelligent, embeddable AI chat assistant for any website",
 };
 
 export default function RootLayout({
