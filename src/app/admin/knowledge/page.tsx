@@ -54,7 +54,10 @@ export default function KnowledgeBasePage() {
     try {
       const res = await fetch("/api/documents");
       const data = await res.json();
-      setDocuments(data);
+      // Only set state if we got an array (API errors return objects)
+      if (Array.isArray(data)) {
+        setDocuments(data);
+      }
     } catch (error) {
       console.error("Failed to fetch documents:", error);
     } finally {

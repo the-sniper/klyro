@@ -894,7 +894,7 @@
               ${botIcon}
             </div>
             <h4>Hey! I'm ${escapeHtml(firstName)}'s copilot</h4>
-            <p>I can help answer questions about ${escapeHtml(config.headerTitle || "this site")}</p>
+            <p>I can help answer questions about them</p>
           </div>
         `;
       } else {

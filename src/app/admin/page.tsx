@@ -32,8 +32,13 @@ export default function AdminDashboard() {
         const docsData = await docsRes.json();
         const widgetsData = await widgetsRes.json();
 
-        setDocuments(docsData);
-        setWidgets(widgetsData);
+        // Only set state if we got arrays (API errors return objects)
+        if (Array.isArray(docsData)) {
+          setDocuments(docsData);
+        }
+        if (Array.isArray(widgetsData)) {
+          setWidgets(widgetsData);
+        }
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
