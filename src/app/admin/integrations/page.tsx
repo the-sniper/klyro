@@ -40,9 +40,15 @@ export default function IntegrationsPage() {
     try {
       const res = await fetch("/api/widget");
       const data = await res.json();
-      setWidgets(data);
+      if (Array.isArray(data)) {
+        setWidgets(data);
+      } else {
+        console.error("API returned non-array data:", data);
+        setWidgets([]);
+      }
     } catch (error) {
       console.error("Failed to fetch widgets:", error);
+      setWidgets([]);
     } finally {
       setLoading(false);
     }

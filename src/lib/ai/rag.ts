@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/client';
 import { generateEmbedding } from './embeddings';
 import type { MatchedChunk, SourceReference, PersonaContext } from '@/types';
 import { fetchLatestRepos } from '../external/github';
+import { fetchPortfolioContent, formatPortfolioForAI } from '../external/portfolio';
 import type { ChatCompletionTool, ChatCompletionMessageParam } from 'openai/resources/index';
 
 let openaiClient: OpenAI | null = null;
@@ -48,6 +49,23 @@ const TOOLS: ChatCompletionTool[] = [
             description: 'Number of repositories to fetch (default: 5)',
           },
         },
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'fetch_url_content',
+      description: 'Fetch fresh content from a URL to get up-to-date information. Use this when: (1) you need to answer questions about where the owner works, their current role, experience, or skills that aren\'t in the knowledge base, (2) a URL document in the knowledge base might have updated content, or (3) you need to verify or expand on information from a URL source. You will be provided with a list of available URLs to fetch from.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: {
+            type: 'string',
+            description: 'The URL to fetch content from. Choose from the available URLs provided in the system context.',
+          },
+        },
+        required: ['url'],
       },
     },
   },
@@ -359,8 +377,60 @@ export async function generateResponse(
     })),
   ];
 
-  // Determine if tools should be used
-  const useTools = !!persona?.external_links?.github;
+  // Fetch URL documents from knowledge base for potential live fetching
+  const { data: urlDocuments } = await supabase
+    .from('documents')
+    .select('id, name, source_url, category')
+    .eq('source_type', 'url')
+    .eq('user_id', persona?.userId || '')
+    .not('source_url', 'is', null);
+
+  // Build list of available URLs (from URL documents + persona external links)
+  const availableUrls: { name: string; url: string; source: string }[] = [];
+  
+  // Add URL documents from knowledge base
+  if (urlDocuments) {
+    for (const doc of urlDocuments) {
+      if (doc.source_url) {
+        availableUrls.push({
+          name: doc.name,
+          url: doc.source_url,
+          source: 'knowledge_base'
+        });
+      }
+    }
+  }
+  
+  // Add persona external links
+  if (persona?.external_links?.website) {
+    availableUrls.push({
+      name: 'Portfolio Website',
+      url: persona.external_links.website,
+      source: 'persona'
+    });
+  }
+  if (persona?.external_links?.linkedin) {
+    availableUrls.push({
+      name: 'LinkedIn Profile',
+      url: persona.external_links.linkedin,
+      source: 'persona'
+    });
+  }
+
+  // If we have URLs available, add them to the system context
+  if (availableUrls.length > 0) {
+    const urlListText = availableUrls
+      .map(u => `- ${u.name}: ${u.url}`)
+      .join('\n');
+    
+    messages.push({
+      role: 'user',
+      content: `[AVAILABLE URL SOURCES FOR LIVE FETCHING]\nIf you need more information to answer a question, you can fetch fresh content from these URLs using the fetch_url_content tool:\n${urlListText}\n\n(Only use this if the knowledge base context doesn't have the answer.)`
+    });
+  }
+
+  // Determine if tools should be used (GitHub, website, or URL documents available)
+  const useTools = !!(persona?.external_links?.github || availableUrls.length > 0);
 
   let completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
@@ -392,6 +462,50 @@ export async function generateResponse(
             tool_call_id: toolCall.id,
             role: 'tool',
             content: toolResult,
+          });
+        } else {
+          messages.push({
+            tool_call_id: toolCall.id,
+            role: 'tool',
+            content: "GitHub URL not configured.",
+          });
+        }
+      } else if (toolCall.function.name === 'fetch_url_content') {
+        const args = JSON.parse(toolCall.function.arguments);
+        const { url } = args;
+        
+        if (url) {
+          // Validate that the URL is in our allowed list
+          const isAllowedUrl = availableUrls.some(u => 
+            u.url === url || 
+            url.includes(u.url) || 
+            u.url.includes(url)
+          );
+          
+          if (isAllowedUrl) {
+            console.log('[RAG] Fetching content from URL:', url);
+            const portfolioInfo = await fetchPortfolioContent(url);
+            const toolResult = portfolioInfo 
+              ? formatPortfolioForAI(portfolioInfo)
+              : "Could not fetch content from this URL. The website might be unavailable or require JavaScript to render.";
+              
+            messages.push({
+              tool_call_id: toolCall.id,
+              role: 'tool',
+              content: toolResult,
+            });
+          } else {
+            messages.push({
+              tool_call_id: toolCall.id,
+              role: 'tool',
+              content: "This URL is not in the allowed list. Please choose from the available URLs provided.",
+            });
+          }
+        } else {
+          messages.push({
+            tool_call_id: toolCall.id,
+            role: 'tool',
+            content: "No URL provided. Please specify which URL to fetch from the available list.",
           });
         }
       }

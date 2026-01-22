@@ -67,7 +67,7 @@ export default function TestChatPage() {
     setIsLoaded(true);
   }, []);
 
-  const isLimitReached = messages.length >= 50;
+  const isLimitReached = messages.length >= 15;
 
   useEffect(() => {
     if (isLimitReached) {
@@ -339,14 +339,14 @@ export default function TestChatPage() {
             </div>
             <div className="testing-badge">
               <span className="testing-text">Testing Mode</span>
-              <span className="message-count">{messages.length}/50</span>
+              <span className="message-count">{messages.length}/15</span>
             </div>
           </div>
 
           <div className="testing-notice">
             <Info size={14} />
             <span>
-              This chat is in testing. It will persist until reset or after 50
+              This chat is in testing. It will persist until reset or after 15
               messages.
             </span>
           </div>
@@ -380,7 +380,7 @@ export default function TestChatPage() {
                   <div>
                     <h4>Message Limit Reached</h4>
                     <p>
-                      The conversation has reached 50 messages and will now
+                      The conversation has reached 15 messages and will now
                       reset.
                     </p>
                   </div>

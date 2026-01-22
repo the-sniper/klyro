@@ -10,6 +10,7 @@ import {
   Fingerprint,
   LogOut,
   Sparkles,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -63,6 +64,16 @@ export function AdminSidebar() {
       </nav>
 
       <div style={{ marginTop: "auto", paddingTop: "24px" }}>
+        <Link
+          href="/admin/profile"
+          className={`sidebar-link ${pathname === "/admin/profile" ? "active" : ""}`}
+        >
+          <User
+            size={22}
+            strokeWidth={pathname === "/admin/profile" ? 2.5 : 2}
+          />
+          <span>Profile</span>
+        </Link>
         <button
           onClick={handleLogout}
           className="sidebar-link w-full"
