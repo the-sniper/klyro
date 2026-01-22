@@ -2,14 +2,15 @@
 
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 import {
   Send,
   RotateCcw,
   Bot,
-  ToggleLeft,
-  ToggleRight,
   Loader2,
   Info,
+  AlertCircle,
+  Code2,
 } from "lucide-react";
 
 interface Message {
@@ -32,10 +33,11 @@ export default function TestChatPage() {
   const [strictMode, setStrictMode] = useState(true);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [hasWidget, setHasWidget] = useState<boolean | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch a valid widget key on mount
-  const [activeWidgetKey, setActiveWidgetKey] = useState<string>("default");
+  const [activeWidgetKey, setActiveWidgetKey] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchWidgetKey() {
@@ -45,39 +47,25 @@ export default function TestChatPage() {
           const widgets = await res.json();
           if (widgets && widgets.length > 0) {
             setActiveWidgetKey(widgets[0].widget_key);
+            setHasWidget(true);
+          } else {
+            setHasWidget(false);
           }
+        } else {
+          setHasWidget(false);
         }
       } catch (e) {
         console.error("Failed to fetch widget key", e);
+        setHasWidget(false);
       }
     }
     fetchWidgetKey();
 
-    // Load persisted chat
-    const savedMessages = localStorage.getItem("test-chat-messages");
-    const savedSessionId = localStorage.getItem("test-chat-session-id");
-    if (savedMessages) {
-      try {
-        setMessages(JSON.parse(savedMessages));
-      } catch (e) {
-        console.error("Failed to parse saved messages", e);
-      }
-    }
-    if (savedSessionId) {
-      setSessionId(savedSessionId);
-    }
+    // Clear any old localStorage data
+    localStorage.removeItem("test-chat-messages");
+    localStorage.removeItem("test-chat-session-id");
     setIsLoaded(true);
   }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    localStorage.setItem("test-chat-messages", JSON.stringify(messages));
-    if (sessionId) {
-      localStorage.setItem("test-chat-session-id", sessionId);
-    } else {
-      localStorage.removeItem("test-chat-session-id");
-    }
-  }, [messages, sessionId, isLoaded]);
 
   const isLimitReached = messages.length >= 50;
 
@@ -182,6 +170,117 @@ export default function TestChatPage() {
     "What skills do you have?",
     "How can I contact you?",
   ];
+
+  // Loading state
+  if (hasWidget === null) {
+    return (
+      <div className="animate-fade-in content-container">
+        <div className="page-header chat-page-header">
+          <div className="header-text">
+            <h1 className="page-title text-gradient">Test Chat</h1>
+            <p className="page-subtitle">
+              Experience how your chatbot interacts with visitors
+            </p>
+          </div>
+        </div>
+        <div className="setup-prompt glass">
+          <Loader2
+            size={32}
+            className="animate-spin"
+            style={{ color: "var(--accent-primary)" }}
+          />
+          <p>Loading...</p>
+        </div>
+        <style jsx>{`
+          .content-container {
+            max-width: 1000px;
+            margin: 0 auto;
+          }
+          .setup-prompt {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding: 80px 40px;
+            border-radius: var(--radius-xl);
+            text-align: center;
+          }
+          .setup-prompt p {
+            color: var(--text-secondary);
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // No widget configured
+  if (!hasWidget) {
+    return (
+      <div className="animate-fade-in content-container">
+        <div className="page-header chat-page-header">
+          <div className="header-text">
+            <h1 className="page-title text-gradient">Test Chat</h1>
+            <p className="page-subtitle">
+              Experience how your chatbot interacts with visitors
+            </p>
+          </div>
+        </div>
+        <div className="setup-prompt glass">
+          <div className="setup-icon">
+            <AlertCircle size={48} />
+          </div>
+          <h2>Widget Setup Required</h2>
+          <p>
+            You need to create a widget before you can test the chat. Head over
+            to Integrations to set up your first widget.
+          </p>
+          <Link href="/admin/integrations" className="btn btn-primary">
+            <Code2 size={18} />
+            Go to Integrations
+          </Link>
+        </div>
+        <style jsx>{`
+          .content-container {
+            max-width: 1000px;
+            margin: 0 auto;
+          }
+          .setup-prompt {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 80px 40px;
+            border-radius: var(--radius-xl);
+            text-align: center;
+          }
+          .setup-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fbbf24;
+          }
+          .setup-prompt h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+          }
+          .setup-prompt p {
+            color: var(--text-secondary);
+            max-width: 400px;
+            line-height: 1.6;
+            margin: 0;
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-in content-container">

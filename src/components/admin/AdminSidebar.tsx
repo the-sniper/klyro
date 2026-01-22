@@ -7,11 +7,10 @@ import {
   Database,
   MessageSquare,
   Code2,
-  Sparkles,
   Fingerprint,
   LogOut,
+  Sparkles,
 } from "lucide-react";
-import { getSupabase } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -24,13 +23,12 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = getSupabase();
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      await fetch("/api/auth/logout", { method: "POST" });
       router.push("/login");
-      router.refresh(); // Clear any server components cache
+      router.refresh();
     } catch (error) {
       console.error("Error logging out:", error);
     }

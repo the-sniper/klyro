@@ -1,90 +1,52 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+interface SessionData {
+  userId: string;
+  email: string;
+  exp: number;
+}
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
+function parseSession(cookie: string | undefined): SessionData | null {
+  if (!cookie) return null;
+  
+  try {
+    const data = JSON.parse(Buffer.from(cookie, 'base64').toString());
+    if (data.exp && data.exp > Date.now()) {
+      return data as SessionData;
     }
-  )
+    return null; // Expired
+  } catch {
+    return null;
+  }
+}
 
-  // This will refresh the session if needed
-  const { data: { user } } = await supabase.auth.getUser()
+export async function middleware(request: NextRequest) {
+  const sessionCookie = request.cookies.get('session')?.value;
+  const session = parseSession(sessionCookie);
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
-                     request.nextUrl.pathname.startsWith('/signup')
+                     request.nextUrl.pathname.startsWith('/signup');
   
-  // Public routes that don't need auth
   const isPublicRoute = isAuthPage || 
-                        request.nextUrl.pathname.startsWith('/api/widget')
+                        request.nextUrl.pathname.startsWith('/api/widget') ||
+                        request.nextUrl.pathname.startsWith('/api/chat') ||
+                        request.nextUrl.pathname.startsWith('/api/auth');
 
-  if (!user && !isPublicRoute) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Redirect unauthenticated users to login
+  if (!session && !isPublicRoute) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Redirect to admin if already logged in and trying to access login/signup or root
-  if (user && (isAuthPage || request.nextUrl.pathname === '/')) {
-    return NextResponse.redirect(new URL('/admin', request.url))
+  // Redirect logged-in users away from auth pages
+  if (session && (isAuthPage || request.nextUrl.pathname === '/')) {
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
-  return response
+  return NextResponse.next();
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (svg, png, etc)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

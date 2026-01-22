@@ -35,6 +35,21 @@ export default function KnowledgeBasePage() {
     fetchDocuments();
   }, []);
 
+  // Auto-poll when documents are processing
+  useEffect(() => {
+    const hasProcessing = documents.some(
+      (doc) => doc.status === "processing" || doc.status === "queued",
+    );
+
+    if (!hasProcessing) return;
+
+    const interval = setInterval(() => {
+      fetchDocuments();
+    }, 3000); // Poll every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [documents]);
+
   async function fetchDocuments() {
     try {
       const res = await fetch("/api/documents");
