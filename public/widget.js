@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.2.6"; // Version for cache debugging
+  const WIDGET_VERSION = "2.2.7"; // Version for cache debugging
   console.log("[Klyro] Widget script loaded, version:", WIDGET_VERSION);
 
   // Get widget configuration from script tag
@@ -356,6 +356,35 @@
       gap: 8px;
       border-top: 1px solid;
     }
+
+    .klyro-branding {
+      padding: 8px 16px;
+      text-align: center;
+      font-size: 11px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .klyro-branding:hover {
+      opacity: 1;
+    }
+
+    .klyro-branding a {
+      color: inherit;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .klyro-branding a:hover {
+      text-decoration: underline;
+    }
+
+    .klyro-branding svg {
+      width: 12px;
+      height: 12px;
+    }
     
     .klyro-input {
       flex: 1;
@@ -476,6 +505,12 @@
       color: #94a3b8;
     }
 
+    .klyro-widget.light .klyro-branding {
+      background: #ffffff;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+    }
+
     .klyro-widget.light .klyro-empty-state {
       background: #f8fafc;
     }
@@ -533,6 +568,12 @@
     
     .klyro-widget.dark .klyro-input::placeholder {
       color: #64748b;
+    }
+
+    .klyro-widget.dark .klyro-branding {
+      background: #1e293b;
+      color: #64748b;
+      border-top: 1px solid #334155;
     }
 
     .klyro-widget.dark .klyro-empty-state {
@@ -755,6 +796,12 @@
           <input type="text" class="klyro-input" placeholder="Type a message...">
           <button class="klyro-send" style="background: ${config.primaryColor}">${sendIcon}</button>
         </div>
+        <div class="klyro-branding">
+          <a href="https://klyro-pro.vercel.app" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            Powered by Klyro
+          </a>
+        </div>
         <div class="klyro-popover-overlay">
           <div class="klyro-popover">
             <h4>Reset Chat?</h4>
@@ -927,10 +974,7 @@
   function formatMessage(text) {
     if (!text) return "";
 
-    console.log(
-      "[Klyro] formatMessage called with:",
-      text.substring(0, 100),
-    );
+    console.log("[Klyro] formatMessage called with:", text.substring(0, 100));
 
     // Step 1: Protect and extract markdown links: [text](url)
     const linkPlaceholders = [];
