@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.1.0"; // Version for cache debugging
+  const WIDGET_VERSION = "2.2.6"; // Version for cache debugging
   console.log("[Chatfolio] Widget script loaded, version:", WIDGET_VERSION);
 
   // Get widget configuration from script tag
@@ -18,12 +18,87 @@
   // Configuration
   const API_BASE = currentScript?.src.replace("/widget.js", "") || "";
 
+  // Storage key for persistence
+  const STORAGE_KEY = `chatfolio_${widgetKey}`;
+
   // State
   let config = null;
   let isOpen = false;
   let messages = [];
   let sessionId = null;
   let isLoading = false;
+
+  // Load persisted chat from localStorage
+  function loadPersistedChat() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        messages = data.messages || [];
+        sessionId = data.sessionId || null;
+        console.log(
+          "[Chatfolio] Loaded persisted chat:",
+          messages.length,
+          "messages",
+        );
+        return true;
+      }
+    } catch (err) {
+      console.error("[Chatfolio] Failed to load persisted chat:", err);
+    }
+    return false;
+  }
+
+  // Save chat to localStorage
+  function persistChat() {
+    try {
+      const data = {
+        messages,
+        sessionId,
+        lastUpdated: new Date().toISOString(),
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (err) {
+      console.error("[Chatfolio] Failed to persist chat:", err);
+    }
+  }
+
+  // Clear persisted chat
+  function clearPersistedChat() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.error("[Chatfolio] Failed to clear persisted chat:", err);
+    }
+  }
+
+  // Download chat transcript
+  function downloadTranscript() {
+    if (messages.length === 0) return;
+
+    const header = config?.headerTitle || "Chat Transcript";
+    const timestamp = new Date().toLocaleString();
+
+    let transcript = `${header}\n`;
+    transcript += `Downloaded: ${timestamp}\n`;
+    transcript += "=".repeat(50) + "\n\n";
+
+    messages.forEach((msg, index) => {
+      const role =
+        msg.role === "user" ? "You" : config?.headerTitle || "Assistant";
+      transcript += `${role}:\n${msg.content}\n\n`;
+    });
+
+    const blob = new Blob([transcript], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `chat-transcript-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   // Styles
   const styles = `
@@ -134,11 +209,93 @@
       color: white;
       font-size: 16px;
       font-weight: 600;
+      margin: 0;
     }
     
     .chatfolio-header-text p {
       color: rgba(255, 255, 255, 0.8);
       font-size: 12px;
+      margin: 0;
+    }
+
+    .chatfolio-header-actions {
+      display: flex;
+      gap: 4px;
+      margin-left: auto;
+    }
+
+    .chatfolio-header-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.15);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .chatfolio-header-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.05);
+    }
+
+    .chatfolio-header-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+
+    .chatfolio-header-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .chatfolio-header-btn:disabled:hover {
+      transform: none;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .chatfolio-empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .chatfolio-empty-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .chatfolio-empty-icon svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .chatfolio-empty-state h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .chatfolio-empty-state p {
+      font-size: 13px;
+      opacity: 0.8;
+      line-height: 1.5;
+      margin-bottom: 0;
+      max-width: 300px;
     }
     
     .chatfolio-messages {
@@ -232,6 +389,26 @@
     .chatfolio-message strong {
       font-weight: 600;
     }
+
+    .chatfolio-message ul {
+      margin: 8px 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .chatfolio-message li {
+      position: relative;
+      padding-left: 16px;
+      margin-bottom: 6px;
+    }
+
+    .chatfolio-message li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
     
     .chatfolio-send {
       width: 40px;
@@ -298,6 +475,26 @@
     .chatfolio-widget.light .chatfolio-input::placeholder {
       color: #94a3b8;
     }
+
+    .chatfolio-widget.light .chatfolio-empty-state {
+      background: #f8fafc;
+    }
+
+    .chatfolio-widget.light .chatfolio-empty-state h4 {
+      color: #1e293b;
+    }
+
+    .chatfolio-widget.light .chatfolio-empty-state p {
+      color: #64748b;
+    }
+
+    .chatfolio-widget.light .chatfolio-empty-icon {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .chatfolio-widget.light .chatfolio-empty-icon svg {
+      fill: var(--primary-color);
+    }
     
     /* Theme: Dark */
     .chatfolio-widget.dark .chatfolio-panel {
@@ -337,6 +534,26 @@
     .chatfolio-widget.dark .chatfolio-input::placeholder {
       color: #64748b;
     }
+
+    .chatfolio-widget.dark .chatfolio-empty-state {
+      background: #0f172a;
+    }
+
+    .chatfolio-widget.dark .chatfolio-empty-state h4 {
+      color: #f1f5f9;
+    }
+
+    .chatfolio-widget.dark .chatfolio-empty-state p {
+      color: #94a3b8;
+    }
+
+    .chatfolio-widget.dark .chatfolio-empty-icon {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .chatfolio-widget.dark .chatfolio-empty-icon svg {
+      fill: var(--primary-color);
+    }
     
     @media (max-width: 480px) {
       .chatfolio-panel {
@@ -348,6 +565,107 @@
         max-height: calc(100vh - 120px);
       }
     }
+
+    .chatfolio-popover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+      padding: 20px;
+    }
+    
+    .chatfolio-popover-overlay.open {
+      display: flex;
+    }
+    
+    .chatfolio-popover {
+      background: #ffffff;
+      width: 100%;
+      max-width: 280px;
+      padding: 24px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: chatfolioPopoverScale 0.2s ease-out;
+    }
+
+    @keyframes chatfolioPopoverScale {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .chatfolio-popover h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .chatfolio-popover p {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .chatfolio-popover-actions {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .chatfolio-popover-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .chatfolio-popover-btn.cancel {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .chatfolio-popover-btn.cancel:hover {
+      background: #e2e8f0;
+    }
+    
+    .chatfolio-popover-btn.confirm {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .chatfolio-popover-btn.confirm:hover {
+      filter: brightness(1.1);
+    }
+
+    .chatfolio-widget.dark .chatfolio-popover {
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    .chatfolio-widget.dark .chatfolio-popover h4 {
+      color: #f1f5f9;
+    }
+
+    .chatfolio-widget.dark .chatfolio-popover p {
+      color: #94a3b8;
+    }
+
+    .chatfolio-widget.dark .chatfolio-popover-btn.cancel {
+      background: #334155;
+      color: #cbd5e1;
+    }
+
+    .chatfolio-widget.dark .chatfolio-popover-btn.cancel:hover {
+      background: #475569;
+    }
   `;
 
   // Icons
@@ -355,6 +673,8 @@
   const closeIcon = `<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
   const sendIcon = `<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>`;
   const botIcon = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+  const downloadIcon = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`;
+  const resetIcon = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`;
 
   // Initialize
   async function init() {
@@ -367,6 +687,23 @@
       if (!res.ok) throw new Error("Widget not found");
       config = await res.json();
       console.log("[Chatfolio] Config loaded:", config);
+
+      // Load chat before rendering
+      loadPersistedChat();
+
+      // Migration: Remove welcome message if it's the first message
+      // (Since we now have the empty state placeholder)
+      if (
+        messages.length > 0 &&
+        config.welcomeMessage &&
+        messages[0].role === "assistant" &&
+        messages[0].content === config.welcomeMessage
+      ) {
+        console.log("[Chatfolio] Removing legacy welcome message from history");
+        messages.shift();
+        persistChat();
+      }
+
       render();
     } catch (err) {
       console.error("Chatfolio: Failed to load widget", err);
@@ -402,13 +739,31 @@
           <div class="chatfolio-header-icon">${botIcon}</div>
           <div class="chatfolio-header-text">
             <h3>${escapeHtml(config.headerTitle || "Chat Assistant")}</h3>
-            <p>Ask me anything</p>
+            <p>Copilot Assistant</p>
+          </div>
+          <div class="chatfolio-header-actions">
+            <button class="chatfolio-header-btn download-btn" title="Download Transcript">
+              ${downloadIcon}
+            </button>
+            <button class="chatfolio-header-btn reset-btn" title="Reset Chat">
+              ${resetIcon}
+            </button>
           </div>
         </div>
         <div class="chatfolio-messages"></div>
         <div class="chatfolio-input-area">
           <input type="text" class="chatfolio-input" placeholder="Type a message...">
           <button class="chatfolio-send" style="background: ${config.primaryColor}">${sendIcon}</button>
+        </div>
+        <div class="chatfolio-popover-overlay">
+          <div class="chatfolio-popover">
+            <h4>Reset Chat?</h4>
+            <p>This will clear your entire conversation history. This action cannot be undone.</p>
+            <div class="chatfolio-popover-actions">
+              <button class="chatfolio-popover-btn cancel">Cancel</button>
+              <button class="chatfolio-popover-btn confirm">Clear All</button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -421,28 +776,53 @@
     const messagesContainer = container.querySelector(".chatfolio-messages");
     const input = container.querySelector(".chatfolio-input");
     const sendBtn = container.querySelector(".chatfolio-send");
+    const resetBtn = container.querySelector(".reset-btn");
+    const downloadBtn = container.querySelector(".download-btn");
 
-    // Add welcome message
-    if (config.welcomeMessage) {
-      messages.push({ role: "assistant", content: config.welcomeMessage });
-      renderMessages();
-    }
+    const popover = container.querySelector(".chatfolio-popover-overlay");
+    const confirmResetBtn = popover.querySelector(".confirm");
+    const cancelResetBtn = popover.querySelector(".cancel");
+
+    // Initial render
+    renderMessages();
 
     // Event listeners
     button.addEventListener("click", () => {
       isOpen = !isOpen;
       panel.classList.toggle("open", isOpen);
       button.innerHTML = isOpen ? closeIcon : chatIcon;
-      if (isOpen) input.focus();
+      if (isOpen) {
+        input.focus();
+        renderMessages(); // Fresh render when opening
+      }
     });
 
-    async function sendMessage() {
-      const text = input.value.trim();
+    resetBtn.addEventListener("click", () => {
+      popover.classList.add("open");
+    });
+
+    cancelResetBtn.addEventListener("click", () => {
+      popover.classList.remove("open");
+    });
+
+    confirmResetBtn.addEventListener("click", () => {
+      messages = [];
+      sessionId = null;
+      clearPersistedChat();
+      renderMessages();
+      popover.classList.remove("open");
+    });
+
+    downloadBtn.addEventListener("click", downloadTranscript);
+
+    async function sendMessage(textOverride) {
+      const text = textOverride || input.value.trim();
       if (!text || isLoading) return;
 
       messages.push({ role: "user", content: text });
-      input.value = "";
+      if (!textOverride) input.value = "";
       renderMessages();
+      persistChat();
 
       isLoading = true;
       renderMessages();
@@ -464,6 +844,7 @@
         if (res.ok) {
           sessionId = data.sessionId;
           messages.push({ role: "assistant", content: data.response });
+          persistChat();
         } else {
           messages.push({
             role: "assistant",
@@ -487,22 +868,53 @@
     });
 
     function renderMessages() {
-      messagesContainer.innerHTML = messages
-        .map(
-          (msg) => `
-        <div class="chatfolio-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
-          ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
-        </div>
-      `,
-        )
-        .join("");
+      // Filter out legacy welcome message from display if it's the first one
+      // (Since we now have the empty state placeholder)
+      const displayMessages = messages.filter((msg, idx) => {
+        if (
+          idx === 0 &&
+          msg.role === "assistant" &&
+          config.welcomeMessage &&
+          msg.content.trim() === config.welcomeMessage.trim()
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      // Show/Hide download button based on displayable message count
+      downloadBtn.disabled = displayMessages.length === 0;
+
+      if (displayMessages.length === 0) {
+        // ... show empty state ...
+        const firstName = (config.headerTitle || "Assistant").split(" ")[0];
+        messagesContainer.innerHTML = `
+          <div class="chatfolio-empty-state">
+            <div class="chatfolio-empty-icon" style="background: ${config.primaryColor}20">
+              ${botIcon}
+            </div>
+            <h4>Hey! I'm ${escapeHtml(firstName)}'s copilot</h4>
+            <p>I can help answer questions about ${escapeHtml(config.headerTitle || "this site")}</p>
+          </div>
+        `;
+      } else {
+        messagesContainer.innerHTML = displayMessages
+          .map(
+            (msg) => `
+          <div class="chatfolio-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
+            ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
+          </div>
+        `,
+          )
+          .join("");
+      }
 
       if (isLoading) {
         messagesContainer.innerHTML += `
           <div class="chatfolio-typing">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span style="background: ${config.primaryColor}"></span>
+            <span style="background: ${config.primaryColor}"></span>
+            <span style="background: ${config.primaryColor}"></span>
           </div>
         `;
       }
@@ -520,18 +932,13 @@
       text.substring(0, 100),
     );
 
-    // Remove em-dashes and en-dashes first
-    let content = text.replace(/\u2014/g, ", ").replace(/\u2013/g, "-");
-
-    // Process markdown BEFORE escaping HTML (otherwise brackets get escaped)
-    // Step 1: Extract and protect markdown links (allow optional space between ] and ()
+    // Step 1: Protect and extract markdown links: [text](url)
     const linkPlaceholders = [];
-    content = content.replace(
-      /\[([^\]]+)\]\s*\(([^)]+)\)/g,
+    let content = text.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
       (match, linkText, url) => {
-        console.log("[Chatfolio] Found markdown link:", linkText, url);
         const placeholder = `__LINK_${linkPlaceholders.length}__`;
-        linkPlaceholders.push({ text: linkText, url: url });
+        linkPlaceholders.push({ text: linkText, url });
         return placeholder;
       },
     );
@@ -553,30 +960,60 @@
     // Step 4: Restore markdown links as actual <a> tags
     linkPlaceholders.forEach((link, i) => {
       const safeText = escapeHtml(link.text);
-      const safeUrl = link.url.replace(/"/g, "&quot;");
       html = html.replace(
         `__LINK_${i}__`,
-        `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeText}</a>`,
+        `<a href="${link.url}" target="_blank" rel="noopener noreferrer">${safeText}</a>`,
       );
     });
 
-    // Step 5: Restore raw URLs as clickable links
+    // Step 5: Restore raw URLs as <a> tags
     urlPlaceholders.forEach((url, i) => {
-      const safeUrl = url.replace(/"/g, "&quot;");
       html = html.replace(
         `__URL_${i}__`,
-        `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`,
+        `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`,
       );
     });
 
     // Markdown: Bold **text**
     html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 
-    // Markdown: Italic *text*
-    html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+    // Markdown: Italic *text* (but not if it's a bullet point at start of line)
+    html = html.replace(/(?<!^|\n)\*([^*\n]+)\*/g, "<em>$1</em>");
 
-    // Newlines to <br>
-    html = html.replace(/\n/g, "<br>");
+    // Convert bullet points (•, -, *) at the start of lines into list items
+    const lines = html.split("\n");
+    let inList = false;
+    let result = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const bulletMatch = line.match(/^[\s]*[•\-\*]\s+(.+)$/);
+
+      if (bulletMatch) {
+        if (!inList) {
+          result.push("<ul>");
+          inList = true;
+        }
+        result.push(`<li>${bulletMatch[1]}</li>`);
+      } else {
+        if (inList) {
+          result.push("</ul>");
+          inList = false;
+        }
+        result.push(line);
+      }
+    }
+
+    if (inList) {
+      result.push("</ul>");
+    }
+
+    html = result.join("\n");
+
+    // Newlines to <br> (but not inside lists)
+    html = html.replace(/\n(?!<\/?[uo]l|<\/?li)/g, "<br>");
+    // Clean up any remaining newlines
+    html = html.replace(/\n/g, "");
 
     console.log("[Chatfolio] formatMessage result:", html.substring(0, 100));
 

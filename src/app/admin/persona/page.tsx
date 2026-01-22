@@ -353,7 +353,7 @@ export default function PersonaPage() {
             </div>
 
             {/* Custom Instructions */}
-            <div className="form-group">
+            <div className="form-group mb-24">
               <label className="form-label">Custom Instructions</label>
               <textarea
                 className="form-textarea"

@@ -25,7 +25,7 @@ export default function TestChatPage() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hi! I'm your portfolio assistant. Ask me anything about your experience, skills, or projects. I'll answer based on your knowledge base.",
+        "Hey! I'm your portfolio assistant. Ask me anything about your experience, skills, or projects. I'll answer based on your knowledge base.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -155,7 +155,7 @@ export default function TestChatPage() {
         id: "welcome",
         role: "assistant",
         content:
-          "Hi! I'm your portfolio assistant. Ask me anything about your experience, skills, or projects. I'll answer based on your knowledge base.",
+          "Hey! I'm your portfolio assistant. Ask me anything about your experience, skills, or projects. I'll answer based on your knowledge base.",
       },
     ];
     setMessages(defaultMessages);
