@@ -6,6 +6,13 @@ interface RouteParams {
   params: Promise<{ key: string }>;
 }
 
+// CORS headers for cross-origin widget requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
 // Get widget configuration by key (public - for chat widget to load)
 export async function GET(
   request: NextRequest,
@@ -25,7 +32,7 @@ export async function GET(
     if (error || !data) {
       return NextResponse.json(
         { error: 'Widget not found' },
-        { status: 404 }
+        { status: 404, headers: corsHeaders }
       );
     }
     
@@ -36,12 +43,12 @@ export async function GET(
       theme: data.theme,
       welcomeMessage: data.welcome_message,
       primaryColor: data.primary_color,
-    });
+    }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching widget:', error);
     return NextResponse.json(
       { error: 'Failed to fetch widget' },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
@@ -142,10 +149,6 @@ export async function DELETE(
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers: corsHeaders,
   });
 }

@@ -1,9 +1,13 @@
 (function () {
   "use strict";
 
+  console.log("[Chatfolio] Widget script loaded");
+
   // Get widget configuration from script tag
   const currentScript = document.currentScript;
   const widgetKey = currentScript?.getAttribute("data-widget-key");
+
+  console.log("[Chatfolio] Widget key:", widgetKey);
 
   if (!widgetKey) {
     console.error("Chatfolio: Missing data-widget-key attribute");
@@ -334,10 +338,15 @@
 
   // Initialize
   async function init() {
+    console.log("[Chatfolio] Initializing, API_BASE:", API_BASE);
     try {
-      const res = await fetch(`${API_BASE}/api/widget/${widgetKey}`);
+      const url = `${API_BASE}/api/widget/${widgetKey}`;
+      console.log("[Chatfolio] Fetching config from:", url);
+      const res = await fetch(url);
+      console.log("[Chatfolio] Response status:", res.status);
       if (!res.ok) throw new Error("Widget not found");
       config = await res.json();
+      console.log("[Chatfolio] Config loaded:", config);
       render();
     } catch (err) {
       console.error("Chatfolio: Failed to load widget", err);
@@ -346,6 +355,7 @@
 
   // Render widget
   function render() {
+    console.log("[Chatfolio] Rendering widget...");
     // Add styles
     const styleEl = document.createElement("style");
     styleEl.textContent = styles;
