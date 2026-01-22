@@ -3,15 +3,26 @@ import { generateResponse } from '@/lib/ai/rag';
 import { createServerClient } from '@/lib/supabase/client';
 import type { PersonaContext } from '@/types';
 
+// CORS headers for cross-origin widget requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+function jsonResponse(data: object, status = 200) {
+  return NextResponse.json(data, { status, headers: corsHeaders });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { message, sessionId, widgetKey, strictMode = true } = body;
     
     if (!message || !widgetKey) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Message and widgetKey are required' },
-        { status: 400 }
+        400
       );
     }
     
@@ -26,9 +37,9 @@ export async function POST(request: NextRequest) {
       .single();
     
     if (widgetError || !widget) {
-      return NextResponse.json(
+      return jsonResponse(
         { error: 'Invalid or inactive widget' },
-        { status: 404 }
+        404
       );
     }
     
@@ -41,9 +52,9 @@ export async function POST(request: NextRequest) {
       );
       
       if (!isAllowed) {
-        return NextResponse.json(
+        return jsonResponse(
           { error: 'Domain not allowed' },
-          { status: 403 }
+          403
         );
       }
     }
@@ -130,7 +141,7 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    return NextResponse.json({
+    return jsonResponse({
       response,
       sources,
       sessionId: currentSessionId,
@@ -138,9 +149,9 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Chat API error:', error);
-    return NextResponse.json(
+    return jsonResponse(
       { error: 'Internal server error' },
-      { status: 500 }
+      500
     );
   }
 }
@@ -149,10 +160,7 @@ export async function POST(request: NextRequest) {
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
+    headers: corsHeaders,
   });
 }
+
