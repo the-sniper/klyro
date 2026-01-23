@@ -95,27 +95,11 @@ export default function LandingPage() {
               style={{ objectFit: "contain" }}
             />
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-            <Link
-              href="/login"
-              className="btn-secondary"
-              style={{
-                padding: "8px 20px",
-                fontSize: "14px",
-                borderRadius: "100px",
-              }}
-            >
+          <div className="nav-actions">
+            <Link href="/login" className="btn-secondary nav-btn">
               Login
             </Link>
-            <Link
-              href="/signup"
-              className="btn-primary"
-              style={{
-                padding: "10px 24px",
-                fontSize: "14px",
-                borderRadius: "100px",
-              }}
-            >
+            <Link href="/signup" className="btn-primary nav-btn">
               Get Started
             </Link>
           </div>
@@ -135,7 +119,7 @@ export default function LandingPage() {
                 className="hero-title animate-fade-in"
                 style={{ animationDelay: "0.1s" }}
               >
-                Define Your Persona, <br />
+                Define Your Persona,{" "}
                 <span style={{ color: "var(--accent-primary)" }}>
                   Let AI Tell Your Story.
                 </span>
@@ -144,7 +128,7 @@ export default function LandingPage() {
                 className="hero-subtitle animate-fade-in"
                 style={{
                   animationDelay: "0.2s",
-                  margin: "0 0 32px 0",
+                  margin: "0 0 48px 0",
                   maxWidth: "100%",
                 }}
               >
@@ -153,28 +137,12 @@ export default function LandingPage() {
                 custom AI persona trained on your unique journey.
               </p>
               <div
-                className="animate-fade-in"
-                style={{
-                  animationDelay: "0.3s",
-                  display: "flex",
-                  justifyContent: "flex-start",
-                  gap: "16px",
-                }}
+                className="hero-buttons animate-fade-in"
+                style={{ animationDelay: "0.3s" }}
               >
-                <Link
-                  href="/signup"
-                  className="btn btn-primary"
-                  style={{ padding: "16px 32px", fontSize: "16px" }}
-                >
+                <Link href="/signup" className="btn btn-primary">
                   Start for Free <ArrowRight size={18} />
                 </Link>
-                {/* <Link
-                  href="#demo"
-                  className="btn btn-secondary"
-                  style={{ padding: "16px 32px", fontSize: "16px" }}
-                >
-                  View Live Demo
-                </Link> */}
               </div>
             </div>
 
@@ -290,13 +258,7 @@ export default function LandingPage() {
             <h2 className="section-title">
               An intelligent assistant that truly knows you.
             </h2>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "18px",
-                marginBottom: "32px",
-              }}
-            >
+            <p className="section-desc" style={{ marginBottom: "32px" }}>
               Upload your resume, technical documents, or link your GitHub.
               Klyro uses advanced RAG technology to ensure every response is
               accurate and based on your verified data.
@@ -304,16 +266,7 @@ export default function LandingPage() {
             <div
               style={{ display: "flex", flexDirection: "column", gap: "20px" }}
             >
-              <div
-                className="glass-hover"
-                style={{
-                  padding: "20px",
-                  borderRadius: "16px",
-                  display: "flex",
-                  gap: "16px",
-                  alignItems: "center",
-                }}
-              >
+              <div className="glass-hover demo-feature-card">
                 <div
                   style={{
                     padding: "10px",
@@ -334,16 +287,7 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-              <div
-                className="glass-hover"
-                style={{
-                  padding: "20px",
-                  borderRadius: "16px",
-                  display: "flex",
-                  gap: "16px",
-                  alignItems: "center",
-                }}
-              >
+              <div className="glass-hover demo-feature-card">
                 <div
                   style={{
                     padding: "10px",
@@ -367,36 +311,19 @@ export default function LandingPage() {
           </div>
 
           <div
-            style={{
-              position: "relative",
-              display: "flex",
-              justifyContent: "center",
-              padding: "60px", // Larger hitspace for better tracking
-            }}
+            className="animate-fade-in demo-widget-wrapper"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             ref={widgetRef}
-            className="animate-fade-in"
           >
             <div
+              className="demo-widget-container"
               style={{
-                borderRadius: "24px",
-                overflow: "hidden",
-                height: "540px",
-                width: "440px",
-                display: "flex",
-                flexDirection: "column",
-                boxShadow:
-                  "0 40px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05)",
-                background: "#0a0a0c",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
                 transform: `perspective(1200px) rotateY(${mousePos.x * 6}deg) rotateX(${-mousePos.y * 6}deg) translate(${-mousePos.x * 40}px, ${-mousePos.y * 40}px)`,
                 transition:
                   mousePos.x === 0 && mousePos.y === 0
                     ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
                     : "transform 0.15s ease-out",
-                transformStyle: "preserve-3d",
-                zIndex: 10,
               }}
             >
               {/* Widget Header */}
@@ -432,7 +359,7 @@ export default function LandingPage() {
                       lineHeight: 1.2,
                     }}
                   >
-                    Klyro Assistant
+                    Walter's Assistant
                   </div>
                   <div
                     style={{
@@ -523,7 +450,7 @@ export default function LandingPage() {
                       color: "#fff",
                     }}
                   >
-                    Hey! I'm Klyro's copilot
+                    Hey! I'm Walter's copilot
                   </div>
                   <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                     I can help answer questions about them
@@ -560,8 +487,8 @@ export default function LandingPage() {
                     lineHeight: "1.4",
                   }}
                 >
-                  Based on your resume, you have 3+ years of experience. You
-                  recently built a RAG pipeline in your "Klyro" project.
+                  Walter has 3+ years of experience. He recently built a RAG
+                  pipeline in his Chat Assistant project.
                 </div>
               </div>
 
@@ -651,49 +578,29 @@ export default function LandingPage() {
         }}
       >
         <div className="landing-container">
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
+          <div style={{ textAlign: "center", marginBottom: "48px" }}>
             <span className="section-label">Personas & Customization</span>
             <h2 className="section-title">Your bot, your personality.</h2>
-            <p
-              style={{
-                color: "var(--text-secondary)",
-                fontSize: "18px",
-                maxWidth: "700px",
-                margin: "0 auto",
-              }}
-            >
+            <p className="section-desc">
               Adjust tone, style, and branding to make the assistant feel like
               an extension of yourself.
             </p>
           </div>
 
           <div
-            style={{
-              position: "relative",
-              display: "flex",
-              justifyContent: "center",
-              padding: "60px",
-            }}
+            className="showcase-wrapper animate-fade-in"
             onMouseMove={handleConfigMouseMove}
             onMouseLeave={handleConfigMouseLeave}
             ref={configWidgetRef}
-            className="animate-fade-in"
           >
             <div
-              className="glass"
+              className="glass showcase-widget-inner"
               style={{
-                borderRadius: "24px",
-                padding: "48px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "48px",
                 transform: `perspective(1500px) rotateY(${configMousePos.x * 2}deg) rotateX(${-configMousePos.y * 2}deg) translate(${-configMousePos.x * 20}px, ${-configMousePos.y * 20}px)`,
                 transition:
                   configMousePos.x === 0 && configMousePos.y === 0
                     ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
                     : "transform 0.15s ease-out",
-                transformStyle: "preserve-3d",
-                cursor: "default",
               }}
             >
               {/* Persona Selection Strategy */}
@@ -733,13 +640,7 @@ export default function LandingPage() {
                   </span>
                 </div> */}
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                    gap: "16px",
-                  }}
-                >
+                <div className="showcase-grid">
                   {[
                     {
                       name: "Friendly",
@@ -775,35 +676,23 @@ export default function LandingPage() {
                   ].map((p, i) => (
                     <div
                       key={i}
-                      style={{
-                        padding: "20px",
-                        borderRadius: "16px",
-                        background: p.active
-                          ? "rgba(59, 130, 246, 0.05)"
-                          : "rgba(255,255,255,0.02)",
-                        border: p.active
-                          ? "2px solid var(--accent-primary)"
-                          : "1px solid rgba(255,255,255,0.05)",
-                        display: "flex",
-                        gap: "16px",
-                        cursor: "default",
-                        transition: "all 0.2s ease",
-                      }}
+                      className={`showcase-card ${p.active ? "active" : ""}`}
                     >
                       <div
                         style={{
                           width: "40px",
                           height: "40px",
+                          flexShrink: 0,
                           borderRadius: "10px",
                           background: p.active
-                            ? "rgba(59, 130, 246, 0.1)"
-                            : "rgba(255,255,255,0.02)",
+                            ? "rgba(59, 130, 246, 0.15)"
+                            : "rgba(255,255,255,0.06)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           color: p.active
                             ? "var(--accent-primary)"
-                            : "var(--text-muted)",
+                            : "var(--text-secondary)",
                         }}
                       >
                         {p.icon}
@@ -813,7 +702,7 @@ export default function LandingPage() {
                           style={{
                             fontWeight: 700,
                             fontSize: "15px",
-                            color: p.active ? "#fff" : "var(--text-secondary)",
+                            color: p.active ? "#fff" : "#e2e8f0",
                             marginBottom: "4px",
                           }}
                         >
@@ -822,7 +711,9 @@ export default function LandingPage() {
                         <div
                           style={{
                             fontSize: "13px",
-                            color: "var(--text-muted)",
+                            color: p.active
+                              ? "var(--text-secondary)"
+                              : "#94a3b8",
                             lineHeight: 1.4,
                           }}
                         >
@@ -835,13 +726,7 @@ export default function LandingPage() {
               </div>
 
               {/* traits and instructions */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "48px",
-                }}
-              >
+              <div className="traits-grid">
                 <div>
                   <label
                     className="form-label"
@@ -965,7 +850,7 @@ export default function LandingPage() {
               <div
                 style={{
                   background: "rgba(255,255,255,0.01)",
-                  padding: "32px",
+                  padding: "48px",
                   borderRadius: "20px",
                   border: "1px solid rgba(255,255,255,0.03)",
                 }}
@@ -976,17 +861,11 @@ export default function LandingPage() {
                 >
                   Connected Knowledge Sources
                 </label>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "16px",
-                  }}
-                >
+                <div className="knowledge-grid">
                   <div
                     className="glass-hover"
                     style={{
-                      padding: "16px 20px",
+                      padding: "20px 24px",
                       borderRadius: "14px",
                       display: "flex",
                       justifyContent: "space-between",
@@ -1003,7 +882,7 @@ export default function LandingPage() {
                     >
                       <Check size={18} className="text-success" />
                       <span style={{ fontSize: "15px", fontWeight: 500 }}>
-                        resume_2024.pdf
+                        walter_resume.pdf
                       </span>
                     </div>
                     <span style={{ fontSize: "12px", color: "var(--success)" }}>
@@ -1013,7 +892,7 @@ export default function LandingPage() {
                   <div
                     className="glass-hover"
                     style={{
-                      padding: "16px 20px",
+                      padding: "20px 24px",
                       borderRadius: "14px",
                       display: "flex",
                       justifyContent: "space-between",
@@ -1069,20 +948,14 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section style={{ padding: "100px 0" }}>
+      <section style={{ padding: "160px 0" }}>
         <div className="landing-container">
-          <div style={{ textAlign: "center", marginBottom: "64px" }}>
+          <div style={{ textAlign: "center", marginBottom: "80px" }}>
             <span className="section-label">Core Capabilities</span>
             <h2 className="section-title">Built for builders.</h2>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-              gap: "32px",
-            }}
-          >
+          <div className="features-grid">
             <div className="card glass-hover" style={{ padding: "32px" }}>
               <div
                 style={{ color: "var(--accent-primary)", marginBottom: "20px" }}
@@ -1098,7 +971,9 @@ export default function LandingPage() {
               >
                 RAG Engine
               </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
+              <p
+                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
+              >
                 Retrieval Augmented Generation ensures your AI only speaks from
                 your data sources.
               </p>
@@ -1121,7 +996,9 @@ export default function LandingPage() {
               >
                 GitHub Sync
               </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
+              <p
+                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
+              >
                 Automatically sync your repositories to keep the AI updated on
                 your latest projects.
               </p>
@@ -1139,7 +1016,9 @@ export default function LandingPage() {
               >
                 One-Tag Install
               </h3>
-              <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
+              <p
+                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
+              >
                 Embed your assistant on any site by simply adding a single line
                 of JavaScript.
               </p>
@@ -1156,35 +1035,17 @@ export default function LandingPage() {
           className="landing-container"
           style={{ textAlign: "center", position: "relative", zIndex: 1 }}
         >
-          <h2
-            style={{
-              fontSize: "56px",
-              fontWeight: 800,
-              marginBottom: "24px",
-              letterSpacing: "-2px",
-            }}
-          >
-            Ready to elevate your portfolio?
-          </h2>
+          <h2 className="cta-title">Ready to elevate your portfolio?</h2>
           <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "20px",
-              marginBottom: "48px",
-              maxWidth: "600px",
-              margin: "0 auto 48px",
-            }}
+            className="section-desc"
+            style={{ marginBottom: "48px", margin: "0 auto 48px" }}
           >
             Use Klyro to define your persona and create a lasting impression.
           </p>
           <Link
             href="/signup"
             className="btn btn-primary"
-            style={{
-              padding: "20px 48px",
-              fontSize: "18px",
-              borderRadius: "100px",
-            }}
+            style={{ borderRadius: "100px" }}
           >
             Get Started for Free{" "}
             <ArrowRight size={20} style={{ marginLeft: "12px" }} />
@@ -1206,9 +1067,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer
         style={{
-          padding: "60px 0",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          background: "rgba(10, 10, 12, 0.5)",
+          padding: "48px 0",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          background:
+            "linear-gradient(180deg, rgba(10, 10, 12, 0.3) 0%, rgba(10, 10, 12, 0.8) 100%)",
         }}
       >
         <div
@@ -1217,6 +1079,8 @@ export default function LandingPage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            flexWrap: "wrap",
+            gap: "24px",
           }}
         >
           <Link href="/" style={{ display: "flex", alignItems: "center" }}>
@@ -1228,7 +1092,9 @@ export default function LandingPage() {
               style={{ objectFit: "contain" }}
             />
           </Link>
-          <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+          <p
+            style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}
+          >
             © {new Date().getFullYear()} Klyro. All rights reserved. Built with
             ❤️ for the community.
           </p>
