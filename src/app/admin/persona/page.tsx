@@ -1018,7 +1018,7 @@ export default function PersonaPage() {
 
         .preset-avatar {
           position: absolute;
-          top: -28px; /* Brought down closer to card */
+          top: -28px;
           left: 50%;
           transform: translateX(-50%);
           width: 76px;
@@ -1043,6 +1043,7 @@ export default function PersonaPage() {
           width: 100%;
           height: 100%;
           object-fit: contain;
+          border-radius: 50%;
           filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
           transition: all 0.3s ease;
         }
@@ -1056,6 +1057,9 @@ export default function PersonaPage() {
 
         /* Refined Custom Card Icon */
         .preset-avatar.custom-icon {
+          top: -10px;
+          width: 60px;
+          height: 60px;
           background: linear-gradient(
             135deg,
             rgba(255, 255, 255, 0.05),
