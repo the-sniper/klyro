@@ -49,14 +49,16 @@ export default function SignupPage() {
 
       <div className="glass auth-card">
         <div className="auth-header">
-          <Image
-            src="/logo.svg"
-            alt="Klyro Logo"
-            width={140}
-            height={48}
-            className="auth-logo"
-            style={{ margin: "0 auto 24px", objectFit: "contain" }}
-          />
+          <Link href="/" className="auth-logo-link">
+            <Image
+              src="/logo.svg"
+              alt="Klyro Logo"
+              width={140}
+              height={48}
+              className="auth-logo"
+              style={{ margin: "0 auto 24px", objectFit: "contain" }}
+            />
+          </Link>
           <h1 className="auth-title">Create Account</h1>
           <p className="auth-subtitle">Get started with Klyro today</p>
         </div>

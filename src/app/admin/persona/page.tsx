@@ -21,6 +21,7 @@ import {
   Zap,
   Feather,
   Pencil,
+  Info,
 } from "lucide-react";
 
 interface PersonaPreset {
@@ -349,41 +350,82 @@ export default function PersonaPage() {
             {presets.length > 0 && (
               <div className="presets-section mb-24">
                 <label className="form-label">Choose a Preset</label>
-                <p className="input-hint mb-12" style={{ marginTop: 0 }}>
+                <p className="input-hint mb-12" style={{ fontSize: "14px" }}>
                   Select a persona type to auto-fill your communication style
                   and traits
                 </p>
                 <div className="presets-grid">
                   {presets.map((preset) => (
-                    <button
-                      key={preset.id}
-                      type="button"
-                      onClick={() => selectPreset(preset)}
-                      className={`preset-card ${config.selected_preset_id === preset.id ? "active" : ""}`}
-                      style={
-                        {
-                          "--preset-color": preset.color,
-                        } as React.CSSProperties
-                      }
-                    >
-                      <div className="preset-avatar">
-                        <img src={preset.avatar} alt={preset.name} />
+                    <div key={preset.id} className="preset-card-wrapper">
+                      <button
+                        type="button"
+                        onClick={() => selectPreset(preset)}
+                        className={`preset-card ${config.selected_preset_id === preset.id ? "active" : ""}`}
+                        style={
+                          {
+                            "--preset-color": preset.color,
+                            "--preset-color-rgb":
+                              preset.color === "#3b82f6"
+                                ? "59, 130, 246"
+                                : preset.color === "#f59e0b"
+                                  ? "245, 158, 11"
+                                  : "217, 70, 239",
+                          } as React.CSSProperties
+                        }
+                      >
+                        <div className="preset-avatar">
+                          <img src={preset.avatar} alt={preset.name} />
+                        </div>
+                        <div className="preset-tagline">{preset.tagline}</div>
+                        <div className="preset-name">{preset.name}</div>
+                      </button>
+
+                      {/* Info Popover */}
+                      <div className="preset-info-trigger">
+                        <Info size={14} />
+                        <div className="preset-popover">
+                          <div className="popover-content">
+                            <div className="popover-desc">
+                              {preset.description}
+                            </div>
+                            <div className="popover-traits">
+                              {preset.personality_traits.map((trait) => (
+                                <span key={trait} className="popover-trait">
+                                  {trait}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="popover-arrow"></div>
+                        </div>
                       </div>
-                      <div className="preset-tagline">{preset.tagline}</div>
-                      <div className="preset-name">{preset.name}</div>
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => selectPreset(null)}
-                    className={`preset-card custom ${!isUsingPreset ? "active" : ""}`}
-                  >
-                    <div className="preset-avatar custom-icon">
-                      <Pencil size={32} />
                     </div>
-                    <div className="preset-tagline">Build Your Own</div>
-                    <div className="preset-name">Custom</div>
-                  </button>
+                  ))}
+                  <div className="preset-card-wrapper">
+                    <button
+                      type="button"
+                      onClick={() => selectPreset(null)}
+                      className={`preset-card custom ${!isUsingPreset ? "active" : ""}`}
+                    >
+                      <div className="preset-avatar custom-icon">
+                        <Pencil size={32} />
+                      </div>
+                      <div className="preset-tagline">Build Your Own</div>
+                      <div className="preset-name">Custom</div>
+                    </button>
+                    <div className="preset-info-trigger">
+                      <Info size={14} />
+                      <div className="preset-popover">
+                        <div className="popover-content">
+                          <div className="popover-desc">
+                            Create a completely unique AI persona by manually
+                            tuning its style and traits.
+                          </div>
+                        </div>
+                        <div className="popover-arrow"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -896,15 +938,18 @@ export default function PersonaPage() {
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
         }
 
-        /* Preset Cards */
+        /* Preset Cards - Character Select Style */
         .presets-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
+          gap: 20px;
+          padding-top: 40px; /* Space for floating avatars */
+          margin-bottom: 32px;
         }
         @media (max-width: 900px) {
           .presets-grid {
             grid-template-columns: repeat(2, 1fr);
+            row-gap: 60px;
           }
         }
         @media (max-width: 500px) {
@@ -912,70 +957,264 @@ export default function PersonaPage() {
             grid-template-columns: 1fr 1fr;
           }
         }
+        .preset-card-wrapper {
+          position: relative;
+        }
         .preset-card {
-          padding: 20px 16px;
-          border-radius: var(--radius);
+          width: 100%;
+          padding: 48px 16px 20px; /* Reduced top padding */
+          border-radius: 24px;
           background: var(--bg-tertiary);
-          border: 2px solid transparent;
+          border: 1px solid var(--border-color);
           cursor: pointer;
           text-align: center;
-          transition: all 0.3s ease;
+          transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 8px;
+          gap: 4px;
+          position: relative;
         }
         .preset-card:hover {
           border-color: var(--border-hover);
+          transform: translateY(-4px);
+          background: var(--bg-secondary);
+          box-shadow: 0 15px 30px -15px rgba(0, 0, 0, 0.8);
         }
         .preset-card.active {
           border-color: var(--preset-color, var(--accent-primary));
-          background: rgba(59, 130, 246, 0.05);
-          box-shadow: 0 0 24px rgba(59, 130, 246, 0.15);
+          background: linear-gradient(
+            to bottom,
+            rgba(var(--preset-color-rgb, 59, 130, 246), 0.05),
+            rgba(var(--preset-color-rgb, 59, 130, 246), 0.02)
+          );
+          box-shadow:
+            0 0 0 1px var(--preset-color, var(--accent-primary)),
+            0 20px 40px -15px rgba(var(--preset-color-rgb, 59, 130, 246), 0.2);
         }
-        .preset-card.active .preset-avatar {
-          transform: scale(1.05);
-        }
-        .preset-card.custom.active {
-          border-color: var(--accent-secondary);
-          box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
-        }
-        .preset-avatar {
-          width: 60px;
-          height: 60px;
+
+        /* Glow Platform / Pedestal */
+        .preset-card::after {
+          content: "";
+          position: absolute;
+          top: 25px; /* Closer to avatar */
+          left: 50%;
+          transform: translateX(-50%);
+          width: 44px;
+          height: 8px;
+          background: var(--preset-color, var(--accent-primary));
           border-radius: 50%;
-          overflow: hidden;
-          transition: transform 0.3s ease;
+          opacity: 0.1;
+          filter: blur(8px);
+          transition: all 0.3s ease;
+          pointer-events: none;
+        }
+        .preset-card.active::after {
+          opacity: 0.25;
+          width: 60px;
+          height: 12px;
+          filter: blur(10px);
+        }
+
+        .preset-avatar {
+          position: absolute;
+          top: -28px; /* Brought down closer to card */
+          left: 50%;
+          transform: translateX(-50%);
+          width: 76px;
+          height: 76px;
+          transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
           display: flex;
           align-items: center;
           justify-content: center;
+          z-index: 10;
+          pointer-events: none;
         }
+
+        .preset-card:hover .preset-avatar {
+          transform: translateX(-50%) translateY(-4px) scale(1.05);
+        }
+
+        .preset-card.active .preset-avatar {
+          transform: translateX(-50%) translateY(-8px) scale(1.1);
+        }
+
         .preset-avatar img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          object-fit: contain;
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+          transition: all 0.3s ease;
         }
+
+        .preset-card.active .preset-avatar img {
+          filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.6))
+            drop-shadow(
+              0 0 15px rgba(var(--preset-color-rgb, 59, 130, 246), 0.4)
+            );
+        }
+
+        /* Refined Custom Card Icon */
         .preset-avatar.custom-icon {
-          background: rgba(99, 102, 241, 0.1);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.01)
+          );
+          border-radius: 50%; /* Changed to circle to match avatar silhouette */
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(4px);
+          box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.3),
+            inset 0 0 10px rgba(255, 255, 255, 0.05);
+          color: var(--text-muted);
+        }
+
+        .preset-card.custom.active {
+          border-color: var(--accent-secondary);
+        }
+
+        .preset-card.custom.active .preset-avatar.custom-icon {
+          color: var(--accent-secondary);
+          border-color: var(--accent-secondary);
+          background: rgba(99, 102, 241, 0.05);
+          box-shadow:
+            0 0 30px rgba(99, 102, 241, 0.2),
+            inset 0 0 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .preset-tagline {
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: var(--text-muted);
+          transition: all 0.3s ease;
+          margin-top: 15px;
+        }
+
+        .preset-name {
+          font-size: 15px;
+          font-weight: 800;
+          color: var(--text-primary);
+          transition: all 0.3s ease;
+          letter-spacing: -0.1px;
+        }
+
+        .preset-card.active .preset-tagline {
+          color: var(--preset-color, var(--accent-primary));
+          transform: translateY(-1px);
+          opacity: 0.9;
+        }
+
+        .preset-card.active .preset-name {
+          transform: translateY(-1px);
+          color: #fff;
+        }
+
+        .preset-card.custom.active .preset-tagline {
           color: var(--accent-secondary);
         }
-        .preset-tagline {
-          font-size: 11px;
+
+        /* Info Trigger & Popover */
+        .preset-info-trigger {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          width: 20px;
+          height: 20px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--text-muted);
+          cursor: help;
+          z-index: 30;
+          transition: all 0.2s;
+        }
+        .preset-info-trigger:hover {
+          background: rgba(255, 255, 255, 0.15);
+          color: white;
+          transform: scale(1.1);
+        }
+        .preset-popover {
+          position: absolute;
+          bottom: calc(100% + 12px);
+          left: 50%;
+          transform: translateX(-50%) translateY(10px);
+          width: 220px;
+          background: #1a1b26;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+          padding: 16px;
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(12px);
+          pointer-events: none;
+        }
+        .preset-info-trigger:hover .preset-popover {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) translateY(0);
+        }
+        .popover-content {
+          text-align: left;
+        }
+        .popover-desc {
+          font-size: 13px;
+          line-height: 1.5;
+          color: #d1d5db;
+          margin-bottom: 12px;
+        }
+        .popover-traits {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+        }
+        .popover-trait {
+          font-size: 10px;
+          font-weight: 700;
+          padding: 3px 8px;
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+          color: var(--text-muted);
+          text-transform: uppercase;
+        }
+        .popover-arrow {
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 6px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .preset-subtitle {
+          font-size: 14px;
+          color: var(--text-muted);
+          margin-top: 0;
+        }
+
+        /* Divider */
+        .style-divider {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          color: var(--text-muted);
+          font-size: 12px;
           font-weight: 600;
           text-transform: uppercase;
           letter-spacing: 0.5px;
-          color: var(--text-muted);
         }
-        .preset-name {
+
+        .preset-subtitle {
           font-size: 14px;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-        .preset-card.active .preset-tagline {
-          color: var(--preset-color, var(--accent-primary));
-        }
-        .preset-card.custom.active .preset-tagline {
-          color: var(--accent-secondary);
+          color: var(--text-muted);
+          margin-top: 0;
         }
 
         /* Divider */

@@ -620,6 +620,19 @@ select:-webkit-autofill:focus {
   margin-bottom: 32px;
 }
 
+.auth-logo-link {
+  display: block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.auth-logo-link:hover {
+  transform: translateY(-2px) scale(1.05);
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.2));
+}
+
 .auth-icon {
   width: 64px;
   height: 64px;
