@@ -20,7 +20,20 @@ import {
   Award,
   Zap,
   Feather,
+  Pencil,
 } from "lucide-react";
+
+interface PersonaPreset {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  avatar: string;
+  color: string;
+  communication_style: string;
+  personality_traits: string[];
+  is_system: boolean;
+}
 
 interface PersonaConfig {
   owner_name: string;
@@ -43,6 +56,7 @@ interface PersonaConfig {
     can_discuss_salary: boolean;
     can_schedule_calls: boolean;
   };
+  selected_preset_id: string | null;
 }
 
 const TONE_OPTIONS = [
@@ -125,6 +139,7 @@ export default function PersonaPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [presets, setPresets] = useState<PersonaPreset[]>([]);
   const [config, setConfig] = useState<PersonaConfig>({
     owner_name: "",
     communication_style: "friendly",
@@ -139,12 +154,49 @@ export default function PersonaPage() {
       can_discuss_salary: false,
       can_schedule_calls: true,
     },
+    selected_preset_id: null,
   });
   const [traitInput, setTraitInput] = useState("");
 
+  // Check if user is using a preset or custom
+  const isUsingPreset = config.selected_preset_id !== null;
+  const selectedPreset = presets.find(
+    (p) => p.id === config.selected_preset_id,
+  );
+
   useEffect(() => {
     fetchConfig();
+    fetchPresets();
   }, []);
+
+  async function fetchPresets() {
+    try {
+      const res = await fetch("/api/persona/presets");
+      if (res.ok) {
+        const data = await res.json();
+        setPresets(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch presets:", error);
+    }
+  }
+
+  function selectPreset(preset: PersonaPreset | null) {
+    if (preset) {
+      setConfig({
+        ...config,
+        selected_preset_id: preset.id,
+        communication_style: preset.communication_style,
+        personality_traits: [...preset.personality_traits],
+      });
+    } else {
+      // Custom mode - keep current values but clear preset
+      setConfig({
+        ...config,
+        selected_preset_id: null,
+      });
+    }
+  }
 
   async function fetchConfig() {
     try {
@@ -186,6 +238,7 @@ export default function PersonaPage() {
       setConfig({
         ...config,
         personality_traits: [...config.personality_traits, trimmed],
+        selected_preset_id: null, // Clear preset when manually editing
       });
     }
     setTraitInput("");
@@ -195,6 +248,7 @@ export default function PersonaPage() {
     setConfig({
       ...config,
       personality_traits: config.personality_traits.filter((t) => t !== trait),
+      selected_preset_id: null, // Clear preset when manually editing
     });
   }
 
@@ -261,7 +315,7 @@ export default function PersonaPage() {
               <input
                 type="text"
                 className="form-input"
-                placeholder="e.g., Areef Syed"
+                placeholder="e.g., Jhon Doe"
                 value={config.owner_name}
                 onChange={(e) =>
                   setConfig({ ...config, owner_name: e.target.value })
@@ -291,14 +345,70 @@ export default function PersonaPage() {
               </div>
             </div>
 
+            {/* Persona Presets */}
+            {presets.length > 0 && (
+              <div className="presets-section mb-24">
+                <label className="form-label">Choose a Preset</label>
+                <p className="input-hint mb-12" style={{ marginTop: 0 }}>
+                  Select a persona type to auto-fill your communication style
+                  and traits
+                </p>
+                <div className="presets-grid">
+                  {presets.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => selectPreset(preset)}
+                      className={`preset-card ${config.selected_preset_id === preset.id ? "active" : ""}`}
+                      style={
+                        {
+                          "--preset-color": preset.color,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <div className="preset-avatar">
+                        <img src={preset.avatar} alt={preset.name} />
+                      </div>
+                      <div className="preset-tagline">{preset.tagline}</div>
+                      <div className="preset-name">{preset.name}</div>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => selectPreset(null)}
+                    className={`preset-card custom ${!isUsingPreset ? "active" : ""}`}
+                  >
+                    <div className="preset-avatar custom-icon">
+                      <Pencil size={32} />
+                    </div>
+                    <div className="preset-tagline">Build Your Own</div>
+                    <div className="preset-name">Custom</div>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Divider */}
+            <div className="style-divider mb-24">
+              <span>
+                {isUsingPreset && selectedPreset
+                  ? `Using ${selectedPreset.name} Style`
+                  : "Or customize your own"}
+              </span>
+            </div>
+
             <div className="tone-grid">
               {TONE_OPTIONS.map((tone) => (
                 <button
                   key={tone.value}
                   type="button"
-                  onClick={() =>
-                    setConfig({ ...config, communication_style: tone.value })
-                  }
+                  onClick={() => {
+                    setConfig({
+                      ...config,
+                      communication_style: tone.value,
+                      selected_preset_id: null, // Clear preset when manually selecting
+                    });
+                  }}
                   className={`tone-card ${config.communication_style === tone.value ? "active" : ""}`}
                 >
                   <div className="tone-icon-wrapper">
@@ -784,6 +894,107 @@ export default function PersonaPage() {
         .links-form .form-input:focus {
           border-color: var(--accent-primary);
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1) !important;
+        }
+
+        /* Preset Cards */
+        .presets-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 900px) {
+          .presets-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 500px) {
+          .presets-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+        .preset-card {
+          padding: 20px 16px;
+          border-radius: var(--radius);
+          background: var(--bg-tertiary);
+          border: 2px solid transparent;
+          cursor: pointer;
+          text-align: center;
+          transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+        }
+        .preset-card:hover {
+          border-color: var(--border-hover);
+        }
+        .preset-card.active {
+          border-color: var(--preset-color, var(--accent-primary));
+          background: rgba(59, 130, 246, 0.05);
+          box-shadow: 0 0 24px rgba(59, 130, 246, 0.15);
+        }
+        .preset-card.active .preset-avatar {
+          transform: scale(1.05);
+        }
+        .preset-card.custom.active {
+          border-color: var(--accent-secondary);
+          box-shadow: 0 0 24px rgba(99, 102, 241, 0.15);
+        }
+        .preset-avatar {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          overflow: hidden;
+          transition: transform 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .preset-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .preset-avatar.custom-icon {
+          background: rgba(99, 102, 241, 0.1);
+          color: var(--accent-secondary);
+        }
+        .preset-tagline {
+          font-size: 11px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: var(--text-muted);
+        }
+        .preset-name {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+        .preset-card.active .preset-tagline {
+          color: var(--preset-color, var(--accent-primary));
+        }
+        .preset-card.custom.active .preset-tagline {
+          color: var(--accent-secondary);
+        }
+
+        /* Divider */
+        .style-divider {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          color: var(--text-muted);
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .style-divider::before,
+        .style-divider::after {
+          content: "";
+          flex: 1;
+          height: 1px;
+          background: var(--border-color);
         }
       `}</style>
     </div>

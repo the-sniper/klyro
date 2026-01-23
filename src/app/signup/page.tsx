@@ -55,7 +55,7 @@ export default function SignupPage() {
             width={140}
             height={48}
             className="auth-logo"
-            style={{ margin: "0 auto 24px" }}
+            style={{ margin: "0 auto 24px", objectFit: "contain" }}
           />
           <h1 className="auth-title">Create Account</h1>
           <p className="auth-subtitle">Get started with Klyro today</p>

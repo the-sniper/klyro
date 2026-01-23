@@ -53,7 +53,7 @@ export default function LoginPage() {
             width={140}
             height={48}
             className="auth-logo"
-            style={{ margin: "0 auto 24px" }}
+            style={{ margin: "0 auto 24px", objectFit: "contain" }}
           />
           <h1 className="auth-title">Welcome Back</h1>
           <p className="auth-subtitle">Sign in to your Klyro dashboard</p>

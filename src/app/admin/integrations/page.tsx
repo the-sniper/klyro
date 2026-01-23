@@ -11,6 +11,8 @@ import {
   Loader2,
   Code2,
   Globe,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import type { Widget } from "@/types";
 
@@ -32,6 +34,7 @@ export default function IntegrationsPage() {
     allowedDomains: "",
     launcherMode: "icon",
     launcherText: "Chat with me",
+    isActive: true,
   });
 
   useEffect(() => {
@@ -69,6 +72,7 @@ export default function IntegrationsPage() {
         allowedDomains: widget.allowed_domains?.join(", ") || "",
         launcherMode: widget.launcher_mode || "icon",
         launcherText: widget.launcher_text || "Chat with me",
+        isActive: widget.is_active !== false,
       });
     } else {
       setEditingWidget(null);
@@ -82,6 +86,7 @@ export default function IntegrationsPage() {
         allowedDomains: "",
         launcherMode: "icon",
         launcherText: "Chat with me",
+        isActive: true,
       });
     }
     setIsModalOpen(true);
@@ -105,6 +110,7 @@ export default function IntegrationsPage() {
           .filter(Boolean),
         launcherMode: formData.launcherMode,
         launcherText: formData.launcherText,
+        isActive: formData.isActive,
       };
 
       if (editingWidget) {
@@ -201,11 +207,21 @@ export default function IntegrationsPage() {
         ) : (
           <div className="widgets-grid">
             {widgets.map((widget) => (
-              <div key={widget.id} className="card glass widget-card">
+              <div
+                key={widget.id}
+                className={`card glass widget-card ${widget.is_active === false ? "widget-disabled" : ""}`}
+              >
                 <div className="widget-card-header">
                   <div className="widget-identity">
                     <div className="widget-meta">
-                      <h3 className="widget-name">{widget.name}</h3>
+                      <div className="widget-name-row">
+                        <h3 className="widget-name">{widget.name}</h3>
+                        <span
+                          className={`status-badge ${widget.is_active === false ? "disabled" : "enabled"}`}
+                        >
+                          {widget.is_active === false ? "Disabled" : "Enabled"}
+                        </span>
+                      </div>
                       <div className="widget-key-wrapper">
                         <span className="key-label">ID:</span>
                         <code className="widget-key">{widget.widget_key}</code>
@@ -213,6 +229,34 @@ export default function IntegrationsPage() {
                     </div>
                   </div>
                   <div className="widget-actions">
+                    <button
+                      className={`action-btn-ghost toggle ${widget.is_active === false ? "off" : "on"}`}
+                      onClick={async () => {
+                        try {
+                          await fetch(`/api/widget/${widget.widget_key}`, {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              isActive: !widget.is_active,
+                            }),
+                          });
+                          fetchWidgets();
+                        } catch (error) {
+                          console.error("Failed to toggle widget:", error);
+                        }
+                      }}
+                      title={
+                        widget.is_active === false
+                          ? "Enable Widget"
+                          : "Disable Widget"
+                      }
+                    >
+                      {widget.is_active === false ? (
+                        <ToggleLeft size={20} />
+                      ) : (
+                        <ToggleRight size={20} />
+                      )}
+                    </button>
                     <button
                       className="action-btn-ghost info"
                       onClick={() => openModal(widget)}
@@ -492,6 +536,38 @@ export default function IntegrationsPage() {
                   Commas separated. Leave blank to allow embedding anywhere.
                 </p>
               </div>
+
+              {editingWidget && (
+                <div className="form-group toggle-group">
+                  <div className="toggle-control">
+                    <div className="toggle-text">
+                      <label className="form-label">Widget Status</label>
+                      <p className="field-hint">
+                        {formData.isActive
+                          ? "Widget is live and will render on client websites."
+                          : "Widget is disabled and won't appear on client websites."}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className={`toggle-switch ${formData.isActive ? "active" : ""}`}
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          isActive: !formData.isActive,
+                        })
+                      }
+                    >
+                      <span className="toggle-track">
+                        <span className="toggle-thumb" />
+                      </span>
+                      <span className="toggle-label">
+                        {formData.isActive ? "Enabled" : "Disabled"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="modal-footer">
                 <button
@@ -873,6 +949,151 @@ export default function IntegrationsPage() {
 
         .text-capitalize {
           text-transform: capitalize;
+        }
+
+        /* Widget Status Styles */
+        .widget-name-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .status-badge {
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 10px;
+          border-radius: 20px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .status-badge.enabled {
+          background: rgba(16, 185, 129, 0.15);
+          color: #10b981;
+          border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.disabled {
+          background: rgba(239, 68, 68, 0.15);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .widget-disabled {
+          opacity: 0.7;
+          border-color: rgba(239, 68, 68, 0.2) !important;
+        }
+
+        .widget-disabled .widget-details-grid,
+        .widget-disabled .embed-section {
+          opacity: 0.5;
+          pointer-events: none;
+        }
+
+        .action-btn-ghost.toggle {
+          width: 44px;
+        }
+
+        .action-btn-ghost.toggle.on {
+          color: #10b981;
+        }
+
+        .action-btn-ghost.toggle.on:hover {
+          background: rgba(16, 185, 129, 0.1);
+          border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .action-btn-ghost.toggle.off {
+          color: #ef4444;
+        }
+
+        .action-btn-ghost.toggle.off:hover {
+          background: rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Toggle Control in Modal */
+        .toggle-group {
+          padding: 20px;
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 16px;
+          border: 1px solid var(--border-color);
+          margin-top: 8px;
+        }
+
+        .toggle-control {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 24px;
+        }
+
+        .toggle-text {
+          flex: 1;
+        }
+
+        .toggle-text .form-label {
+          margin-bottom: 4px;
+        }
+
+        .toggle-text .field-hint {
+          margin-top: 0;
+        }
+
+        .toggle-switch {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 8px 16px;
+          border-radius: 12px;
+          transition: all 0.2s;
+        }
+
+        .toggle-switch:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-track {
+          position: relative;
+          width: 48px;
+          height: 26px;
+          background: #334155;
+          border-radius: 13px;
+          transition: background 0.2s;
+        }
+
+        .toggle-switch.active .toggle-track {
+          background: #10b981;
+        }
+
+        .toggle-thumb {
+          position: absolute;
+          left: 3px;
+          top: 3px;
+          width: 20px;
+          height: 20px;
+          background: white;
+          border-radius: 50%;
+          transition: transform 0.2s;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-thumb {
+          transform: translateX(22px);
+        }
+
+        .toggle-label {
+          font-size: 14px;
+          font-weight: 600;
+          color: var(--text-secondary);
+          min-width: 70px;
+        }
+
+        .toggle-switch.active .toggle-label {
+          color: #10b981;
         }
       `}</style>
     </>

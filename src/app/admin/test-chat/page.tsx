@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Send,
   RotateCcw,
@@ -324,10 +325,14 @@ export default function TestChatPage() {
         <div className="chat-container">
           <div className="chat-header">
             <div className="chat-bot-identity">
-              <div className="bot-avatar-glow">
-                <div className="bot-avatar">
-                  <Bot size={24} />
-                </div>
+              <div className="bot-avatar-plain">
+                <Image
+                  src="/logo.svg"
+                  alt="Klyro"
+                  width={100}
+                  height={32}
+                  style={{ objectFit: "contain" }}
+                />
               </div>
               <div className="chat-info">
                 <h3 className="bot-name">Portfolio Assistant</h3>
@@ -570,27 +575,9 @@ export default function TestChatPage() {
           align-items: center;
           gap: 16px;
         }
-        .bot-avatar-glow {
-          position: relative;
-        }
-        .bot-avatar-glow::after {
-          content: "";
-          position: absolute;
-          inset: -4px;
-          background: var(--accent-gradient);
-          border-radius: 50%;
-          filter: blur(8px);
-          opacity: 0.3;
-        }
-        .bot-avatar {
-          width: 48px;
-          height: 48px;
-          background: var(--accent-gradient);
-          border-radius: 50%;
+        .bot-avatar-plain {
           display: flex;
           align-items: center;
-          justify-content: center;
-          color: white;
           position: relative;
           z-index: 1;
         }

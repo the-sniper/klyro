@@ -43,6 +43,7 @@ export async function GET() {
         can_discuss_salary: false,
         can_schedule_calls: true,
       },
+      selected_preset_id: widget?.selected_preset_id || null,
     };
     
     return NextResponse.json(config);
@@ -80,6 +81,7 @@ export async function PUT(request: NextRequest) {
       custom_instructions: body.custom_instructions || null,
       external_links: body.external_links || {},
       access_permissions: body.access_permissions || {},
+      selected_preset_id: body.selected_preset_id || null,
     };
 
     if (count === 0) {

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Bot,
@@ -47,17 +48,15 @@ export default function LandingPage() {
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div
-              className="sidebar-logo-icon"
-              style={{ width: "32px", height: "32px" }}
-            >
-              <Bot size={18} />
-            </div>
-            <span className="sidebar-logo-text" style={{ fontSize: "18px" }}>
-              Klyro
-            </span>
-          </div>
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+            <Image
+              src="/logo.svg"
+              alt="Klyro Logo"
+              width={120}
+              height={40}
+              style={{ objectFit: "contain" }}
+            />
+          </Link>
           <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
             <Link
               href="/login"
@@ -90,17 +89,17 @@ export default function LandingPage() {
         <div className="landing-container">
           <div className="hero-content-wrapper">
             <div className="hero-text-content">
-              <div className="badge animate-fade-in">
+              {/* <div className="badge animate-fade-in">
                 <Sparkles size={14} style={{ marginRight: "8px" }} />
                 The next generation of portfolio engagement
-              </div>
+              </div> */}
               <h1
                 className="hero-title animate-fade-in"
                 style={{ animationDelay: "0.1s" }}
               >
-                Your Portfolio, <br />
+                Define Your Persona, <br />
                 <span style={{ color: "var(--accent-primary)" }}>
-                  Powered by AI.
+                  Let AI Tell Your Story.
                 </span>
               </h1>
               <p
@@ -111,9 +110,9 @@ export default function LandingPage() {
                   maxWidth: "100%",
                 }}
               >
-                Transform your static website into an interactive conversation.
-                Let visitors ask questions about your work, skills, and
-                experience with a custom AI trained on your data.
+                Transform your static portfolio into a dynamic digital twin. Let
+                visitors explore your work, skills, and personality through a
+                custom AI persona trained on your unique journey.
               </p>
               <div
                 className="animate-fade-in"
@@ -131,13 +130,13 @@ export default function LandingPage() {
                 >
                   Start for Free <ArrowRight size={18} />
                 </Link>
-                <Link
+                {/* <Link
                   href="#demo"
                   className="btn btn-secondary"
                   style={{ padding: "16px 32px", fontSize: "16px" }}
                 >
                   View Live Demo
-                </Link>
+                </Link> */}
               </div>
             </div>
 
@@ -158,7 +157,7 @@ export default function LandingPage() {
                     name: "The Architect",
                     tagline: "Precise & Logistical",
                     info: "Specializes in technical architecture, system design, and deep-dive technical queries.",
-                    avatar: "/images/avatars/architect.png",
+                    avatar: "/images/avatars/architect_head.png",
                     color: "#3b82f6",
                   },
                   {
@@ -166,7 +165,7 @@ export default function LandingPage() {
                     name: "The Strategist",
                     tagline: "Results-Driven",
                     info: "Emphasizes market impact, project ROI, and long-term strategic value of your work.",
-                    avatar: "/images/avatars/strategist.png",
+                    avatar: "/images/avatars/strategist_head.png",
                     color: "#f59e0b",
                   },
                   {
@@ -174,7 +173,7 @@ export default function LandingPage() {
                     name: "The Muse",
                     tagline: "Witty & Inspiring",
                     info: "Focuses on user experience, design philosophy, and creative storytelling of your journey.",
-                    avatar: "/images/avatars/muse.png",
+                    avatar: "/images/avatars/muse_head.png",
                     color: "#d946ef",
                   },
                 ].map((persona, i) => {
@@ -628,16 +627,19 @@ export default function LandingPage() {
                 style={{
                   width: "80px",
                   height: "80px",
-                  background: "var(--accent-gradient)",
-                  borderRadius: "24px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: "#fff",
-                  boxShadow: "var(--accent-glow)",
+                  position: "relative",
                 }}
               >
-                <Bot size={40} />
+                <Image
+                  src="/logo.svg"
+                  alt="Klyro Logo"
+                  width={80}
+                  height={80}
+                  style={{ objectFit: "contain" }}
+                />
               </div>
               <div style={{ textAlign: "center" }}>
                 <h3
@@ -816,17 +818,15 @@ export default function LandingPage() {
             alignItems: "center",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div
-              className="sidebar-logo-icon"
-              style={{ width: "24px", height: "24px" }}
-            >
-              <Bot size={14} />
-            </div>
-            <span className="sidebar-logo-text" style={{ fontSize: "16px" }}>
-              Klyro
-            </span>
-          </div>
+          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+            <Image
+              src="/logo.svg"
+              alt="Klyro Logo"
+              width={100}
+              height={32}
+              style={{ objectFit: "contain" }}
+            />
+          </Link>
           <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
             © 2024 Klyro. All rights reserved. Built with ❤️ for the community.
           </p>

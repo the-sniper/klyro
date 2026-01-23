@@ -119,10 +119,9 @@
       cursor: pointer;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s, box-shadow 0.2s;
       z-index: 9999;
+      background: transparent !important;
+      box-shadow: none !important;
     }
     
     .klyro-button:hover {
@@ -138,11 +137,10 @@
       left: 20px;
     }
     
-    .klyro-button svg {
-      width: 28px;
-      height: 28px;
-      fill: white;
-      flex-shrink: 0;
+    .klyro-button img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
     }
 
     .klyro-button.text-mode {
@@ -208,8 +206,6 @@
     .klyro-header-icon {
       width: 40px;
       height: 40px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -808,12 +804,14 @@
 
     container.innerHTML = `
       <button class="klyro-button ${config.position} ${isTextMode ? "text-mode" : ""}" style="background: ${config.primaryColor}">
-        ${chatIcon}
+        <img src="${API_BASE}/logo.svg" style="width: 28px; height: 28px; object-fit: contain;">
         ${isTextMode ? `<span class="klyro-button-text">${escapeHtml(config.launcherText)}</span>` : ""}
       </button>
       <div class="klyro-panel ${config.position}">
         <div class="klyro-header" style="background: ${config.primaryColor}">
-          <div class="klyro-header-icon">${botIcon}</div>
+          <div class="klyro-header-icon">
+            <img src="${API_BASE}/logo.svg" style="width: 24px; height: 24px; object-fit: contain;">
+          </div>
           <div class="klyro-header-text">
             <h3>${escapeHtml(config.headerTitle || "Chat Assistant")}</h3>
             <p>Your personal guide to this site</p>
@@ -834,8 +832,7 @@
         </div>
         <div class="klyro-branding">
           <a href="https://klyro-pro.vercel.app" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            <span>Powered by <span class="brand-name">Klyro</span></span>
+            <img src="${API_BASE}/logo.svg" style="height: 16px; object-fit: contain; opacity: 0.6;">
           </a>
         </div>
         <div class="klyro-popover-overlay">
@@ -883,7 +880,7 @@
         renderMessages(); // Fresh render when opening
       } else {
         button.innerHTML =
-          chatIcon +
+          `<img src="${API_BASE}/logo.svg" style="width: 28px; height: 28px; object-fit: contain;">` +
           (isTextMode
             ? `<span class="klyro-button-text">${escapeHtml(config.launcherText)}</span>`
             : "");
@@ -984,11 +981,10 @@
         const firstName = (config.headerTitle || "Assistant").split(" ")[0];
         messagesContainer.innerHTML = `
           <div class="klyro-empty-state">
-            <div class="klyro-empty-icon" style="background: ${config.primaryColor}20">
-              ${botIcon}
+            <div class="klyro-empty-icon">
+              <img src="${API_BASE}/logo.svg" style="width: 80px; height: 32px; object-fit: contain;">
             </div>
-            <h4>Hey! I'm ${escapeHtml(firstName)}'s copilot</h4>
-            <p>I can help answer questions about them</p>
+            <h4>I can help answer questions</h4>
           </div>
         `;
       } else {
