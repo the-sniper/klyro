@@ -44,6 +44,7 @@ export function AdminSidebar() {
           width={120}
           height={60}
           className="sidebar-logo-image"
+          style={{ objectFit: "contain" }}
         />
       </Link>
 

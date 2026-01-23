@@ -28,6 +28,7 @@ export async function middleware(request: NextRequest) {
                      request.nextUrl.pathname.startsWith('/signup');
   
   const isPublicRoute = isAuthPage || 
+                        request.nextUrl.pathname === '/' ||
                         request.nextUrl.pathname.startsWith('/api/widget') ||
                         request.nextUrl.pathname.startsWith('/api/chat') ||
                         request.nextUrl.pathname.startsWith('/api/auth');
@@ -38,7 +39,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect logged-in users away from auth pages
-  if (session && (isAuthPage || request.nextUrl.pathname === '/')) {
+  if (session && isAuthPage) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 
