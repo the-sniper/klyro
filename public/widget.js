@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.2.7"; // Version for cache debugging
+  const WIDGET_VERSION = "2.3.1"; // Version for cache debugging - SPA route change detection
   console.log("[Klyro] Widget script loaded, version:", WIDGET_VERSION);
 
   // Get widget configuration from script tag
@@ -27,6 +27,8 @@
   let messages = [];
   let sessionId = null;
   let isLoading = false;
+  let widgetContainer = null; // Reference to the widget DOM container
+  let lastCheckedPath = null; // Track last path for route change detection
 
   // Load persisted chat from localStorage
   function loadPersistedChat() {
@@ -749,6 +751,101 @@
   const downloadIcon = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`;
   const resetIcon = `<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`;
 
+  // Check if current route matches any of the allowed routes
+  function shouldDisplayOnRoute(allowedRoutes) {
+    // If no routes specified, show everywhere
+    if (!allowedRoutes || allowedRoutes.length === 0) {
+      return true;
+    }
+
+    const currentPath = window.location.pathname;
+
+    for (const route of allowedRoutes) {
+      const trimmedRoute = route.trim();
+
+      // Exact match
+      if (trimmedRoute === currentPath) {
+        return true;
+      }
+
+      // Handle wildcard patterns like /blog/*
+      if (trimmedRoute.endsWith("/*")) {
+        const basePath = trimmedRoute.slice(0, -2); // Remove /*
+        if (
+          currentPath === basePath ||
+          currentPath.startsWith(basePath + "/")
+        ) {
+          return true;
+        }
+      }
+
+      // Handle root path specifically
+      if (trimmedRoute === "/" && currentPath === "/") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Update widget visibility based on current route
+  function updateWidgetVisibility() {
+    if (!widgetContainer || !config) return;
+
+    const currentPath = window.location.pathname;
+
+    // Only process if path actually changed
+    if (currentPath === lastCheckedPath) return;
+    lastCheckedPath = currentPath;
+
+    const shouldShow = shouldDisplayOnRoute(config.allowedRoutes);
+
+    if (shouldShow) {
+      widgetContainer.style.display = "";
+      console.log("[Klyro] Widget shown on route:", currentPath);
+    } else {
+      widgetContainer.style.display = "none";
+      // Also close the panel if it's open
+      if (isOpen) {
+        isOpen = false;
+        const panel = widgetContainer.querySelector(".klyro-panel");
+        if (panel) panel.classList.remove("open");
+      }
+      console.log("[Klyro] Widget hidden on route:", currentPath);
+    }
+  }
+
+  // Setup route change listeners for SPA navigation
+  function setupRouteChangeListeners() {
+    // Store initial path
+    lastCheckedPath = window.location.pathname;
+
+    // Listen for browser back/forward navigation
+    window.addEventListener("popstate", () => {
+      console.log("[Klyro] Popstate detected");
+      updateWidgetVisibility();
+    });
+
+    // Intercept history.pushState for SPA navigation
+    const originalPushState = history.pushState;
+    history.pushState = function (...args) {
+      originalPushState.apply(this, args);
+      console.log("[Klyro] PushState detected");
+      // Use setTimeout to let the URL update complete
+      setTimeout(updateWidgetVisibility, 0);
+    };
+
+    // Intercept history.replaceState for SPA navigation
+    const originalReplaceState = history.replaceState;
+    history.replaceState = function (...args) {
+      originalReplaceState.apply(this, args);
+      console.log("[Klyro] ReplaceState detected");
+      setTimeout(updateWidgetVisibility, 0);
+    };
+
+    console.log("[Klyro] Route change listeners set up");
+  }
+
   // Initialize
   async function init() {
     console.log("[Klyro] Initializing, API_BASE:", API_BASE);
@@ -777,7 +874,21 @@
         persistChat();
       }
 
+      // Always render the widget
       render();
+
+      // Setup route change listeners for SPA navigation
+      setupRouteChangeListeners();
+
+      // Check initial visibility (will hide if not on allowed route)
+      const shouldShow = shouldDisplayOnRoute(config.allowedRoutes);
+      if (!shouldShow && widgetContainer) {
+        widgetContainer.style.display = "none";
+        console.log(
+          "[Klyro] Widget hidden on initial route:",
+          window.location.pathname,
+        );
+      }
     } catch (err) {
       console.error("Klyro: Failed to load widget", err);
     }
@@ -852,6 +963,9 @@
     `;
 
     document.body.appendChild(container);
+
+    // Store reference to container for route visibility control
+    widgetContainer = container;
 
     // Elements
     const button = container.querySelector(".klyro-button");

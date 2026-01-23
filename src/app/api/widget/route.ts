@@ -61,6 +61,8 @@ export async function POST(request: NextRequest) {
       customInstructions,
       launcherMode = 'icon',
       launcherText = '',
+      // Route visibility
+      allowedRoutes = [],
     } = body;
     
     if (!name) {
@@ -89,6 +91,7 @@ export async function POST(request: NextRequest) {
         custom_instructions: customInstructions || null,
         launcher_mode: launcherMode,
         launcher_text: launcherText || null,
+        allowed_routes: allowedRoutes,
         // Associate with current user
         user_id: user.id,
       })

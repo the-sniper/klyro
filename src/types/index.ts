@@ -83,6 +83,8 @@ export interface Widget {
   // Launcher configuration
   launcher_mode: 'icon' | 'text';
   launcher_text: string | null;
+  // Route visibility configuration
+  allowed_routes: string[]; // Routes where widget should display, empty means all
   // External links the bot can share
   external_links: {
     github?: string;

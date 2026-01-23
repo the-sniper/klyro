@@ -35,6 +35,7 @@ export default function IntegrationsPage() {
     launcherMode: "icon",
     launcherText: "Chat with me",
     isActive: true,
+    allowedRoutes: "",
   });
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function IntegrationsPage() {
         launcherMode: widget.launcher_mode || "icon",
         launcherText: widget.launcher_text || "Chat with me",
         isActive: widget.is_active !== false,
+        allowedRoutes: widget.allowed_routes?.join(", ") || "",
       });
     } else {
       setEditingWidget(null);
@@ -87,6 +89,7 @@ export default function IntegrationsPage() {
         launcherMode: "icon",
         launcherText: "Chat with me",
         isActive: true,
+        allowedRoutes: "",
       });
     }
     setIsModalOpen(true);
@@ -111,6 +114,10 @@ export default function IntegrationsPage() {
         launcherMode: formData.launcherMode,
         launcherText: formData.launcherText,
         isActive: formData.isActive,
+        allowedRoutes: formData.allowedRoutes
+          .split(",")
+          .map((r) => r.trim())
+          .filter(Boolean),
       };
 
       if (editingWidget) {
@@ -306,11 +313,19 @@ export default function IntegrationsPage() {
                     </div>
                   </div>
                   <div className="detail-item full-width">
-                    <span className="detail-label">Visibility Control</span>
+                    <span className="detail-label">Domain Visibility</span>
                     <span className="detail-value">
                       {widget.allowed_domains?.length
                         ? `Active on: ${widget.allowed_domains.join(", ")}`
                         : "Public (All Domains)"}
+                    </span>
+                  </div>
+                  <div className="detail-item full-width">
+                    <span className="detail-label">Page Routes</span>
+                    <span className="detail-value">
+                      {widget.allowed_routes?.length
+                        ? widget.allowed_routes.join(", ")
+                        : "All Pages"}
                     </span>
                   </div>
                 </div>
@@ -534,6 +549,26 @@ export default function IntegrationsPage() {
                 />
                 <p className="field-hint">
                   Commas separated. Leave blank to allow embedding anywhere.
+                </p>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Allowed Routes (Page Visibility)
+                </label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="/, /about, /contact"
+                  value={formData.allowedRoutes}
+                  onChange={(e) =>
+                    setFormData({ ...formData, allowedRoutes: e.target.value })
+                  }
+                />
+                <p className="field-hint">
+                  Comma separated routes where the widget should appear.
+                  Supports wildcards like /blog/*. Leave blank to show on all
+                  pages.
                 </p>
               </div>
 
