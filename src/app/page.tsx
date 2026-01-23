@@ -698,7 +698,7 @@ export default function LandingPage() {
             >
               {/* Persona Selection Strategy */}
               <div>
-                <div
+                {/* <div
                   style={{
                     textAlign: "center",
                     position: "relative",
@@ -731,7 +731,7 @@ export default function LandingPage() {
                   >
                     OR CUSTOMIZE YOUR OWN
                   </span>
-                </div>
+                </div> */}
 
                 <div
                   style={{
@@ -868,17 +868,23 @@ export default function LandingPage() {
                     >
                       Add a trait...
                     </div>
-                    <button
-                      className="btn btn-secondary"
+                    <div
                       style={{
                         padding: "0 24px",
                         borderRadius: "12px",
                         background: "#1e1e24",
                         cursor: "default",
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        color: "#fff",
+                        border: "1px solid rgba(255,255,255,0.05)",
+                        pointerEvents: "none",
                       }}
                     >
                       Add
-                    </button>
+                    </div>
                   </div>
                   <div style={{ marginBottom: "12px" }}>
                     <span
@@ -941,7 +947,7 @@ export default function LandingPage() {
                       border: "1px solid rgba(255,255,255,0.05)",
                     }}
                   >
-                    Never talk about the tech stack
+                    Always fetch the project details from my Github
                   </div>
                   <p
                     style={{
@@ -1039,18 +1045,24 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              <div style={{ textAlign: "center" }}>
-                <button
-                  className="btn btn-primary"
+              {/* <div style={{ textAlign: "center" }}>
+                <div
                   style={{
+                    display: "inline-block",
                     padding: "16px 48px",
                     borderRadius: "100px",
                     cursor: "default",
+                    background: "var(--accent-gradient)",
+                    color: "#fff",
+                    fontWeight: 700,
+                    fontSize: "16px",
+                    pointerEvents: "none",
+                    boxShadow: "0 10px 20px rgba(59, 130, 246, 0.2)",
                   }}
                 >
                   Preview Your Configured Assistant
-                </button>
-              </div>
+                </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -1163,8 +1175,7 @@ export default function LandingPage() {
               margin: "0 auto 48px",
             }}
           >
-            Join hundreds of developers using Klyro to create a lasting
-            impression.
+            Use Klyro to define your persona and create a lasting impression.
           </p>
           <Link
             href="/signup"
@@ -1218,7 +1229,8 @@ export default function LandingPage() {
             />
           </Link>
           <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
-            © 2024 Klyro. All rights reserved. Built with ❤️ for the community.
+            © {new Date().getFullYear()} Klyro. All rights reserved. Built with
+            ❤️ for the community.
           </p>
         </div>
       </footer>
