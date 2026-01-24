@@ -96,24 +96,15 @@ export default function LandingPage() {
                 <Sparkles size={14} style={{ marginRight: "8px" }} />
                 The next generation of portfolio engagement
               </div> */}
-              <h1
-                className="hero-title animate-fade-in animation-delay-1"
-              >
-                Define Your Persona,{" "}
-                <span className="text-accent">
-                  Let AI Tell Your Story.
-                </span>
+              <h1 className="hero-title animate-fade-in animation-delay-1">
+                Define Your Persona, Let AI Tell Your Story.
               </h1>
-              <p
-                className="hero-subtitle animate-fade-in animation-delay-2"
-              >
+              <p className="hero-subtitle animate-fade-in animation-delay-2">
                 Transform your static portfolio into a dynamic digital twin. Let
                 visitors explore your work, skills, and personality through a
                 custom AI persona trained on your unique journey.
               </p>
-              <div
-                className="hero-buttons animate-fade-in animation-delay-3"
-              >
+              <div className="hero-buttons animate-fade-in animation-delay-3">
                 <Link href="/signup" className="btn btn-primary hero-main-btn">
                   Start for Free <ArrowRight size={18} />
                 </Link>
@@ -239,9 +230,7 @@ export default function LandingPage() {
                     <Shield size={24} />
                   </div>
                   <div>
-                    <h4 className="demo-feature-title">
-                      Privacy First
-                    </h4>
+                    <h4 className="demo-feature-title">Privacy First</h4>
                     <p className="demo-feature-desc">
                       Your data is encrypted and only used to train your
                       personal model.
@@ -253,9 +242,7 @@ export default function LandingPage() {
                     <Zap size={24} />
                   </div>
                   <div>
-                    <h4 className="demo-feature-title">
-                      Ultra Fast Retrieval
-                    </h4>
+                    <h4 className="demo-feature-title">Ultra Fast Retrieval</h4>
                     <p className="demo-feature-desc">
                       Sub-second response times using optimized vector Search.
                     </p>
@@ -286,9 +273,7 @@ export default function LandingPage() {
                     <Check size={24} />
                   </div>
                   <div className="demo-widget-info">
-                    <div className="demo-widget-title">
-                      Walter's Assistant
-                    </div>
+                    <div className="demo-widget-title">Walter's Assistant</div>
                     <div className="demo-widget-subtitle">
                       Your personal guide to this site
                     </div>
@@ -341,14 +326,9 @@ export default function LandingPage() {
 
                 {/* Branding Footer */}
                 <div className="demo-widget-footer">
-                  <Layers
-                    size={14}
-                    className="text-accent"
-                  />
+                  <Layers size={14} className="text-accent" />
                   Powered by{" "}
-                  <span className="text-accent font-bold">
-                    Klyro
-                  </span>
+                  <span className="text-accent font-bold">Klyro</span>
                 </div>
               </div>
             </div>
@@ -464,12 +444,12 @@ export default function LandingPage() {
                         {p.icon}
                       </div>
                       <div>
-                        <div className={`showcase-card-name ${p.active ? "text-white" : ""}`}>
+                        <div
+                          className={`showcase-card-name ${p.active ? "text-white" : ""}`}
+                        >
                           {p.name}
                         </div>
-                        <div className="showcase-card-desc">
-                          {p.desc}
-                        </div>
+                        <div className="showcase-card-desc">{p.desc}</div>
                       </div>
                     </div>
                   ))}
@@ -486,14 +466,10 @@ export default function LandingPage() {
                     <div className="glass glass-input-placeholder">
                       Add a trait...
                     </div>
-                    <div className="trait-add-btn">
-                      Add
-                    </div>
+                    <div className="trait-add-btn">Add</div>
                   </div>
                   <div className="mb-12">
-                    <span className="trait-suggestion-label">
-                      Suggestions:
-                    </span>
+                    <span className="trait-suggestion-label">Suggestions:</span>
                   </div>
                   <div className="flex-wrap-gap-8">
                     {[
@@ -505,10 +481,7 @@ export default function LandingPage() {
                       "curious",
                       "detail-oriented",
                     ].map((s) => (
-                      <div
-                        key={s}
-                        className="badge trait-badge"
-                      >
+                      <div key={s} className="badge trait-badge">
                         + {s}
                       </div>
                     ))}
@@ -594,9 +567,7 @@ export default function LandingPage() {
               <div className="feature-card-icon text-accent">
                 <Shield size={32} />
               </div>
-              <h3 className="feature-card-title">
-                RAG Engine
-              </h3>
+              <h3 className="feature-card-title">RAG Engine</h3>
               <p className="feature-card-desc">
                 Retrieval Augmented Generation ensures your AI only speaks from
                 your data sources.
@@ -606,9 +577,7 @@ export default function LandingPage() {
               <div className="feature-card-icon text-accent-secondary">
                 <Github size={32} />
               </div>
-              <h3 className="feature-card-title">
-                GitHub Sync
-              </h3>
+              <h3 className="feature-card-title">GitHub Sync</h3>
               <p className="feature-card-desc">
                 Automatically sync your repositories to keep the AI updated on
                 your latest projects.
@@ -618,9 +587,7 @@ export default function LandingPage() {
               <div className="feature-card-icon text-success">
                 <Zap size={32} />
               </div>
-              <h3 className="feature-card-title">
-                One-Tag Install
-              </h3>
+              <h3 className="feature-card-title">One-Tag Install</h3>
               <p className="feature-card-desc">
                 Embed your assistant on any site by simply adding a single line
                 of JavaScript.
@@ -637,12 +604,8 @@ export default function LandingPage() {
             Use Klyro to define your persona and create a lasting impression.
           </p>
           <div className="hero-buttons cta-buttons">
-            <Link
-              href="/signup"
-              className="btn btn-primary cta-btn-rounded"
-            >
-              Get Started for Free{" "}
-              <ArrowRight size={20} className="ml-12" />
+            <Link href="/signup" className="btn btn-primary cta-btn-rounded">
+              Get Started for Free <ArrowRight size={20} className="ml-12" />
             </Link>
           </div>
         </div>
@@ -652,10 +615,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="landing-footer landing-footer-styled">
         <div className="landing-container footer-content landing-footer-container">
-          <Link
-            href="/"
-            className="footer-logo footer-logo-link"
-          >
+          <Link href="/" className="footer-logo footer-logo-link">
             <Image
               src="/logo.svg"
               alt="Klyro Logo"

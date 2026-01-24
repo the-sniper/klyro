@@ -261,7 +261,7 @@ export default function KnowledgeBasePage() {
 
                     return (
                       <tr key={doc.id} className="table-row-hover">
-                        <td>
+                        <td data-label="Document Name">
                           <div className="doc-identity">
                             <div
                               className={`doc-icon-wrapper ${doc.source_type}`}
@@ -275,17 +275,17 @@ export default function KnowledgeBasePage() {
                             <span className="doc-name">{doc.name}</span>
                           </div>
                         </td>
-                        <td>
+                        <td data-label="Source">
                           <span className="source-tag text-capitalize">
                             {doc.source_type}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Category">
                           <span className="category-label text-capitalize">
                             {doc.category || "General"}
                           </span>
                         </td>
-                        <td>
+                        <td data-label="Status">
                           <div className={`status-pill ${status.className}`}>
                             <StatusIcon
                               size={12}
@@ -298,7 +298,7 @@ export default function KnowledgeBasePage() {
                             <span>{status.label}</span>
                           </div>
                         </td>
-                        <td className="text-muted">
+                        <td data-label="Last Sync" className="text-muted">
                           {new Date(doc.updated_at).toLocaleDateString(
                             undefined,
                             {
@@ -308,7 +308,7 @@ export default function KnowledgeBasePage() {
                             },
                           )}
                         </td>
-                        <td className="text-right">
+                        <td data-label="Actions" className="text-right">
                           <div className="actions-flex">
                             <button
                               className="action-btn-ghost info"

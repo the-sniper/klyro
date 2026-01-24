@@ -67,6 +67,7 @@ export function AdminSidebar({
 
   return (
     <aside className={`admin-sidebar glass ${isOpen ? "open" : ""}`}>
+      {" "}
       <Link href="/admin" className="sidebar-logo" onClick={onClose}>
         <Image
           src="/logo.svg"
@@ -77,13 +78,11 @@ export function AdminSidebar({
           style={{ objectFit: "contain" }}
         />
       </Link>
-
       <nav className="sidebar-nav">
         {navItems.map((item) => (
           <NavLink key={item.href} item={item} onClick={onClose} />
         ))}
       </nav>
-
       <div style={{ marginTop: "auto", paddingTop: "24px" }}>
         <Link
           href="/admin/profile"

@@ -77,34 +77,42 @@ export default function AdminDashboard() {
           <div className="stat-card-icon">
             <FileText size={24} />
           </div>
-          <div className="stat-card-value">{documents.length}</div>
-          <div className="stat-card-label">Documents</div>
+          <div className="stat-card-data">
+            <div className="stat-card-value">{documents.length}</div>
+            <div className="stat-card-label">Documents</div>
+          </div>
         </div>
 
         <div className="stat-card glass-hover">
           <div className="stat-card-icon icon-wrapper-success">
             <Database size={24} />
           </div>
-          <div className="stat-card-value text-success">{readyDocs}</div>
-          <div className="stat-card-label">Ready</div>
+          <div className="stat-card-data">
+            <div className="stat-card-value text-success">{readyDocs}</div>
+            <div className="stat-card-label">Ready</div>
+          </div>
         </div>
 
         <div className="stat-card glass-hover">
           <div className="stat-card-icon icon-wrapper-warning">
             <TrendingUp size={24} />
           </div>
-          <div className="stat-card-value text-warning">{processingDocs}</div>
-          <div className="stat-card-label">Processing</div>
+          <div className="stat-card-data">
+            <div className="stat-card-value text-warning">{processingDocs}</div>
+            <div className="stat-card-label">Processing</div>
+          </div>
         </div>
 
         <div className="stat-card glass-hover">
           <div className="stat-card-icon icon-wrapper-secondary">
             <Code2 size={24} />
           </div>
-          <div className="stat-card-value text-accent-secondary">
-            {widgets.length}
+          <div className="stat-card-data">
+            <div className="stat-card-value text-accent-secondary">
+              {widgets.length}
+            </div>
+            <div className="stat-card-label">Widgets</div>
           </div>
-          <div className="stat-card-label">Widgets</div>
         </div>
       </div>
 
