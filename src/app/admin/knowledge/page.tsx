@@ -15,6 +15,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { Document } from "@/types";
+import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
 
 export default function KnowledgeBasePage() {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -25,6 +26,9 @@ export default function KnowledgeBasePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [resetting, setResetting] = useState(false);
+
+  // Lock body scroll when any modal is open
+  useBodyScrollLock(isModalOpen || isResetModalOpen);
 
   const [formData, setFormData] = useState({
     name: "",

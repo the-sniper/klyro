@@ -16,6 +16,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import type { Widget } from "@/types";
+import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
 
 export default function IntegrationsPage() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
@@ -24,6 +25,9 @@ export default function IntegrationsPage() {
   const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Lock body scroll when modal is open
+  useBodyScrollLock(isModalOpen);
 
   const [formData, setFormData] = useState({
     name: "",

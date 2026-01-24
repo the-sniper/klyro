@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Menu, X } from "lucide-react";
+import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
 
 export default function AdminLayout({
   children,
@@ -12,6 +13,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Lock body scroll when sidebar is open
+  useBodyScrollLock(isSidebarOpen);
 
   return (
     <div className="admin-layout">

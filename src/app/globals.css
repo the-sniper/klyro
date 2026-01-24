@@ -3364,6 +3364,12 @@ html {
   pointer-events: none;
 }
 
+/* Disable body scroll when modal/popup is open */
+body:has(.modal-overlay),
+body:has(.sidebar-overlay.open) {
+  overflow: hidden;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -3375,6 +3381,18 @@ html {
   justify-content: center;
   z-index: 1000;
   padding: 24px;
+}
+
+/* Mobile modal adjustments - account for header */
+@media (max-width: 1024px) {
+  .modal-overlay {
+    padding-top: 90px; /* Account for mobile header (70px) + some spacing */
+    align-items: flex-start;
+  }
+  
+  .modal-glass {
+    max-height: calc(100vh - 110px);
+  }
 }
 
 .modal-glass {
@@ -4676,23 +4694,28 @@ html {
     transform: translateX(100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     padding-top: 100px;
-    padding-bottom: 100px; /* Extra padding for mobile browser bottom bar */
+    padding-bottom: 32px;
     z-index: 1700;
     border-right: none;
     border-left: 1px solid var(--border-color);
+    height: 100vh;
     height: 100dvh; /* Dynamic viewport height for mobile browsers */
-    height: 100vh; /* Fallback for older browsers */
-    overflow-y: auto; /* Allow scrolling if content overflows */
-  }
-
-  @supports (height: 100dvh) {
-    .admin-sidebar {
-      height: 100dvh;
-    }
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
   }
 
   .admin-sidebar.open {
     transform: translateX(0);
+  }
+
+  /* Disable body scroll when sidebar is open */
+  body:has(.admin-sidebar.open) {
+    overflow: hidden;
+  }
+
+  /* Fallback for browsers that don't support :has() */
+  .sidebar-open-body {
+    overflow: hidden;
   }
 
   .admin-main {
