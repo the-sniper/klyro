@@ -3383,15 +3383,17 @@ body:has(.sidebar-overlay.open) {
   padding: 24px;
 }
 
-/* Mobile modal adjustments - account for header */
+/* Mobile modal adjustments - account for header and bottom browser UI */
 @media (max-width: 1024px) {
   .modal-overlay {
     padding-top: 90px; /* Account for mobile header (70px) + some spacing */
+    padding-bottom: 100px; /* Space for mobile browser UI */
     align-items: flex-start;
   }
   
   .modal-glass {
-    max-height: calc(100vh - 110px);
+    max-height: calc(100dvh - 200px);
+    padding-bottom: 60px;
   }
 }
 
@@ -5689,7 +5691,7 @@ body:has(.sidebar-overlay.open) {
   .modal-footer {
     flex-direction: column-reverse !important;
     gap: 12px !important;
-    padding: 12px 24px 24px !important;
+    padding: 12px 24px 60px !important;
   }
 
   .modal-footer .btn {
