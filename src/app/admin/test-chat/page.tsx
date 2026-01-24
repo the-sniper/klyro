@@ -347,7 +347,13 @@ export default function TestChatPage() {
                     <button
                       key={idx}
                       className="suggestion-btn"
-                      onClick={() => setInput(prompt)}
+                      onClick={() => {
+                        setInput(prompt);
+                        setTimeout(() => {
+                          const form = document.querySelector('.chat-form') as HTMLFormElement;
+                          form?.requestSubmit();
+                        }, 0);
+                      }}
                     >
                       {prompt}
                     </button>
