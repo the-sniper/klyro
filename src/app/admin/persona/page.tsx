@@ -346,13 +346,7 @@ export default function PersonaPage() {
 
             <section className="card glass-hover mb-24">
               <div className="section-header">
-                <div
-                  className="section-icon-wrapper"
-                  style={{
-                    background: "rgba(99, 102, 241, 0.1)",
-                    color: "var(--accent-secondary)",
-                  }}
-                >
+                <div className="section-icon-wrapper icon-wrapper-secondary">
                   <MessageCircle size={20} />
                 </div>
                 <div>
@@ -364,7 +358,7 @@ export default function PersonaPage() {
               {presets.length > 0 && (
                 <div className="presets-section mb-24">
                   <label className="form-label">Choose a Preset</label>
-                  <p className="input-hint mb-12" style={{ fontSize: "14px" }}>
+                  <p className="input-hint mb-12 text-sm">
                     Select a persona type to auto-fill your communication style
                     and traits
                   </p>
@@ -555,13 +549,7 @@ export default function PersonaPage() {
           <div className="persona-side-col">
             <section className="card glass-hover mb-24">
               <div className="section-header">
-                <div
-                  className="section-icon-wrapper"
-                  style={{
-                    background: "rgba(245, 158, 11, 0.1)",
-                    color: "var(--warning)",
-                  }}
-                >
+                <div className="section-icon-wrapper icon-wrapper-warning">
                   <Link2 size={20} />
                 </div>
                 <div>
@@ -668,13 +656,7 @@ export default function PersonaPage() {
 
             <section className="card glass-hover">
               <div className="section-header">
-                <div
-                  className="section-icon-wrapper"
-                  style={{
-                    background: "rgba(16, 185, 129, 0.1)",
-                    color: "var(--success)",
-                  }}
-                >
+                <div className="section-icon-wrapper icon-wrapper-success">
                   <CheckCircle size={20} />
                 </div>
                 <div>
@@ -829,17 +811,10 @@ export default function PersonaPage() {
                           <label className="form-label text-xs mb-1.5 opacity-80">
                             Calendly Personal Access Token
                           </label>
-                          <div
-                            className="flex items-center gap-12"
-                            style={{
-                              display: "flex",
-                              gap: "12px",
-                              alignItems: "stretch",
-                            }}
-                          >
+                          <div className="calendly-input-row">
                             <input
                               type="password"
-                              className="form-input text-sm flex-1"
+                              className="form-input text-sm calendly-input"
                               placeholder="Starts with 'eyJ...'"
                               value={config.calendly_token || ""}
                               onChange={(e) =>
@@ -848,45 +823,25 @@ export default function PersonaPage() {
                                   calendly_token: e.target.value,
                                 })
                               }
-                              style={{ flex: 1, minWidth: 0 }}
                             />
                             <button
                               type="button"
-                              className="btn btn-primary p-0 flex items-center justify-center"
-                              style={{
-                                width: "48px",
-                                height: "48px",
-                                minWidth: "48px",
-                                flexShrink: 0,
-                              }}
+                              className="btn btn-primary calendly-save-btn"
                               onClick={handleSave}
                               disabled={saving}
                             >
                               {saving ? (
-                                <div
-                                  style={{
-                                    position: "relative",
-                                    zIndex: 10,
-                                    display: "flex",
-                                  }}
-                                >
+                                <div className="calendly-btn-inner">
                                   <Loader2
                                     size={20}
                                     className="animate-spin text-white"
                                   />
                                 </div>
                               ) : (
-                                <div
-                                  style={{
-                                    position: "relative",
-                                    zIndex: 10,
-                                    display: "flex",
-                                  }}
-                                >
+                                <div className="calendly-btn-inner">
                                   <Check
                                     size={20}
                                     className="text-white"
-                                    style={{ color: "white" }}
                                   />
                                 </div>
                               )}

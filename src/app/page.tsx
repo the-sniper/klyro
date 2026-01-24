@@ -73,7 +73,7 @@ export default function LandingPage() {
               alt="Klyro Logo"
               width={120}
               height={40}
-              style={{ objectFit: "contain" }}
+              className="nav-logo-img"
             />
           </Link>
           <div className="nav-actions">
@@ -97,29 +97,22 @@ export default function LandingPage() {
                 The next generation of portfolio engagement
               </div> */}
               <h1
-                className="hero-title animate-fade-in"
-                style={{ animationDelay: "0.1s" }}
+                className="hero-title animate-fade-in animation-delay-1"
               >
                 Define Your Persona,{" "}
-                <span style={{ color: "var(--accent-primary)" }}>
+                <span className="text-accent">
                   Let AI Tell Your Story.
                 </span>
               </h1>
               <p
-                className="hero-subtitle animate-fade-in"
-                style={{
-                  animationDelay: "0.2s",
-                  margin: "0 0 48px 0",
-                  maxWidth: "100%",
-                }}
+                className="hero-subtitle animate-fade-in animation-delay-2"
               >
                 Transform your static portfolio into a dynamic digital twin. Let
                 visitors explore your work, skills, and personality through a
                 custom AI persona trained on your unique journey.
               </p>
               <div
-                className="hero-buttons animate-fade-in"
-                style={{ animationDelay: "0.3s" }}
+                className="hero-buttons animate-fade-in animation-delay-3"
               >
                 <Link href="/signup" className="btn btn-primary hero-main-btn">
                   Start for Free <ArrowRight size={18} />
@@ -240,62 +233,30 @@ export default function LandingPage() {
                 Klyro uses advanced RAG technology to ensure every response is
                 accurate and based on your verified data.
               </p>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "20px",
-                }}
-              >
+              <div className="flex-col-gap-20">
                 <div className="glass-hover demo-feature-card">
-                  <div
-                    style={{
-                      padding: "10px",
-                      background: "rgba(59, 130, 246, 0.1)",
-                      color: "var(--accent-primary)",
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      width: "44px",
-                      height: "44px",
-                    }}
-                  >
+                  <div className="icon-wrapper icon-wrapper-primary">
                     <Shield size={24} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
+                    <h4 className="demo-feature-title">
                       Privacy First
                     </h4>
-                    <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+                    <p className="demo-feature-desc">
                       Your data is encrypted and only used to train your
                       personal model.
                     </p>
                   </div>
                 </div>
                 <div className="glass-hover demo-feature-card">
-                  <div
-                    style={{
-                      padding: "10px",
-                      background: "rgba(99, 102, 241, 0.1)",
-                      color: "var(--accent-secondary)",
-                      borderRadius: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      width: "44px",
-                      height: "44px",
-                    }}
-                  >
+                  <div className="icon-wrapper icon-wrapper-secondary">
                     <Zap size={24} />
                   </div>
                   <div>
-                    <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
+                    <h4 className="demo-feature-title">
                       Ultra Fast Retrieval
                     </h4>
-                    <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+                    <p className="demo-feature-desc">
                       Sub-second response times using optimized vector Search.
                     </p>
                   </div>
@@ -320,246 +281,72 @@ export default function LandingPage() {
                 }}
               >
                 {/* Widget Header */}
-                <div
-                  style={{
-                    padding: "16px 20px",
-                    background: "var(--accent-gradient)",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "12px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      background: "rgba(255,255,255,0.2)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                    }}
-                  >
+                <div className="demo-widget-header">
+                  <div className="demo-widget-avatar">
                     <Check size={24} />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        color: "white",
-                        lineHeight: 1.2,
-                      }}
-                    >
+                  <div className="demo-widget-info">
+                    <div className="demo-widget-title">
                       Walter's Assistant
                     </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "rgba(255,255,255,0.8)",
-                      }}
-                    >
+                    <div className="demo-widget-subtitle">
                       Your personal guide to this site
                     </div>
                   </div>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        background: "rgba(255,255,255,0.15)",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                      }}
-                    >
+                  <div className="demo-widget-actions">
+                    <div className="demo-widget-action-btn">
                       <Download size={16} />
                     </div>
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        background: "rgba(255,255,255,0.15)",
-                        borderRadius: "8px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                      }}
-                    >
+                    <div className="demo-widget-action-btn">
                       <RotateCcw size={16} />
                     </div>
                   </div>
                 </div>
 
                 {/* Chat Area */}
-                <div
-                  style={{
-                    flex: 1,
-                    padding: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "12px",
-                    fontSize: "13.5px",
-                    overflowY: "hidden",
-                    background: "#0f172a",
-                  }}
-                >
+                <div className="demo-widget-chat">
                   {/* Empty State Visual */}
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      margin: "5px 0 15px 0",
-                      textAlign: "center",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "56px",
-                        height: "56px",
-                        background: "rgba(59, 130, 246, 0.1)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--accent-primary)",
-                        marginBottom: "12px",
-                        border: "1px solid rgba(59, 130, 246, 0.2)",
-                      }}
-                    >
+                  <div className="demo-widget-empty-state">
+                    <div className="demo-widget-empty-icon">
                       <Check size={26} />
                     </div>
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: "16px",
-                        marginBottom: "4px",
-                        color: "#fff",
-                      }}
-                    >
+                    <div className="demo-widget-empty-title">
                       Hey! I'm Walter's copilot
                     </div>
-                    <div
-                      style={{ fontSize: "13px", color: "var(--text-muted)" }}
-                    >
+                    <div className="demo-widget-empty-subtitle">
                       I can help answer questions about them
                     </div>
                   </div>
 
-                  <div
-                    className="chat-message user"
-                    style={{
-                      alignSelf: "flex-end",
-                      textAlign: "left",
-                      animation: "fadeIn 0.5s ease-out forwards",
-                      background: "var(--accent-gradient)",
-                      padding: "10px 14px",
-                      borderRadius: "16px 16px 4px 16px",
-                      maxWidth: "85%",
-                      lineHeight: "1.4",
-                      boxShadow: "0 4px 12px rgba(59, 130, 246, 0.2)",
-                    }}
-                  >
+                  <div className="demo-chat-user">
                     Tell me about your experience with machine learning.
                   </div>
-                  <div
-                    className="chat-message assistant"
-                    style={{
-                      alignSelf: "flex-start",
-                      textAlign: "left",
-                      animation: "fadeIn 0.5s ease-out forwards",
-                      animationDelay: "1s",
-                      background: "#1e293b",
-                      border: "1px solid #334155",
-                      padding: "10px 14px",
-                      borderRadius: "16px 16px 16px 4px",
-                      color: "#f1f5f9",
-                      maxWidth: "85%",
-                      lineHeight: "1.4",
-                    }}
-                  >
+                  <div className="demo-chat-assistant">
                     Walter has 3+ years of experience. He recently built a RAG
                     pipeline in his Chat Assistant project.
                   </div>
                 </div>
 
                 {/* Input Area */}
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    background: "#1e293b",
-                    borderTop: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        background: "#0f172a",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "100px",
-                        padding: "8px 16px",
-                        fontSize: "13px",
-                        color: "rgba(255,255,255,0.4)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
+                <div className="demo-widget-input-area">
+                  <div className="demo-widget-input-row">
+                    <div className="demo-widget-input">
                       <span>Type a message...</span>
                     </div>
-                    <div
-                      style={{
-                        width: "36px",
-                        height: "36px",
-                        background: "var(--accent-primary)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                      }}
-                    >
+                    <div className="demo-widget-send-btn">
                       <Send size={16} />
                     </div>
                   </div>
                 </div>
 
                 {/* Branding Footer */}
-                <div
-                  style={{
-                    padding: "10px",
-                    textAlign: "center",
-                    background: "#1e293b",
-                    borderTop: "1px solid rgba(255,255,255,0.05)",
-                    fontSize: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "6px",
-                    color: "rgba(255,255,255,0.5)",
-                  }}
-                >
+                <div className="demo-widget-footer">
                   <Layers
                     size={14}
-                    style={{ color: "var(--accent-primary)" }}
+                    className="text-accent"
                   />
                   Powered by{" "}
-                  <span
-                    style={{ fontWeight: 700, color: "var(--accent-primary)" }}
-                  >
+                  <span className="text-accent font-bold">
                     Klyro
                   </span>
                 </div>
@@ -571,10 +358,10 @@ export default function LandingPage() {
 
       <section className="landing-section">
         <div className="landing-container">
-          <div style={{ textAlign: "center" }}>
+          <div className="text-center">
             <span className="section-label">Personas & Customization</span>
             <h2 className="section-title">Your bot, your personality.</h2>
-            <p className="section-desc" style={{ marginBottom: "0" }}>
+            <p className="section-desc mb-0">
               Adjust tone, style, and branding to make the assistant feel like
               an extension of yourself.
             </p>
@@ -672,44 +459,15 @@ export default function LandingPage() {
                       className={`showcase-card ${p.active ? "active" : ""}`}
                     >
                       <div
-                        style={{
-                          width: "40px",
-                          height: "40px",
-                          flexShrink: 0,
-                          borderRadius: "10px",
-                          background: p.active
-                            ? "rgba(59, 130, 246, 0.15)"
-                            : "rgba(255,255,255,0.06)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: p.active
-                            ? "var(--accent-primary)"
-                            : "var(--text-secondary)",
-                        }}
+                        className={`showcase-icon-wrapper ${p.active ? "showcase-icon-wrapper-active" : "showcase-icon-wrapper-default"}`}
                       >
                         {p.icon}
                       </div>
                       <div>
-                        <div
-                          style={{
-                            fontWeight: 700,
-                            fontSize: "15px",
-                            color: p.active ? "#fff" : "#e2e8f0",
-                            marginBottom: "4px",
-                          }}
-                        >
+                        <div className={`showcase-card-name ${p.active ? "text-white" : ""}`}>
                           {p.name}
                         </div>
-                        <div
-                          style={{
-                            fontSize: "13px",
-                            color: p.active
-                              ? "var(--text-secondary)"
-                              : "#94a3b8",
-                            lineHeight: 1.4,
-                          }}
-                        >
+                        <div className="showcase-card-desc">
                           {p.desc}
                         </div>
                       </div>
@@ -721,65 +479,23 @@ export default function LandingPage() {
               {/* traits and instructions */}
               <div className="traits-grid">
                 <div>
-                  <label
-                    className="form-label"
-                    style={{ marginBottom: "16px", display: "block" }}
-                  >
+                  <label className="form-label form-label-block">
                     Personality Traits
                   </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <div
-                      className="glass"
-                      style={{
-                        flex: 1,
-                        padding: "12px 18px",
-                        borderRadius: "12px",
-                        color: "rgba(255,255,255,0.2)",
-                        fontSize: "14px",
-                      }}
-                    >
+                  <div className="trait-input-container">
+                    <div className="glass glass-input-placeholder">
                       Add a trait...
                     </div>
-                    <div
-                      style={{
-                        padding: "0 24px",
-                        borderRadius: "12px",
-                        background: "#1e1e24",
-                        cursor: "default",
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        color: "#fff",
-                        border: "1px solid rgba(255,255,255,0.05)",
-                        pointerEvents: "none",
-                      }}
-                    >
+                    <div className="trait-add-btn">
                       Add
                     </div>
                   </div>
-                  <div style={{ marginBottom: "12px" }}>
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        color: "var(--text-muted)",
-                        textTransform: "uppercase",
-                        letterSpacing: "1px",
-                      }}
-                    >
+                  <div className="mb-12">
+                    <span className="trait-suggestion-label">
                       Suggestions:
                     </span>
                   </div>
-                  <div
-                    style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}
-                  >
+                  <div className="flex-wrap-gap-8">
                     {[
                       "technical",
                       "creative",
@@ -791,15 +507,7 @@ export default function LandingPage() {
                     ].map((s) => (
                       <div
                         key={s}
-                        className="badge"
-                        style={{
-                          margin: 0,
-                          background: "rgba(255,255,255,0.03)",
-                          border: "1px solid rgba(255,255,255,0.1)",
-                          padding: "6px 14px",
-                          fontSize: "13px",
-                          cursor: "default",
-                        }}
+                        className="badge trait-badge"
                       >
                         + {s}
                       </div>
@@ -808,101 +516,42 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <label
-                    className="form-label"
-                    style={{ marginBottom: "16px", display: "block" }}
-                  >
+                  <label className="form-label form-label-block">
                     Custom Instructions
                   </label>
-                  <div
-                    className="glass"
-                    style={{
-                      padding: "16px",
-                      borderRadius: "16px",
-                      minHeight: "120px",
-                      fontSize: "14px",
-                      color: "#fff",
-                      border: "1px solid rgba(255,255,255,0.05)",
-                    }}
-                  >
+                  <div className="glass custom-instructions-box">
                     Always fetch the project details from my Github
                   </div>
-                  <p
-                    style={{
-                      fontSize: "12px",
-                      color: "var(--text-muted)",
-                      marginTop: "12px",
-                    }}
-                  >
+                  <p className="input-hint-text">
                     Specific guidance for the bot's responses
                   </p>
                 </div>
               </div>
 
               <div className="knowledge-sources-container">
-                <label
-                  className="form-label"
-                  style={{ marginBottom: "20px", display: "block" }}
-                >
+                <label className="form-label form-label-block mb-20">
                   Connected Knowledge Sources
                 </label>
                 <div className="knowledge-grid">
-                  <div
-                    className="glass-hover"
-                    style={{
-                      padding: "20px 24px",
-                      borderRadius: "14px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      border: "1px solid rgba(16, 185, 129, 0.2)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        alignItems: "center",
-                      }}
-                    >
+                  <div className="glass-hover knowledge-source-card knowledge-source-card-success">
+                    <div className="knowledge-source-inner">
                       <Check size={18} className="text-success" />
-                      <span style={{ fontSize: "15px", fontWeight: 500 }}>
+                      <span className="knowledge-source-name">
                         walter_resume.pdf
                       </span>
                     </div>
-                    <span style={{ fontSize: "12px", color: "var(--success)" }}>
+                    <span className="knowledge-source-status text-success">
                       Processed
                     </span>
                   </div>
-                  <div
-                    className="glass-hover"
-                    style={{
-                      padding: "20px 24px",
-                      borderRadius: "14px",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      border: "1px solid rgba(59, 130, 246, 0.2)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "12px",
-                        alignItems: "center",
-                      }}
-                    >
+                  <div className="glass-hover knowledge-source-card knowledge-source-card-primary">
+                    <div className="knowledge-source-inner">
                       <Github size={18} className="text-accent" />
-                      <span style={{ fontSize: "15px", fontWeight: 500 }}>
+                      <span className="knowledge-source-name">
                         github.com/the-sniper/klyro
                       </span>
                     </div>
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--accent-primary)",
-                      }}
-                    >
+                    <span className="knowledge-source-status text-accent">
                       Synced
                     </span>
                   </div>
@@ -935,75 +584,44 @@ export default function LandingPage() {
       {/* Features Grid */}
       <section className="landing-section">
         <div className="landing-container">
-          <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <div className="text-center mb-48">
             <span className="section-label">Core Capabilities</span>
             <h2 className="section-title">Built for builders.</h2>
           </div>
 
           <div className="features-grid">
-            <div className="card glass-hover" style={{ padding: "32px" }}>
-              <div
-                style={{ color: "var(--accent-primary)", marginBottom: "20px" }}
-              >
+            <div className="card glass-hover feature-card">
+              <div className="feature-card-icon text-accent">
                 <Shield size={32} />
               </div>
-              <h3
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  marginBottom: "12px",
-                }}
-              >
+              <h3 className="feature-card-title">
                 RAG Engine
               </h3>
-              <p
-                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
-              >
+              <p className="feature-card-desc">
                 Retrieval Augmented Generation ensures your AI only speaks from
                 your data sources.
               </p>
             </div>
-            <div className="card glass-hover" style={{ padding: "32px" }}>
-              <div
-                style={{
-                  color: "var(--accent-secondary)",
-                  marginBottom: "20px",
-                }}
-              >
+            <div className="card glass-hover feature-card">
+              <div className="feature-card-icon text-accent-secondary">
                 <Github size={32} />
               </div>
-              <h3
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  marginBottom: "12px",
-                }}
-              >
+              <h3 className="feature-card-title">
                 GitHub Sync
               </h3>
-              <p
-                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
-              >
+              <p className="feature-card-desc">
                 Automatically sync your repositories to keep the AI updated on
                 your latest projects.
               </p>
             </div>
-            <div className="card glass-hover" style={{ padding: "32px" }}>
-              <div style={{ color: "var(--success)", marginBottom: "20px" }}>
+            <div className="card glass-hover feature-card">
+              <div className="feature-card-icon text-success">
                 <Zap size={32} />
               </div>
-              <h3
-                style={{
-                  fontSize: "20px",
-                  fontWeight: 700,
-                  marginBottom: "12px",
-                }}
-              >
+              <h3 className="feature-card-title">
                 One-Tag Install
               </h3>
-              <p
-                style={{ color: "#cbd5e1", fontSize: "15px", lineHeight: 1.6 }}
-              >
+              <p className="feature-card-desc">
                 Embed your assistant on any site by simply adding a single line
                 of JavaScript.
               </p>
@@ -1012,72 +630,41 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-section" style={{ position: "relative" }}>
-        <div className="landing-container" style={{ textAlign: "center" }}>
+      <section className="landing-section cta-section">
+        <div className="landing-container text-center">
           <h2 className="cta-title">Ready to elevate your portfolio?</h2>
-          <p className="section-desc" style={{ margin: "0 auto 48px" }}>
+          <p className="section-desc cta-desc">
             Use Klyro to define your persona and create a lasting impression.
           </p>
-          <div className="hero-buttons" style={{ justifyContent: "center" }}>
+          <div className="hero-buttons cta-buttons">
             <Link
               href="/signup"
-              className="btn btn-primary"
-              style={{ borderRadius: "100px" }}
+              className="btn btn-primary cta-btn-rounded"
             >
               Get Started for Free{" "}
-              <ArrowRight size={20} style={{ marginLeft: "12px" }} />
+              <ArrowRight size={20} className="ml-12" />
             </Link>
           </div>
         </div>
-        <div
-          className="auth-bg-blob-2 float-animation"
-          style={{
-            width: "60%",
-            height: "60%",
-            bottom: "-20%",
-            right: "-10%",
-            opacity: 0.2,
-            animationDelay: "1s",
-          }}
-        ></div>
+        <div className="auth-bg-blob-2 float-animation cta-blob"></div>
       </section>
 
       {/* Footer */}
-      <footer
-        className="landing-footer"
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.08)",
-          background:
-            "linear-gradient(180deg, rgba(10, 10, 12, 0.3) 0%, rgba(10, 10, 12, 0.8) 100%)",
-        }}
-      >
-        <div
-          className="landing-container footer-content"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "24px",
-          }}
-        >
+      <footer className="landing-footer landing-footer-styled">
+        <div className="landing-container footer-content landing-footer-container">
           <Link
             href="/"
-            className="footer-logo"
-            style={{ display: "flex", alignItems: "center" }}
+            className="footer-logo footer-logo-link"
           >
             <Image
               src="/logo.svg"
               alt="Klyro Logo"
               width={100}
               height={32}
-              style={{ objectFit: "contain" }}
+              className="footer-logo-img"
             />
           </Link>
-          <p
-            className="footer-copyright"
-            style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}
-          >
+          <p className="footer-copyright footer-copyright-text">
             © {new Date().getFullYear()} Klyro. All rights reserved.{" "}
             <br className="mobile-only" /> Built with ❤️ for the community.
           </p>

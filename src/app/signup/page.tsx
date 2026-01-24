@@ -55,8 +55,7 @@ export default function SignupPage() {
               alt="Klyro Logo"
               width={140}
               height={48}
-              className="auth-logo"
-              style={{ margin: "0 auto 24px", objectFit: "contain" }}
+              className="auth-logo auth-logo-wrapper"
             />
           </Link>
           <h1 className="auth-title">Create Account</h1>
@@ -113,8 +112,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary w-full"
-            style={{ width: "100%", marginTop: "12px", height: "48px" }}
+            className="btn btn-primary auth-btn"
           >
             {loading ? (
               <Loader2 className="animate-spin" size={20} />
