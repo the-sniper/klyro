@@ -3254,6 +3254,81 @@ html {
   color: white;
 }
 
+/* Install Help Section */
+.install-help {
+  margin-top: 16px;
+  padding: 16px 20px;
+  background: rgba(99, 102, 241, 0.05);
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 16px 16px;
+}
+
+.install-help-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin-bottom: 12px;
+}
+
+.install-help-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.install-help-content p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.install-help-content p strong {
+  color: var(--text-primary);
+}
+
+.install-help-content code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: var(--accent-primary);
+}
+
+.install-help-example {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.example-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.example-code {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  font-family: "JetBrains Mono", monospace;
+  white-space: pre;
+  overflow-x: auto;
+  margin: 0;
+}
+
 /* Status Badge */
 .status-badge {
   font-size: 11px;
@@ -6026,16 +6101,16 @@ html {
   }
 
   .widget-meta {
-    width: 100%;
+    width: 100% !important;
   }
 
   .widget-name-row {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-    gap: 8px;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    align-items: center !important;
+    gap: 8px !important;
   }
 
   .widget-name {
@@ -6048,7 +6123,8 @@ html {
   }
 
   .status-badge {
-    flex-shrink: 0;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
   }
 
   .widget-key-wrapper {

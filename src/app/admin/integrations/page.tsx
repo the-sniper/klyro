@@ -13,6 +13,7 @@ import {
   Globe,
   ToggleLeft,
   ToggleRight,
+  HelpCircle,
 } from "lucide-react";
 import type { Widget } from "@/types";
 
@@ -349,6 +350,30 @@ export default function IntegrationsPage() {
                         <Copy size={16} />
                       )}
                     </button>
+                  </div>
+                  <div className="install-help">
+                    <div className="install-help-header">
+                      <HelpCircle size={14} className="text-accent" />
+                      <span>How to Install</span>
+                    </div>
+                    <div className="install-help-content">
+                      <p><strong>1. Copy the code</strong> — Click the copy button above to copy the script tag.</p>
+                      <p><strong>2. Paste before &lt;/body&gt;</strong> — Add the code just before the closing <code>&lt;/body&gt;</code> tag in your HTML file.</p>
+                      <p><strong>3. Works everywhere</strong> — Compatible with HTML, React, Next.js, WordPress, Webflow, Squarespace, and more.</p>
+                    </div>
+                    <div className="install-help-example">
+                      <span className="example-label">Example placement:</span>
+                      <pre className="example-code">{`<!DOCTYPE html>
+<html>
+  <head>...</head>
+  <body>
+    <!-- Your website content -->
+    
+    <!-- Paste widget code here -->
+    <script src=".../widget.js" data-widget-key="..."></script>
+  </body>
+</html>`}</pre>
+                    </div>
                   </div>
                 </div>
               </div>
