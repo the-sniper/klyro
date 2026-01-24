@@ -36,13 +36,17 @@ export async function GET() {
       custom_instructions: widget?.custom_instructions || '',
       external_links: widget?.external_links || {},
       access_permissions: widget?.access_permissions || {
-        can_share_github: true,
-        can_share_linkedin: true,
-        can_share_twitter: true,
-        can_share_email: true,
+        can_share_github: !!widget?.external_links?.github,
+        can_share_linkedin: !!widget?.external_links?.linkedin,
+        can_share_twitter: !!widget?.external_links?.twitter,
+        can_share_email: !!widget?.external_links?.email,
         can_discuss_salary: false,
         can_schedule_calls: true,
+        salary_range: '',
+        currency: 'USD',
+        open_for_negotiation: true,
       },
+      calendly_token: widget?.calendly_token || null,
       selected_preset_id: widget?.selected_preset_id || null,
     };
     
@@ -81,6 +85,7 @@ export async function PUT(request: NextRequest) {
       custom_instructions: body.custom_instructions || null,
       external_links: body.external_links || {},
       access_permissions: body.access_permissions || {},
+      calendly_token: body.calendly_token || null,
       selected_preset_id: body.selected_preset_id || null,
     };
 

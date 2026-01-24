@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
+import { Outfit } from "next/font/google";
 import "./globals.css";
+
+const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Klyro - AI Chat Assistant",
@@ -14,10 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={outfit.className}>
         {children}
         <Toaster
-          position="top-center"
+          position="bottom-right"
           toastOptions={{
             duration: 4000,
             style: {

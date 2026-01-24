@@ -102,7 +102,11 @@ export interface Widget {
     can_share_email: boolean;
     can_discuss_salary: boolean;
     can_schedule_calls: boolean;
+    salary_range?: string;
+    currency?: string;
+    open_for_negotiation?: boolean;
   };
+  calendly_token: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -162,7 +166,11 @@ export interface PersonaContext {
     can_share_email?: boolean;
     can_discuss_salary?: boolean;
     can_schedule_calls?: boolean;
+    salary_range?: string;
+    currency?: string;
+    open_for_negotiation?: boolean;
   };
+  calendly_token?: string | null;
   conversationHistory?: Array<{
     role: 'user' | 'assistant';
     content: string;
