@@ -471,7 +471,7 @@ export default function PersonaPage() {
 
               <div className="form-group mb-24">
                 <label className="form-label">Personality Traits</label>
-                <div className="flex gap-2 mb-12">
+                <div className="trait-input-wrapper flex gap-2 mb-12">
                   <input
                     type="text"
                     className="form-input"
@@ -839,10 +839,7 @@ export default function PersonaPage() {
                                 </div>
                               ) : (
                                 <div className="calendly-btn-inner">
-                                  <Check
-                                    size={20}
-                                    className="text-white"
-                                  />
+                                  <Check size={20} className="text-white" />
                                 </div>
                               )}
                             </button>
