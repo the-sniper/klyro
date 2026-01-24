@@ -643,7 +643,10 @@ export default function PersonaPage() {
                             // If current permission state matches the new value's presence (both true or both false), don't change it
                             // This allows users to manually turn it off even if a value exists
                             // But we auto-enable it if they just typed something
-                            if (val && !prev.external_links[field.key]) {
+                            if (
+                              val &&
+                              !(prev.external_links as any)[field.key]
+                            ) {
                               (newPermissions as any)[permissionKey] = true;
                             } else if (!val) {
                               (newPermissions as any)[permissionKey] = false;

@@ -65,28 +65,9 @@ export default function LandingPage() {
   return (
     <main className="landing-page">
       {/* Navigation */}
-      <nav
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 100,
-          padding: "24px 0",
-          background: "rgba(10, 10, 12, 0.8)",
-          backdropFilter: "blur(12px)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
-        }}
-      >
-        <div
-          className="landing-container"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+      <nav className="landing-nav">
+        <div className="landing-container nav-content">
+          <Link href="/" className="nav-logo">
             <Image
               src="/logo.svg"
               alt="Klyro Logo"
@@ -140,7 +121,7 @@ export default function LandingPage() {
                 className="hero-buttons animate-fade-in"
                 style={{ animationDelay: "0.3s" }}
               >
-                <Link href="/signup" className="btn btn-primary">
+                <Link href="/signup" className="btn btn-primary hero-main-btn">
                   Start for Free <ArrowRight size={18} />
                 </Link>
               </div>
@@ -247,341 +228,353 @@ export default function LandingPage() {
       </section>
 
       {/* Product Demo Section */}
-      <section
-        id="demo"
-        className="landing-container"
-        style={{ padding: "80px 0" }}
-      >
-        <div className="demo-grid">
-          <div style={{ textAlign: "left" }}>
-            {/* <span className="section-label">Live Preview</span> */}
-            <h2 className="section-title">
-              An intelligent assistant that truly knows you.
-            </h2>
-            <p className="section-desc" style={{ marginBottom: "32px" }}>
-              Upload your resume, technical documents, or link your GitHub.
-              Klyro uses advanced RAG technology to ensure every response is
-              accurate and based on your verified data.
-            </p>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-            >
-              <div className="glass-hover demo-feature-card">
-                <div
-                  style={{
-                    padding: "10px",
-                    background: "rgba(59, 130, 246, 0.1)",
-                    color: "var(--accent-primary)",
-                    borderRadius: "12px",
-                  }}
-                >
-                  <Shield size={24} />
+      <section id="demo" className="landing-section">
+        <div className="landing-container">
+          <div className="demo-grid">
+            <div>
+              <h2 className="section-title">
+                An intelligent assistant that truly knows you.
+              </h2>
+              <p className="section-desc">
+                Upload your resume, technical documents, or link your GitHub.
+                Klyro uses advanced RAG technology to ensure every response is
+                accurate and based on your verified data.
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}
+              >
+                <div className="glass-hover demo-feature-card">
+                  <div
+                    style={{
+                      padding: "10px",
+                      background: "rgba(59, 130, 246, 0.1)",
+                      color: "var(--accent-primary)",
+                      borderRadius: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      width: "44px",
+                      height: "44px",
+                    }}
+                  >
+                    <Shield size={24} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
+                      Privacy First
+                    </h4>
+                    <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+                      Your data is encrypted and only used to train your
+                      personal model.
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
-                    Privacy First
-                  </h4>
-                  <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
-                    Your data is encrypted and only used to train your personal
-                    model.
-                  </p>
-                </div>
-              </div>
-              <div className="glass-hover demo-feature-card">
-                <div
-                  style={{
-                    padding: "10px",
-                    background: "rgba(99, 102, 241, 0.1)",
-                    color: "var(--accent-secondary)",
-                    borderRadius: "12px",
-                  }}
-                >
-                  <Zap size={24} />
-                </div>
-                <div>
-                  <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
-                    Ultra Fast Retrieval
-                  </h4>
-                  <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
-                    Sub-second response times using optimized vector Search.
-                  </p>
+                <div className="glass-hover demo-feature-card">
+                  <div
+                    style={{
+                      padding: "10px",
+                      background: "rgba(99, 102, 241, 0.1)",
+                      color: "var(--accent-secondary)",
+                      borderRadius: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      width: "44px",
+                      height: "44px",
+                    }}
+                  >
+                    <Zap size={24} />
+                  </div>
+                  <div>
+                    <h4 style={{ fontSize: "16px", fontWeight: 600 }}>
+                      Ultra Fast Retrieval
+                    </h4>
+                    <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+                      Sub-second response times using optimized vector Search.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div
-            className="animate-fade-in demo-widget-wrapper"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            ref={widgetRef}
-          >
             <div
-              className="demo-widget-container"
-              style={{
-                transform: `perspective(1200px) rotateY(${mousePos.x * 6}deg) rotateX(${-mousePos.y * 6}deg) translate(${-mousePos.x * 40}px, ${-mousePos.y * 40}px)`,
-                transition:
-                  mousePos.x === 0 && mousePos.y === 0
-                    ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
-                    : "transform 0.15s ease-out",
-              }}
+              className="animate-fade-in demo-widget-wrapper"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              ref={widgetRef}
             >
-              {/* Widget Header */}
               <div
+                className="demo-widget-container"
                 style={{
-                  padding: "16px 20px",
-                  background: "var(--accent-gradient)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
+                  transform: `perspective(1200px) rotateY(${mousePos.x * 6}deg) rotateX(${-mousePos.y * 6}deg) translate(${-mousePos.x * 40}px, ${-mousePos.y * 40}px)`,
+                  transition:
+                    mousePos.x === 0 && mousePos.y === 0
+                      ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
+                      : "transform 0.15s ease-out",
                 }}
               >
+                {/* Widget Header */}
                 <div
                   style={{
-                    width: "40px",
-                    height: "40px",
-                    background: "rgba(255,255,255,0.2)",
-                    borderRadius: "50%",
+                    padding: "16px 20px",
+                    background: "var(--accent-gradient)",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
+                    gap: "12px",
                   }}
                 >
-                  <Check size={24} />
-                </div>
-                <div style={{ flex: 1 }}>
                   <div
                     style={{
-                      fontSize: "16px",
-                      fontWeight: 700,
-                      color: "white",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Walter's Assistant
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "rgba(255,255,255,0.8)",
-                    }}
-                  >
-                    Your personal guide to this site
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      background: "rgba(255,255,255,0.15)",
-                      borderRadius: "8px",
+                      width: "40px",
+                      height: "40px",
+                      background: "rgba(255,255,255,0.2)",
+                      borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       color: "white",
                     }}
                   >
-                    <Download size={16} />
+                    <Check size={24} />
                   </div>
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      background: "rgba(255,255,255,0.15)",
-                      borderRadius: "8px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                    }}
-                  >
-                    <RotateCcw size={16} />
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: "16px",
+                        fontWeight: 700,
+                        color: "white",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Walter's Assistant
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "rgba(255,255,255,0.8)",
+                      }}
+                    >
+                      Your personal guide to this site
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        background: "rgba(255,255,255,0.15)",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                      }}
+                    >
+                      <Download size={16} />
+                    </div>
+                    <div
+                      style={{
+                        width: "32px",
+                        height: "32px",
+                        background: "rgba(255,255,255,0.15)",
+                        borderRadius: "8px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                      }}
+                    >
+                      <RotateCcw size={16} />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Chat Area */}
-              <div
-                style={{
-                  flex: 1,
-                  padding: "20px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                  fontSize: "13.5px",
-                  overflowY: "hidden",
-                  background: "#0f172a",
-                }}
-              >
-                {/* Empty State Visual */}
+                {/* Chat Area */}
                 <div
                   style={{
+                    flex: 1,
+                    padding: "20px",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "5px 0 15px 0",
-                    textAlign: "center",
+                    gap: "12px",
+                    fontSize: "13.5px",
+                    overflowY: "hidden",
+                    background: "#0f172a",
                   }}
                 >
+                  {/* Empty State Visual */}
                   <div
                     style={{
-                      width: "56px",
-                      height: "56px",
-                      background: "rgba(59, 130, 246, 0.1)",
-                      borderRadius: "50%",
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "var(--accent-primary)",
-                      marginBottom: "12px",
-                      border: "1px solid rgba(59, 130, 246, 0.2)",
+                      margin: "5px 0 15px 0",
+                      textAlign: "center",
                     }}
                   >
-                    <Check size={26} />
+                    <div
+                      style={{
+                        width: "56px",
+                        height: "56px",
+                        background: "rgba(59, 130, 246, 0.1)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "var(--accent-primary)",
+                        marginBottom: "12px",
+                        border: "1px solid rgba(59, 130, 246, 0.2)",
+                      }}
+                    >
+                      <Check size={26} />
+                    </div>
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "16px",
+                        marginBottom: "4px",
+                        color: "#fff",
+                      }}
+                    >
+                      Hey! I'm Walter's copilot
+                    </div>
+                    <div
+                      style={{ fontSize: "13px", color: "var(--text-muted)" }}
+                    >
+                      I can help answer questions about them
+                    </div>
+                  </div>
+
+                  <div
+                    className="chat-message user"
+                    style={{
+                      alignSelf: "flex-end",
+                      textAlign: "left",
+                      animation: "fadeIn 0.5s ease-out forwards",
+                      background: "var(--accent-gradient)",
+                      padding: "10px 14px",
+                      borderRadius: "16px 16px 4px 16px",
+                      maxWidth: "85%",
+                      lineHeight: "1.4",
+                      boxShadow: "0 4px 12px rgba(59, 130, 246, 0.2)",
+                    }}
+                  >
+                    Tell me about your experience with machine learning.
                   </div>
                   <div
+                    className="chat-message assistant"
                     style={{
-                      fontWeight: 700,
-                      fontSize: "16px",
-                      marginBottom: "4px",
-                      color: "#fff",
+                      alignSelf: "flex-start",
+                      textAlign: "left",
+                      animation: "fadeIn 0.5s ease-out forwards",
+                      animationDelay: "1s",
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      padding: "10px 14px",
+                      borderRadius: "16px 16px 16px 4px",
+                      color: "#f1f5f9",
+                      maxWidth: "85%",
+                      lineHeight: "1.4",
                     }}
                   >
-                    Hey! I'm Walter's copilot
-                  </div>
-                  <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                    I can help answer questions about them
+                    Walter has 3+ years of experience. He recently built a RAG
+                    pipeline in his Chat Assistant project.
                   </div>
                 </div>
 
+                {/* Input Area */}
                 <div
-                  className="chat-message user"
                   style={{
-                    alignSelf: "flex-end",
-                    animation: "fadeIn 0.5s ease-out forwards",
-                    background: "var(--accent-gradient)",
-                    padding: "10px 14px",
-                    borderRadius: "16px 16px 4px 16px",
-                    maxWidth: "85%",
-                    lineHeight: "1.4",
-                    boxShadow: "0 4px 12px rgba(59, 130, 246, 0.2)",
-                  }}
-                >
-                  Tell me about your experience with machine learning.
-                </div>
-                <div
-                  className="chat-message assistant"
-                  style={{
-                    alignSelf: "flex-start",
-                    animation: "fadeIn 0.5s ease-out forwards",
-                    animationDelay: "1s",
+                    padding: "12px 16px",
                     background: "#1e293b",
-                    border: "1px solid #334155",
-                    padding: "10px 14px",
-                    borderRadius: "16px 16px 16px 4px",
-                    color: "#f1f5f9",
-                    maxWidth: "85%",
-                    lineHeight: "1.4",
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
                   }}
                 >
-                  Walter has 3+ years of experience. He recently built a RAG
-                  pipeline in his Chat Assistant project.
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        background: "#0f172a",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        borderRadius: "100px",
+                        padding: "8px 16px",
+                        fontSize: "13px",
+                        color: "rgba(255,255,255,0.4)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <span>Type a message...</span>
+                    </div>
+                    <div
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        background: "var(--accent-primary)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                      }}
+                    >
+                      <Send size={16} />
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              {/* Input Area */}
-              <div
-                style={{
-                  padding: "12px 16px",
-                  background: "#1e293b",
-                  borderTop: "1px solid rgba(255,255,255,0.05)",
-                }}
-              >
+                {/* Branding Footer */}
                 <div
                   style={{
+                    padding: "10px",
+                    textAlign: "center",
+                    background: "#1e293b",
+                    borderTop: "1px solid rgba(255,255,255,0.05)",
+                    fontSize: "12px",
                     display: "flex",
                     alignItems: "center",
-                    gap: "10px",
+                    justifyContent: "center",
+                    gap: "6px",
+                    color: "rgba(255,255,255,0.5)",
                   }}
                 >
-                  <div
-                    style={{
-                      flex: 1,
-                      background: "#0f172a",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "100px",
-                      padding: "8px 16px",
-                      fontSize: "13px",
-                      color: "rgba(255,255,255,0.4)",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
+                  <Layers
+                    size={14}
+                    style={{ color: "var(--accent-primary)" }}
+                  />
+                  Powered by{" "}
+                  <span
+                    style={{ fontWeight: 700, color: "var(--accent-primary)" }}
                   >
-                    <span>Type a message...</span>
-                  </div>
-                  <div
-                    style={{
-                      width: "36px",
-                      height: "36px",
-                      background: "var(--accent-primary)",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                    }}
-                  >
-                    <Send size={16} />
-                  </div>
+                    Klyro
+                  </span>
                 </div>
-              </div>
-
-              {/* Branding Footer */}
-              <div
-                style={{
-                  padding: "10px",
-                  textAlign: "center",
-                  background: "#1e293b",
-                  borderTop: "1px solid rgba(255,255,255,0.05)",
-                  fontSize: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "6px",
-                  color: "rgba(255,255,255,0.5)",
-                }}
-              >
-                <Layers size={14} style={{ color: "var(--accent-primary)" }} />
-                Powered by{" "}
-                <span
-                  style={{ fontWeight: 700, color: "var(--accent-primary)" }}
-                >
-                  Klyro
-                </span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Configuration Showcase */}
-      <section
-        style={{
-          background: "rgba(255,255,255,0.02)",
-          padding: "100px 0",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
-        }}
-      >
+      <section className="landing-section">
         <div className="landing-container">
-          <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <div style={{ textAlign: "center" }}>
             <span className="section-label">Personas & Customization</span>
             <h2 className="section-title">Your bot, your personality.</h2>
-            <p className="section-desc">
+            <p className="section-desc" style={{ marginBottom: "0" }}>
               Adjust tone, style, and branding to make the assistant feel like
               an extension of yourself.
             </p>
@@ -846,15 +839,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Knowledge Sources section moved inside */}
-              <div
-                style={{
-                  background: "rgba(255,255,255,0.01)",
-                  padding: "48px",
-                  borderRadius: "20px",
-                  border: "1px solid rgba(255,255,255,0.03)",
-                }}
-              >
+              <div className="knowledge-sources-container">
                 <label
                   className="form-label"
                   style={{ marginBottom: "20px", display: "block" }}
@@ -948,9 +933,9 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section style={{ padding: "160px 0" }}>
+      <section className="landing-section">
         <div className="landing-container">
-          <div style={{ textAlign: "center", marginBottom: "80px" }}>
+          <div style={{ textAlign: "center", marginBottom: "48px" }}>
             <span className="section-label">Core Capabilities</span>
             <h2 className="section-title">Built for builders.</h2>
           </div>
@@ -1027,29 +1012,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section
-        style={{ padding: "100px 0", position: "relative", overflow: "hidden" }}
-      >
-        <div
-          className="landing-container"
-          style={{ textAlign: "center", position: "relative", zIndex: 1 }}
-        >
+      <section className="landing-section" style={{ position: "relative" }}>
+        <div className="landing-container" style={{ textAlign: "center" }}>
           <h2 className="cta-title">Ready to elevate your portfolio?</h2>
-          <p
-            className="section-desc"
-            style={{ marginBottom: "48px", margin: "0 auto 48px" }}
-          >
+          <p className="section-desc" style={{ margin: "0 auto 48px" }}>
             Use Klyro to define your persona and create a lasting impression.
           </p>
-          <Link
-            href="/signup"
-            className="btn btn-primary"
-            style={{ borderRadius: "100px" }}
-          >
-            Get Started for Free{" "}
-            <ArrowRight size={20} style={{ marginLeft: "12px" }} />
-          </Link>
+          <div className="hero-buttons" style={{ justifyContent: "center" }}>
+            <Link
+              href="/signup"
+              className="btn btn-primary"
+              style={{ borderRadius: "100px" }}
+            >
+              Get Started for Free{" "}
+              <ArrowRight size={20} style={{ marginLeft: "12px" }} />
+            </Link>
+          </div>
         </div>
         <div
           className="auth-bg-blob-2 float-animation"
@@ -1066,15 +1044,15 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer
+        className="landing-footer"
         style={{
-          padding: "48px 0",
           borderTop: "1px solid rgba(255,255,255,0.08)",
           background:
             "linear-gradient(180deg, rgba(10, 10, 12, 0.3) 0%, rgba(10, 10, 12, 0.8) 100%)",
         }}
       >
         <div
-          className="landing-container"
+          className="landing-container footer-content"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -1083,7 +1061,11 @@ export default function LandingPage() {
             gap: "24px",
           }}
         >
-          <Link href="/" style={{ display: "flex", alignItems: "center" }}>
+          <Link
+            href="/"
+            className="footer-logo"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <Image
               src="/logo.svg"
               alt="Klyro Logo"
@@ -1093,10 +1075,11 @@ export default function LandingPage() {
             />
           </Link>
           <p
+            className="footer-copyright"
             style={{ fontSize: "14px", color: "var(--text-muted)", margin: 0 }}
           >
-            © {new Date().getFullYear()} Klyro. All rights reserved. Built with
-            ❤️ for the community.
+            © {new Date().getFullYear()} Klyro. All rights reserved.{" "}
+            <br className="mobile-only" /> Built with ❤️ for the community.
           </p>
         </div>
       </footer>
