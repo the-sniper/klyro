@@ -23,13 +23,7 @@ export default function RootLayout({
           position="bottom-right"
           toastOptions={{
             duration: 4000,
-            style: {
-              background: "#1a1a2e",
-              color: "#fff",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "12px",
-              padding: "12px 16px",
-            },
+            className: "toast-container",
             success: {
               iconTheme: {
                 primary: "#10b981",

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Menu, X } from "lucide-react";
 
@@ -13,13 +15,24 @@ export default function AdminLayout({
 
   return (
     <div className="admin-layout">
-      <button
-        className="mobile-nav-toggle"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        aria-label="Toggle Menu"
-      >
-        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-      </button>
+      <div className="mobile-header">
+        <Link href="/admin" className="mobile-logo">
+          <Image
+            src="/logo.svg"
+            alt="Klyro Logo"
+            width={100}
+            height={40}
+            style={{ objectFit: "contain" }}
+          />
+        </Link>
+        <button
+          className="mobile-nav-toggle"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          aria-label="Toggle Menu"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
 
       <div
         className={`sidebar-overlay ${isSidebarOpen ? "open" : ""}`}
