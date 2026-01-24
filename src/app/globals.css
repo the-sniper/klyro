@@ -1038,7 +1038,7 @@ select:-webkit-autofill:focus {
 .nav-btn {
   padding: 10px 24px;
   font-size: 14px;
-  border-radius: 100px;
+  border-radius: var(--radius);
 }
 
 .hero-section {
@@ -1098,7 +1098,7 @@ select:-webkit-autofill:focus {
   padding: 8px 16px;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
-  border-radius: 100px;
+  border-radius: var(--radius);
   color: var(--accent-primary);
   font-size: 14px;
   font-weight: 600;
@@ -2513,7 +2513,7 @@ html {
 }
 
 .cta-btn-rounded {
-  border-radius: 100px;
+  border-radius: var(--radius);
 }
 
 .cta-desc {
@@ -2726,7 +2726,7 @@ html {
 }
 
 .cta-btn-rounded {
-  border-radius: 100px;
+  border-radius: var(--radius);
 }
 
 .cta-desc {
@@ -3214,6 +3214,7 @@ html {
 .embed-code-wrapper {
   position: relative;
   padding: 24px;
+  padding-right: 70px;
 }
 
 .embed-code {
@@ -3224,6 +3225,7 @@ html {
   font-family: "JetBrains Mono", monospace;
   white-space: pre-wrap;
   overflow-wrap: break-word;
+  word-break: break-all;
 }
 
 .copy-btn {
@@ -4961,6 +4963,9 @@ html {
     flex-direction: column;
     align-items: center;
   }
+  .hero-buttons .btn {
+    border-radius: var(--radius) !important;
+  }
 }
 @media (max-width: 768px) {
   .knowledge-sources-container {
@@ -5003,22 +5008,52 @@ html {
   .hero-content-wrapper {
     display: flex;
     flex-direction: column-reverse;
-    gap: 40px;
+    gap: 20px;
   }
 
   .hero-section {
-    padding: 120px 0 60px !important;
+    padding: 100px 0 60px !important;
   }
 
   .persona-carousel-wrapper {
-    gap: 8px !important;
-    margin-top: 100px;
+    gap: 0px !important;
+    margin-top: 40px;
   }
 
   .persona-stack-container {
-    height: 340px !important;
-    transform: scale(0.8) !important;
-    margin-bottom: 0px !important; /* Reduced distance to dots */
+    height: 500px !important;
+    transform: scale(1.1) !important;
+    margin-bottom: -20px !important; /* Bring dots closer */
+  }
+
+  .carousel-indicators {
+    margin-top: 0 !important;
+  }
+
+  .persona-card {
+    width: 300px !important;
+    min-height: 380px !important;
+    padding: 36px !important;
+  }
+
+  .persona-avatar-container {
+    width: 130px !important;
+    height: 130px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .persona-name {
+    font-size: 26px !important;
+  }
+
+  .persona-tagline {
+    font-size: 12px !important;
+    letter-spacing: 3px !important;
+  }
+
+  .persona-info {
+    font-size: 16px !important;
+    line-height: 1.6 !important;
   }
 
   .persona-card:not(.pos-center) {
@@ -5237,6 +5272,7 @@ html {
 @media (max-width: 640px) {
   .hero-title {
     font-size: 42px;
+    margin-top: 30px;
   }
   .hero-section {
     padding: 100px 0 60px;
@@ -5732,6 +5768,7 @@ html {
   }
   .hero-buttons .btn {
     width: 100%;
+    border-radius: var(--radius) !important;
   }
 }
 @media (max-width: 480px) {
@@ -6177,9 +6214,57 @@ html {
 
   .embed-code-wrapper {
     padding: 12px;
+    padding-right: 60px;
   }
 
   .embed-code {
     font-size: 11px;
+  }
+
+  .copy-btn {
+    width: 36px;
+    height: 36px;
+    top: 10px;
+    right: 10px;
+    border-radius: 8px;
+  }
+
+  /* Mobile Install Help */
+  .install-help {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 0 0 12px 12px;
+  }
+
+  .install-help-header {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .install-help-content p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .install-help-content code {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+
+  .install-help-example {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+
+  .example-label {
+    font-size: 10px;
+  }
+
+  .example-code {
+    font-size: 9px;
+    padding: 10px 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
