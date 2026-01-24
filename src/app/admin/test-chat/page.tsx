@@ -325,7 +325,7 @@ export default function TestChatPage() {
         <div className="chat-container">
           <div className="chat-header">
             <div className="chat-bot-identity">
-              <div className="bot-avatar-plain">
+              {/* <div className="bot-avatar-plain">
                 <Image
                   src="/logo.svg"
                   alt="Klyro"
@@ -333,7 +333,7 @@ export default function TestChatPage() {
                   height={32}
                   style={{ objectFit: "contain" }}
                 />
-              </div>
+              </div> */}
               <div className="chat-info">
                 <h3 className="bot-name">Portfolio Assistant</h3>
                 <div className="bot-status">

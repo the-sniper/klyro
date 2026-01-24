@@ -152,7 +152,18 @@ export async function POST(request: NextRequest) {
       communicationStyle: widget.communication_style || 'friendly',
       customInstructions: widget.custom_instructions || undefined,
       external_links: widget.external_links || undefined,
-      access_permissions: widget.access_permissions || undefined,
+      access_permissions: widget.access_permissions || {
+        can_share_github: true,
+        can_share_linkedin: true,
+        can_share_twitter: true,
+        can_share_email: true,
+        can_discuss_salary: false,
+        can_schedule_calls: true,
+        salary_range: '',
+        currency: 'USD',
+        open_for_negotiation: true,
+      },
+      calendly_token: widget.calendly_token || undefined,
       conversationHistory,
     };
 
@@ -162,7 +173,9 @@ export async function POST(request: NextRequest) {
       ownerName: persona.ownerName,
       hasExternalLinks: !!persona.external_links,
       links: persona.external_links,
-      permissions: persona.access_permissions
+      permissions: persona.access_permissions,
+      hasCalendly: !!persona.calendly_token,
+      calendlyLength: persona.calendly_token?.length || 0
     });
     
     // Generate response using RAG with persona context

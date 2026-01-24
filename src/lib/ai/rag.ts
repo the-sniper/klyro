@@ -86,6 +86,39 @@ const TOOLS: ChatCompletionTool[] = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'get_scheduling_options',
+      description: 'Fetch available meeting types and scheduling links from Calendly. Use this when the user asks to schedule a call, book a meeting, or asks about availability.',
+      parameters: {
+        type: 'object',
+        properties: {},
+        required: [],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_available_slots',
+      description: 'Fetch specific available timeslots for a given meeting type. Use this when the user asks for available times on a specific day or week.',
+      parameters: {
+        type: 'object',
+        properties: {
+          event_type_uri: {
+            type: 'string',
+            description: 'The URI of the event type to check availability for.',
+          },
+          days_ahead: {
+            type: 'number',
+            description: 'How many days ahead to check (default: 3). Max 7.',
+          },
+        },
+        required: ['event_type_uri'],
+      },
+    },
+  },
 ];
 
 /**
@@ -113,6 +146,13 @@ function getSystemPrompt(persona?: PersonaContext): string {
   const customSection = persona?.customInstructions 
     ? `\nAdditional instructions from ${ownerName}: ${persona.customInstructions}`
     : '';
+
+  // Add scheduling awareness to the persona instructions
+  const schedulingContext = (persona?.access_permissions?.can_schedule_calls && persona?.calendly_token)
+    ? `\nSCHEDULING: You have scheduling tools available. (1) Use get_scheduling_options to list meeting types. (2) If a user asks for specific available times or dates, use get_available_slots with the appropriate meeting URI to show them real-time availability.`
+    : (persona?.access_permissions?.can_schedule_calls)
+      ? `\nSCHEDULING: While the owner allows scheduling calls, no Calendly account has been connected yet. If someone asks to book a call, explain that you don't have a scheduling link ready yet but they can reach out via email or phone.`
+      : '';
 
   // Build permissions and links section - only include links that are actually configured
   let permissionsSection = '';
@@ -149,6 +189,13 @@ ${linkItems.join('\n')}
 
 When sharing links, format them naturally in your response. Only share what's listed above.`;
     }
+
+    // Add salary info if allowed
+    if (p.can_discuss_salary && p.salary_range) {
+      permissionsSection += `\n\nSALARY/COMPENSATION:
+You are allowed to discuss ${ownerName}'s salary expectations. The current target range is ${p.salary_range} ${p.currency || 'USD'}. ${p.open_for_negotiation ? 'This range is open for negotiation.' : 'This range is firm.'}
+When asked, share this range naturally. Do not share it unless explicitly asked about salary, compensation, or money.`;
+    }
     
     // Add restrictions
     const restrictions: string[] = [];
@@ -164,7 +211,7 @@ When sharing links, format them naturally in your response. Only share what's li
   return `You are an intelligent AI assistant for ${ownerName}'s portfolio website. Today is ${currentDate}.
 
 PERSONA & VOICE:
-${styleDesc}${traitsSection}${customSection}
+${styleDesc}${traitsSection}${customSection}${schedulingContext}
 
 YOUR IDENTITY:
 - You are an AI assistant representing ${ownerName}. Be transparent about this.
@@ -386,6 +433,12 @@ export async function generateResponse(
   const supabase = createServerClient();
   const openai = getOpenAI();
   
+  // Safety check for non-string inputs (e.g. from frontend events)
+  if (typeof query !== 'string') {
+    console.warn('[RAG] generateResponse received non-string query:', query);
+    query = String(query);
+  }
+  
   console.log('[RAG] generateResponse called with query:', { 
     query, 
     queryType: typeof query, 
@@ -489,7 +542,12 @@ export async function generateResponse(
   }
 
   // Determine if tools should be used (GitHub, website, or URL documents available)
-  const useTools = !!(persona?.external_links?.github || availableUrls.length > 0);
+  // Determine if tools should be used (GitHub, website, URL documents, or Calendly)
+  const useTools = !!(
+    persona?.external_links?.github || 
+    availableUrls.length > 0 || 
+    (persona?.access_permissions?.can_schedule_calls && persona?.calendly_token)
+  );
 
   // If user is asking about projects/github but it's not configured, add a hint for the AI
   if (!persona?.external_links?.github && (query.toLowerCase().includes('project') || query.toLowerCase().includes('github') || query.toLowerCase().includes('build'))) {
@@ -599,6 +657,113 @@ export async function generateResponse(
             role: 'tool',
             content: "No URL provided. Please specify which URL to fetch from the available list.",
           });
+        }
+      } else if (toolCall.function.name === 'get_scheduling_options') {
+        const token = persona?.calendly_token;
+        if (token) {
+           try {
+             // Dynamic import to avoid initialization issues
+             const { getCalendlyUser, getEventTypes } = await import('./calendly');
+             const user = await getCalendlyUser(token);
+             if (user) {
+               const events = await getEventTypes(token, user.resource.uri);
+               if (events.length > 0) {
+                  // Format events with links
+                  const list = events
+                    .filter(e => e.active)
+                    .map(e => `- **${e.name}** (${e.duration} min). URI: ${e.uri} | Link: ${e.scheduling_url}`)
+                    .join('\n');
+                  
+                  const toolResult = `Active Calendly Event Types:\n${list}\n\n(Provide the relevant booking link to the user. If they want to see specific available times, use get_available_slots with the URI provided above.)`;
+                  
+                  messages.push({
+                    tool_call_id: toolCall.id,
+                    role: 'tool',
+                    content: toolResult,
+                  });
+               } else {
+                  messages.push({
+                    tool_call_id: toolCall.id,
+                    role: 'tool',
+                    content: "No active event types found in Calendly.",
+                  });
+               }
+             } else {
+               messages.push({
+                 tool_call_id: toolCall.id,
+                 role: 'tool',
+                 content: "Could not authenticate with Calendly. Invalid token or API error.",
+               });
+             }
+           } catch (error) {
+              console.error('Calendly tool error:', error);
+              messages.push({
+                tool_call_id: toolCall.id,
+                role: 'tool',
+                content: "An error occurred while fetching Calendly options.",
+              });
+           }
+        } else {
+           messages.push({
+             tool_call_id: toolCall.id,
+             role: 'tool',
+             content: "Calendly is not configured for this persona (missing token).",
+           });
+        }
+      } else if (toolCall.function.name === 'get_available_slots') {
+        const token = persona?.calendly_token;
+        const args = JSON.parse(toolCall.function.arguments);
+        const event_type_uri = args.event_type_uri;
+        const days_ahead = args.days_ahead || 3;
+
+        if (token && event_type_uri) {
+           try {
+             const { getAvailableSlots } = await import('./calendly');
+             
+             const start = new Date();
+             const end = new Date();
+             end.setDate(end.getDate() + Math.min(days_ahead, 7));
+             
+             const slots = await getAvailableSlots(token, event_type_uri, start.toISOString(), end.toISOString());
+             
+             if (slots.length > 0) {
+                // Group by day for readability
+                const grouped = slots.reduce((acc: any, slot: any) => {
+                  const d = new Date(slot.start_time);
+                  const dateKey = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                  if (!acc[dateKey]) acc[dateKey] = [];
+                  if (acc[dateKey].length < 6) { 
+                    acc[dateKey].push(d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+                  }
+                  return acc;
+                }, {});
+                
+                let toolResult = "Here are some available times:\n";
+                for (const [date, times] of Object.entries(grouped)) {
+                   toolResult += `\n**${date}**: ${(times as string[]).join(', ')}`;
+                }
+                toolResult += `\n\n(Inform the user that these are the next available slots and provide a link to the main scheduling page or the specific event type URL if they want to see more.)`;
+                
+                messages.push({
+                  tool_call_id: toolCall.id,
+                  role: 'tool',
+                  content: toolResult,
+                });
+             } else {
+                messages.push({
+                  tool_call_id: toolCall.id,
+                  role: 'tool',
+                  content: "No available timeslots found for this period. Suggest they check the full calendar link.",
+                });
+             }
+           } catch (error) {
+              console.error('Calendly availability error:', error);
+              messages.push({
+                tool_call_id: toolCall.id,
+                role: 'tool',
+                content: "Error fetching availability details.",
+              });
+           }
         }
       }
     }
