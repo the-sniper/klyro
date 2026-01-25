@@ -26,8 +26,8 @@ export function InstallBanner() {
   if (isIOS && showIOSInstructions) {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="w-full max-w-md mx-3 mb-3 rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl p-4 animate-in slide-in-from-bottom duration-300">
-          <div className="flex items-center justify-between mb-4">
+        <div className="w-full max-w-md mx-4 mb-4 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-xl p-5 animate-in slide-in-from-bottom duration-300">
+          <div className="flex items-center justify-between mb-5">
             <h3 className="text-lg font-semibold text-white">
               Install Klyro
             </h3>
@@ -39,12 +39,12 @@ export function InstallBanner() {
             </button>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm font-medium text-emerald-500">
+          <div className="space-y-5">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
                 1
               </div>
-              <div className="flex-1">
+              <div className="flex-1 pt-1">
                 <p className="text-sm text-white">
                   Tap the{" "}
                   <Share className="inline h-4 w-4 text-blue-500 mx-1" /> Share
@@ -53,11 +53,11 @@ export function InstallBanner() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm font-medium text-emerald-500">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
                 2
               </div>
-              <div className="flex-1">
+              <div className="flex-1 pt-1">
                 <p className="text-sm text-white">
                   Scroll down and tap{" "}
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-neutral-800 rounded text-xs font-medium">
@@ -67,11 +67,11 @@ export function InstallBanner() {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-sm font-medium text-emerald-500">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
                 3
               </div>
-              <div className="flex-1">
+              <div className="flex-1 pt-1">
                 <p className="text-sm text-white">
                   Tap <span className="font-medium">Add</span> to install the
                   app
@@ -80,9 +80,9 @@ export function InstallBanner() {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-neutral-800">
+          <div className="mt-5 pt-5 border-t border-neutral-800">
             <button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20"
               onClick={() => {
                 setShowIOSInstructions(false);
                 dismissInstallBanner();
