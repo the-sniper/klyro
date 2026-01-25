@@ -206,7 +206,7 @@ export default function IntegrationsPage() {
                 <Code2 size={48} />
               </div>
               <h3 className="empty-title">No active widgets</h3>
-              <p className="empty-desc" style={{ marginBottom: "10px" }}>
+              <p className="empty-desc" style={{ marginBottom: "30px" }}>
                 Create a custom chat widget to start collecting leads and
                 answering questions on your site.
               </p>

@@ -963,6 +963,82 @@ select:-webkit-autofill:focus {
   text-decoration: underline !important;
 }
 
+/* OTP Verification Styles */
+.otp-form .otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.otp-form .otp-input {
+  width: 48px;
+  height: 56px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #3f3f46;
+  background: rgba(39, 39, 42, 0.5);
+  color: #fff;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.otp-form .otp-input:focus {
+  outline: none;
+  border-color: var(--accent-secondary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.otp-form .otp-input.filled {
+  border-color: var(--accent-secondary);
+}
+
+.otp-form .otp-verify-btn {
+  margin-top: 24px;
+}
+
+.otp-form .otp-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.otp-form .otp-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #a1a1aa;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.otp-form .otp-back-btn:hover {
+  color: #d4d4d8;
+}
+
+.otp-form .otp-resend-btn {
+  font-size: 14px;
+  color: var(--accent-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.otp-form .otp-resend-btn:hover {
+  color: var(--accent-primary);
+}
+
+.otp-form .otp-resend-btn:disabled {
+  color: #71717a;
+  cursor: not-allowed;
+}
+
 .error-banner {
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);

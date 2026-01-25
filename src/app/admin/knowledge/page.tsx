@@ -229,7 +229,7 @@ export default function KnowledgeBasePage() {
                 <FileText size={48} />
               </div>
               <h3 className="empty-title">Your knowledge base is empty</h3>
-              <p className="empty-desc">
+              <p className="empty-desc" style={{marginBottom: "30px"}}>
                 Train your chatbot by adding documents, text snippets, or
                 website URLs.
               </p>

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     const { data: existingUser } = await adminClient
       .from('users')
       .select('id')
-      .eq('email', email)
+      .eq('email', email.toLowerCase())
       .single();
 
     if (existingUser) {
@@ -36,17 +36,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify that the email has been verified via OTP
+    const { data: verification } = await adminClient
+      .from('email_verifications')
+      .select('id, verified')
+      .eq('email', email.toLowerCase())
+      .eq('verified', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!verification) {
+      return NextResponse.json(
+        { error: 'Please verify your email first' },
+        { status: 400 }
+      );
+    }
+
     // Hash the password
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user in our table
+    // Create user in our table with email_verified set to true
     const { data: newUser, error: insertError } = await adminClient
       .from('users')
       .insert({
         email: email.toLowerCase(),
         full_name: name || null,
         password_hash: passwordHash,
+        email_verified: true,
       })
       .select('id, email')
       .single();
