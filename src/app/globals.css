@@ -1,5 +1,78 @@
 @import "tailwindcss";
 
+/* PWA Safe Area Styles */
+/* iOS PWA status bar filler - fills the notch/status bar area with a solid background */
+/* Base padding for main content below fixed header */
+.pwa-main-offset {
+  padding-top: 4rem;
+}
+
+/* PWA standalone mode - apply safe area padding */
+@supports (padding-top: env(safe-area-inset-top)) {
+  @media all and (display-mode: standalone) {
+    .pwa-header-safe-area {
+      padding-top: calc(env(safe-area-inset-top) + 12px);
+    }
+
+    /* Fixed header with safe area - used for app headers, adds extra 12px buffer for better spacing */
+    .pwa-fixed-header {
+      padding-top: calc(env(safe-area-inset-top) + 12px);
+    }
+
+    /* Adjust main content to account for header + safe area + buffer in PWA mode */
+    .pwa-main-offset {
+      padding-top: calc(4rem + env(safe-area-inset-top) + 12px) !important;
+    }
+
+    /* Safe area padding for bottom navigation/elements */
+    .pwa-bottom-safe-area {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}
+
+/* Animation keyframes for install banner */
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+
+.slide-in-from-bottom {
+  animation-name: slide-in-from-bottom;
+}
+
+.fade-in {
+  animation-name: fade-in;
+}
+
+.duration-200 {
+  animation-duration: 0.2s;
+}
+
+.duration-300 {
+  animation-duration: 0.3s;
+}
+
 :root {
   /* Premium Dark Theme - Neo-Noir Aesthetic */
   --bg-primary: #0a0a0c;
@@ -3383,6 +3456,22 @@ body:has(.sidebar-overlay.open) {
   padding: 24px;
 }
 
+.installBanner{
+  padding: 10px 5px;
+}
+
+.installBanner img {
+  border-radius: 50%;
+}
+
+.installBtn {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+}
+
 /* Mobile modal adjustments - account for header and bottom browser UI */
 @media (max-width: 1024px) {
   .modal-overlay {
@@ -3390,7 +3479,7 @@ body:has(.sidebar-overlay.open) {
     padding-bottom: 100px; /* Space for mobile browser UI */
     align-items: flex-start;
   }
-  
+
   .modal-glass {
     max-height: calc(100dvh - 200px);
     padding-bottom: 120px;
@@ -4855,6 +4944,51 @@ body:has(.sidebar-overlay.open) {
   }
 }
 
+/* Fix hero cards for 768px-1024px range */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .persona-carousel-wrapper {
+    gap: 0;
+    margin-top: 20px;
+  }
+  .persona-stack-container {
+    height: 480px !important;
+    transform: scale(0.95) !important;
+    margin-bottom: 20px !important;
+  }
+  .persona-card {
+    width: 300px !important;
+    min-height: 380px !important;
+    padding: 32px !important;
+    border-radius: 24px !important;
+  }
+  .persona-avatar-container {
+    width: 120px !important;
+    height: 120px !important;
+    margin-bottom: 16px !important;
+  }
+  .persona-name {
+    font-size: 24px !important;
+  }
+  .persona-tagline {
+    font-size: 11px !important;
+    letter-spacing: 2.5px !important;
+    margin-bottom: 12px !important;
+  }
+  .persona-info {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+  .pos-left {
+    transform: translateX(-70px) translateY(30px) rotate(-10deg) scale(0.8) !important;
+  }
+  .pos-right {
+    transform: translateX(70px) translateY(30px) rotate(10deg) scale(0.8) !important;
+  }
+  .carousel-indicators {
+    margin-top: 10px !important;
+  }
+}
+
 /* --- Max Width: 900px --- */
 @media (max-width: 900px) {
   .premium-table thead {
@@ -5339,6 +5473,52 @@ body:has(.sidebar-overlay.open) {
     gap: 20px;
   }
 }
+
+/* Fix hero cards for 480px-640px range */
+@media (min-width: 481px) and (max-width: 640px) {
+  .persona-carousel-wrapper {
+    gap: 0;
+    margin-top: 20px;
+  }
+  .persona-stack-container {
+    height: 420px !important;
+    transform: scale(0.9) !important;
+    margin-bottom: 20px !important;
+  }
+  .persona-card {
+    width: 260px !important;
+    min-height: 320px !important;
+    padding: 28px !important;
+    border-radius: 20px !important;
+  }
+  .persona-avatar-container {
+    width: 100px !important;
+    height: 100px !important;
+    margin-bottom: 14px !important;
+  }
+  .persona-name {
+    font-size: 20px !important;
+  }
+  .persona-tagline {
+    font-size: 10px !important;
+    letter-spacing: 2px !important;
+    margin-bottom: 10px !important;
+  }
+  .persona-info {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  .pos-left {
+    transform: translateX(-50px) translateY(25px) rotate(-8deg) scale(0.75) !important;
+  }
+  .pos-right {
+    transform: translateX(50px) translateY(25px) rotate(8deg) scale(0.75) !important;
+  }
+  .carousel-indicators {
+    margin-top: 10px !important;
+  }
+}
+
 @media (max-width: 640px) {
   .persona-carousel-wrapper {
     gap: 8px;
