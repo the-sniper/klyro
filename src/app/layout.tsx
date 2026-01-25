@@ -152,7 +152,7 @@ export default function RootLayout({
           />
         </PWAProvider>
         <Script
-          src="http://klyro-pro.vercel.app/widget.js"
+          src="https://klyro-pro.vercel.app/widget.js"
           data-widget-key="MnK1XElbACpl"
         />
       </body>
