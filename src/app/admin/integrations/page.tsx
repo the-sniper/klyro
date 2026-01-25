@@ -206,7 +206,7 @@ export default function IntegrationsPage() {
                 <Code2 size={48} />
               </div>
               <h3 className="empty-title">No active widgets</h3>
-              <p className="empty-desc">
+              <p className="empty-desc" style={{ marginBottom: "10px" }}>
                 Create a custom chat widget to start collecting leads and
                 answering questions on your site.
               </p>
@@ -361,9 +361,20 @@ export default function IntegrationsPage() {
                       <span>How to Install</span>
                     </div>
                     <div className="install-help-content">
-                      <p><strong>1. Copy the code</strong> — Click the copy button above to copy the script tag.</p>
-                      <p><strong>2. Paste before &lt;/body&gt;</strong> — Add the code just before the closing <code>&lt;/body&gt;</code> tag in your HTML file.</p>
-                      <p><strong>3. Works everywhere</strong> — Compatible with HTML, React, Next.js, WordPress, Webflow, Squarespace, and more.</p>
+                      <p>
+                        <strong>1. Copy the code</strong> — Click the copy
+                        button above to copy the script tag.
+                      </p>
+                      <p>
+                        <strong>2. Paste before &lt;/body&gt;</strong> — Add the
+                        code just before the closing <code>&lt;/body&gt;</code>{" "}
+                        tag in your HTML file.
+                      </p>
+                      <p>
+                        <strong>3. Works everywhere</strong> — Compatible with
+                        HTML, React, Next.js, WordPress, Webflow, Squarespace,
+                        and more.
+                      </p>
                     </div>
                     <div className="install-help-example">
                       <span className="example-label">Example placement:</span>
@@ -449,11 +460,16 @@ export default function IntegrationsPage() {
                 <textarea
                   className="form-textarea mini"
                   placeholder="Hi! How can I help you learn about my experience?"
+                  maxLength={50}
                   value={formData.welcomeMessage}
                   onChange={(e) =>
-                    setFormData({ ...formData, welcomeMessage: e.target.value })
+                    setFormData({
+                      ...formData,
+                      welcomeMessage: e.target.value.slice(0, 50),
+                    })
                   }
                 />
+                <p className="field-hint">Max 50 characters.</p>
               </div>
 
               <div className="form-row">
