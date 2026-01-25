@@ -26,8 +26,11 @@ export function InstallBanner() {
   if (isIOS && showIOSInstructions) {
     return (
       <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="w-full max-w-md mx-4 mb-4 rounded-2xl bg-neutral-900 border border-neutral-800 shadow-xl p-5 animate-in slide-in-from-bottom duration-300">
-          <div className="flex items-center justify-between mb-5">
+        <div 
+          className="w-full max-w-md rounded-2xl bg-neutral-900 border border-neutral-800 shadow-xl animate-in slide-in-from-bottom duration-300"
+          style={{ margin: '16px', padding: '24px' }}
+        >
+          <div className="flex items-center justify-between" style={{ marginBottom: '24px' }}>
             <h3 className="text-lg font-semibold text-white">
               Install Klyro
             </h3>
@@ -39,13 +42,16 @@ export function InstallBanner() {
             </button>
           </div>
 
-          <div className="space-y-5">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="flex items-center" style={{ gap: '16px' }}>
+              <div 
+                className="flex-shrink-0 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500"
+                style={{ width: '36px', height: '36px' }}
+              >
                 1
               </div>
-              <div className="flex-1 pt-1">
-                <p className="text-sm text-white">
+              <div className="flex-1">
+                <p className="text-sm text-white" style={{ lineHeight: '1.6' }}>
                   Tap the{" "}
                   <Share className="inline h-4 w-4 text-blue-500 mx-1" /> Share
                   button in Safari&apos;s toolbar
@@ -53,12 +59,15 @@ export function InstallBanner() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
+            <div className="flex items-center" style={{ gap: '16px' }}>
+              <div 
+                className="flex-shrink-0 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500"
+                style={{ width: '36px', height: '36px' }}
+              >
                 2
               </div>
-              <div className="flex-1 pt-1">
-                <p className="text-sm text-white">
+              <div className="flex-1">
+                <p className="text-sm text-white" style={{ lineHeight: '1.6' }}>
                   Scroll down and tap{" "}
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-neutral-800 rounded text-xs font-medium">
                     <Plus className="h-3 w-3" /> Add to Home Screen
@@ -67,12 +76,15 @@ export function InstallBanner() {
               </div>
             </div>
 
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500">
+            <div className="flex items-center" style={{ gap: '16px' }}>
+              <div 
+                className="flex-shrink-0 rounded-full bg-blue-500/15 flex items-center justify-center text-sm font-medium text-blue-500"
+                style={{ width: '36px', height: '36px' }}
+              >
                 3
               </div>
-              <div className="flex-1 pt-1">
-                <p className="text-sm text-white">
+              <div className="flex-1">
+                <p className="text-sm text-white" style={{ lineHeight: '1.6' }}>
                   Tap <span className="font-medium">Add</span> to install the
                   app
                 </p>
@@ -80,9 +92,10 @@ export function InstallBanner() {
             </div>
           </div>
 
-          <div className="mt-5 pt-5 border-t border-neutral-800">
+          <div style={{ marginTop: '24px' }}>
             <button
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20"
+              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/20"
+              style={{ padding: '14px 16px' }}
               onClick={() => {
                 setShowIOSInstructions(false);
                 dismissInstallBanner();
