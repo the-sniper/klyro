@@ -1101,8 +1101,8 @@
             <div class="klyro-empty-icon" style="background: ${config.primaryColor}20">
               ${botIcon}
             </div>
-            <h4>Hey! I'm ${escapeHtml(firstName)}'s copilot</h4>
-            <p>I can help answer questions about them</p>
+            <h4>${escapeHtml(config.welcomeHeadline || `Hey! I'm ${firstName}'s copilot`)}</h4>
+            <p>${escapeHtml(config.welcomeMessage || "I can help answer questions about them")}</p>
           </div>
         `;
       } else {

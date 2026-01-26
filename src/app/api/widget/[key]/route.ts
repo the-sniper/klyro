@@ -42,6 +42,7 @@ export async function GET(
       position: data.position,
       theme: data.theme,
       welcomeMessage: data.welcome_message,
+      welcomeHeadline: data.welcome_headline,
       headerTitle: data.header_title || 'Chat Assistant',
       primaryColor: data.primary_color,
       launcherMode: data.launcher_mode || 'icon',
@@ -74,6 +75,7 @@ export async function PUT(
     if (body.position !== undefined) updateData.position = body.position;
     if (body.theme !== undefined) updateData.theme = body.theme;
     if (body.welcomeMessage !== undefined) updateData.welcome_message = body.welcomeMessage;
+    if (body.welcomeHeadline !== undefined) updateData.welcome_headline = body.welcomeHeadline || null;
     if (body.allowedDomains !== undefined) updateData.allowed_domains = body.allowedDomains;
     if (body.primaryColor !== undefined) updateData.primary_color = body.primaryColor;
     if (body.headerTitle !== undefined) updateData.header_title = body.headerTitle;

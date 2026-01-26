@@ -49,6 +49,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       name, 
+      headerTitle = 'Chat Assistant',
+      welcomeHeadline = '',
       position = 'bottom-right', 
       theme = 'auto',
       welcomeMessage = 'Hi! How can I help you learn more about me?',
@@ -79,6 +81,8 @@ export async function POST(request: NextRequest) {
       .insert({
         widget_key: generateWidgetKey(),
         name,
+        header_title: headerTitle,
+        welcome_headline: welcomeHeadline || null,
         position,
         theme,
         welcome_message: welcomeMessage,

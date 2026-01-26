@@ -1,0 +1,1 @@
+ALTER TABLE widgets ADD COLUMN welcome_headline TEXT DEFAULT NULL;

@@ -32,6 +32,7 @@ export default function IntegrationsPage() {
   const [formData, setFormData] = useState({
     name: "",
     headerTitle: "Chat Assistant",
+    welcomeHeadline: "",
     welcomeMessage: "Hi! How can I help you learn more about me?",
     position: "bottom-right",
     theme: "dark",
@@ -71,6 +72,7 @@ export default function IntegrationsPage() {
       setFormData({
         name: widget.name,
         headerTitle: widget.header_title || "Chat Assistant",
+        welcomeHeadline: widget.welcome_headline || "",
         welcomeMessage: widget.welcome_message,
         position: widget.position,
         theme: widget.theme,
@@ -86,6 +88,7 @@ export default function IntegrationsPage() {
       setFormData({
         name: "",
         headerTitle: "Chat Assistant",
+        welcomeHeadline: "",
         welcomeMessage: "Hi! How can I help you learn more about me?",
         position: "bottom-right",
         theme: "dark",
@@ -108,6 +111,7 @@ export default function IntegrationsPage() {
       const payload = {
         name: formData.name,
         headerTitle: formData.headerTitle,
+        welcomeHeadline: formData.welcomeHeadline,
         welcomeMessage: formData.welcomeMessage,
         position: formData.position,
         theme: formData.theme,
@@ -452,6 +456,26 @@ export default function IntegrationsPage() {
                 />
                 <p className="field-hint">
                   The title displayed in the chat widget header.
+                </p>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Welcome Headline</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g., Hey! I'm John's copilot"
+                  maxLength={30}
+                  value={formData.welcomeHeadline}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      welcomeHeadline: e.target.value.slice(0, 30),
+                    })
+                  }
+                />
+                <p className="field-hint">
+                  The headline shown in the empty state. Max 30 characters.
                 </p>
               </div>
 
