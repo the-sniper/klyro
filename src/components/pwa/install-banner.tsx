@@ -111,6 +111,14 @@ export function InstallBanner() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-50 animate-in slide-in-from-bottom duration-300">
+      {/* Overlay close button - top left */}
+      <button
+        className="absolute -top-2 -left-2 h-6 w-6 flex items-center justify-center rounded-full bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-all duration-200 shadow-lg z-10"
+        onClick={dismissInstallBanner}
+      >
+        <X className="h-3.5 w-3.5" />
+        <span className="sr-only">Dismiss</span>
+      </button>
       <div className="installBanner flex items-center gap-3 rounded-2xl bg-neutral-900/95 border border-neutral-700/50 shadow-2xl shadow-black/50 px-4 py-3 sm:px-5 sm:py-4 backdrop-blur-md">
         {/* App Icon */}
         <div className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shadow-lg">
