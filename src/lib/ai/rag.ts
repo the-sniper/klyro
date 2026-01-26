@@ -207,7 +207,7 @@ function getSystemPrompt(persona?: PersonaContext): string {
   // Build persona-specific instructions
   const ownerName = persona?.ownerName
     ? persona.ownerName
-    : "the portfolio owner";
+    : "the website owner";
   const styleDesc = persona?.communicationStyle
     ? STYLE_DESCRIPTIONS[persona.communicationStyle]
     : STYLE_DESCRIPTIONS.friendly;
@@ -305,7 +305,7 @@ ${behaviors}${personalityCheck}`;
   // Add scheduling awareness to the persona instructions
   const schedulingContext =
     persona?.access_permissions?.can_schedule_calls && persona?.calendly_token
-      ? `\nSCHEDULING: You have scheduling tools available. (1) Use get_scheduling_options to list meeting types. (2) If a user asks for specific available times or dates, use get_available_slots with the appropriate meeting URI to show them real-time availability.`
+      ? `\nSCHEDULING: You have active Calendly event types provided in the [CALENDLY CONFIGURATION] section of your context. (1) Use this information to suggest meeting types. (2) If a user asks for specific available times or dates, use get_available_slots with the corresponding meeting URI to show them real-time availability.`
       : persona?.access_permissions?.can_schedule_calls
         ? `\nSCHEDULING: While the owner allows scheduling calls, no Calendly account has been connected yet. If someone asks to book a call, explain that you don't have a scheduling link ready yet but they can reach out via email or phone.`
         : "";
@@ -363,7 +363,7 @@ When asked, share this range naturally. Do not share it unless explicitly asked 
     }
   }
 
-  return `You are an intelligent AI assistant for ${ownerName}'s portfolio website. Today is ${currentDate}.
+  return `You are an intelligent AI assistant for ${ownerName}'s website. Today is ${currentDate}.
 
 PERSONA & VOICE (THIS IS YOUR CORE IDENTITY - NEVER BREAK CHARACTER):
 ${styleDesc}${traitsBehaviors}${customSection}${schedulingContext}
@@ -547,11 +547,11 @@ async function rewriteQuery(
       messages: [
         {
           role: "system",
-          content: `You are a search query optimizer for a portfolio website AI assistant. Given a conversation history and a follow-up question, rewrite the question to be a standalone, specific search query.
+          content: `You are a search query optimizer for a website AI assistant. Given a conversation history and a follow-up question, rewrite the question to be a standalone, specific search query.
 
 CRITICAL RULES:
-1. This is a PORTFOLIO ASSISTANT. When users use pronouns like "their", "them", "his", "her", "your", or "you" referring to a PERSON, they almost always mean the PORTFOLIO OWNER, not external entities/companies/products being discussed.
-2. If the user asks for "info", "details", "contact", "about them", "about you", "what do you do?", or "what's your deal?", they want the PORTFOLIO OWNER's background, work, or contact info.
+1. This is a WEBSITE ASSISTANT. When users use pronouns like "their", "them", "his", "her", "your", or "you" referring to a PERSON, they almost always mean the WEBSITE OWNER, not external entities/companies/products being discussed.
+2. If the user asks for "info", "details", "contact", "about them", "about you", "what do you do?", or "what's your deal?", they want the WEBSITE OWNER's background, work, or contact info.
 3. Resolve demonstrative pronouns like "this project", "that one", "it", or "that" to the specific project, experience, or skill mentioned in the immediately preceding messages.
 4. Only interpret pronouns as referring to an external entity if the context makes it absolutely clear they're asking about that specific external thing (e.g., "how much does AirLog cost?").
 5. **CONVERSATIONAL PROGRESSION: If the user asks for "other", "another", "something else", or "besides [Subject]", your rewritten query MUST include "excluding [Subject]" or "different from [Subject]" to ensure vector search finds NEW information.**
@@ -709,6 +709,39 @@ export async function generateResponse(
       role: "user",
       content: `[AVAILABLE URL SOURCES FOR LIVE FETCHING]\nIf you need more information to answer a question, you can fetch fresh content from these URLs using the fetch_url_content tool:\n${urlListText}\n\n(Only use this if the knowledge base context doesn't have the answer.)`,
     });
+  }
+
+  // Prefetch Calendly event configuration if enabled
+  if (
+    persona?.access_permissions?.can_schedule_calls &&
+    persona?.calendly_token
+  ) {
+    try {
+      const { getCalendlyUser, getEventTypes } = await import("./calendly");
+      const user = await getCalendlyUser(persona.calendly_token);
+      if (user) {
+        const events = await getEventTypes(
+          persona.calendly_token,
+          user.resource.uri,
+        );
+        if (events.length > 0) {
+          const eventsList = events
+            .filter((e) => e.active)
+            .map(
+              (e) =>
+                `- **${e.name}** (${e.duration} min)\n  URI: ${e.uri}\n  Link: ${e.scheduling_url}`,
+            )
+            .join("\n");
+
+          messages.push({
+            role: "system",
+            content: `[CALENDLY CONFIGURATION]\nUse these event details when checking availability:\n${eventsList}\n\nIMPORTANT: When calling 'get_available_slots', you MUST use the exact URI provided above for the corresponding event type.`,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to prefetch Calendly config:", error);
+    }
   }
 
   // Determine if tools should be used (GitHub, website, or URL documents available)
@@ -898,7 +931,7 @@ export async function generateResponse(
       } else if (toolCall.function.name === "get_available_slots") {
         const token = persona?.calendly_token;
         const args = JSON.parse(toolCall.function.arguments);
-        const event_type_uri = args.event_type_uri;
+        const event_type_uri = args.event_type_uri?.trim();
         const days_ahead = args.days_ahead || 3;
 
         if (token && event_type_uri) {
@@ -906,8 +939,14 @@ export async function generateResponse(
             const { getAvailableSlots } = await import("./calendly");
 
             const start = new Date();
+            // Start 15 minutes in the future to avoid "start_time must be in the future" errors and give users buffer
+            start.setMinutes(start.getMinutes() + 15);
+
             const end = new Date();
-            end.setDate(end.getDate() + Math.min(days_ahead, 7));
+            // Add buffer to ensure we cover full working days. 
+            end.setDate(end.getDate() + Math.min(days_ahead + 2, 14));
+
+            console.log(`[Calendly] Fetching slots from ${start.toISOString()} to ${end.toISOString()}`);
 
             const slots = await getAvailableSlots(
               token,
@@ -926,22 +965,27 @@ export async function generateResponse(
                   day: "numeric",
                 });
                 if (!acc[dateKey]) acc[dateKey] = [];
-                if (acc[dateKey].length < 6) {
-                  acc[dateKey].push(
-                    d.toLocaleTimeString("en-US", {
-                      hour: "numeric",
-                      minute: "2-digit",
-                    }),
-                  );
-                }
+                // Capture all slots
+                acc[dateKey].push(
+                  d.toLocaleTimeString("en-US", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  }),
+                );
                 return acc;
               }, {});
 
-              let toolResult = "Here are some available times:\n";
+              let toolResult = "AVAILABLE TIME SLOTS (Raw Data):\n";
               for (const [date, times] of Object.entries(grouped)) {
                 toolResult += `\n**${date}**: ${(times as string[]).join(", ")}`;
               }
-              toolResult += `\n\n(Inform the user that these are the next available slots and provide a link to the main scheduling page or the specific event type URL if they want to see more.)`;
+              
+              toolResult += `\n\nINSTRUCTIONS FOR AI (Follow Strictness):
+1. The list above contains ALL available slots.
+2. IF this is the FIRST time sharing times: list only the first 6-8 slots, then add "I also have availability in the [afternoon/evening]."
+3. IF the user specifically asks for "evening", "afternoon", "late", or "more" times: YOU MUST IGNORE THE LIMIT and list those specific slots from the data above.
+4. If the user asks "Are there evening slots?" and you see slots like 5:00 PM or later in the raw data, YOU MUST SAY YES and list them. Do no say "I don't have evening slots" if they are in the data.
+5. Always provide the "Schedule a Meeting" link.`;
 
               messages.push({
                 tool_call_id: toolCall.id,
