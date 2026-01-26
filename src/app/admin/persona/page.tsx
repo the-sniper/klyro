@@ -23,6 +23,7 @@ import {
   Feather,
   Pencil,
   Info,
+  X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -64,6 +65,15 @@ interface PersonaConfig {
   };
   calendly_token?: string | null;
   selected_preset_id: string | null;
+}
+
+interface DrawerData {
+  name: string;
+  tagline: string;
+  description: string;
+  traits: string[];
+  avatar: string | React.ReactNode;
+  color?: string;
 }
 
 const TONE_OPTIONS = [
@@ -159,6 +169,15 @@ export default function PersonaPage() {
     selected_preset_id: null,
   });
   const [traitInput, setTraitInput] = useState("");
+  const [drawerData, setDrawerData] = useState<DrawerData | null>(null);
+
+  function handleInfoClick(e: React.MouseEvent, data: DrawerData) {
+    if (window.innerWidth <= 640) {
+      e.preventDefault();
+      e.stopPropagation();
+      setDrawerData(data);
+    }
+  }
 
   const isUsingPreset = config.selected_preset_id !== null;
   const selectedPreset = presets.find(
@@ -169,6 +188,20 @@ export default function PersonaPage() {
     fetchConfig();
     fetchPresets();
   }, []);
+
+  useEffect(() => {
+    if (drawerData) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [drawerData]);
 
   async function fetchPresets() {
     try {
@@ -387,7 +420,19 @@ export default function PersonaPage() {
                           <div className="preset-tagline">{preset.tagline}</div>
                           <div className="preset-name">{preset.name}</div>
                         </button>
-                        <div className="preset-info-trigger">
+                        <div
+                          className="preset-info-trigger cursor-pointer"
+                          onClick={(e) =>
+                            handleInfoClick(e, {
+                              name: preset.name,
+                              tagline: preset.tagline,
+                              description: preset.description,
+                              traits: preset.personality_traits,
+                              avatar: preset.avatar,
+                              color: preset.color,
+                            })
+                          }
+                        >
                           <Info size={14} />
                           <div className="preset-popover">
                             <div className="popover-content">
@@ -419,7 +464,19 @@ export default function PersonaPage() {
                         <div className="preset-tagline">Build Your Own</div>
                         <div className="preset-name">Custom</div>
                       </button>
-                      <div className="preset-info-trigger">
+                      <div
+                        className="preset-info-trigger cursor-pointer"
+                        onClick={(e) =>
+                          handleInfoClick(e, {
+                            name: "Custom",
+                            tagline: "Build Your Own",
+                            description:
+                              "Create a completely unique AI persona by manually tuning its style and traits.",
+                            traits: [],
+                            avatar: <Pencil size={32} />,
+                          })
+                        }
+                      >
                         <Info size={14} />
                         <div className="preset-popover">
                           <div className="popover-content">
@@ -857,6 +914,63 @@ export default function PersonaPage() {
           </div>
         </div>
       </div>
+      {/* Mobile Info Drawer */}
+      {drawerData && (
+        <>
+          <div className="drawer-overlay" onClick={() => setDrawerData(null)} />
+          <div className="drawer-container">
+            <div className="drawer-handle" />
+            <div className="drawer-header">
+              <div className="drawer-profile">
+                <div className="drawer-avatar-box">
+                  {typeof drawerData.avatar === "string" ? (
+                    <img
+                      src={drawerData.avatar}
+                      alt={drawerData.name}
+                      className="drawer-avatar-img"
+                    />
+                  ) : (
+                    <div className="drawer-avatar-placeholder">
+                      {drawerData.avatar}
+                    </div>
+                  )}
+                  {drawerData.color && (
+                    <div
+                      className="drawer-color-overlay"
+                      style={{ background: drawerData.color }}
+                    />
+                  )}
+                </div>
+                <div className="drawer-text">
+                  <h3 className="drawer-title">{drawerData.name}</h3>
+                  {drawerData.tagline && (
+                    <p className="drawer-tagline">{drawerData.tagline}</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setDrawerData(null)}
+                className="drawer-close-btn"
+                aria-label="Close drawer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <p className="drawer-desc">{drawerData.description}</p>
+
+            {drawerData.traits && drawerData.traits.length > 0 && (
+              <div className="drawer-traits">
+                {drawerData.traits.map((trait) => (
+                  <span key={trait} className="drawer-trait-badge">
+                    {trait}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
