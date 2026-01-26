@@ -1,112 +1,11 @@
-"use strict";
-(() => {
-  var _ = (E, b, u) =>
-    new Promise((L, S) => {
-      var e = (d) => {
-          try {
-            l(u.next(d));
-          } catch (k) {
-            S(k);
-          }
-        },
-        m = (d) => {
-          try {
-            l(u.throw(d));
-          } catch (k) {
-            S(k);
-          }
-        },
-        l = (d) => (d.done ? L(d.value) : Promise.resolve(d.value).then(e, m));
-      l((u = u.apply(E, b)).next());
-    });
-  (function () {
-    "use strict";
-    console.log("[Klyro] Widget script loaded, version:", "2.3.1");
-    let b = document.currentScript,
-      u = b == null ? void 0 : b.getAttribute("data-widget-key");
-    if ((console.log("[Klyro] Widget key:", u), !u)) {
-      console.error("Klyro: Missing data-widget-key attribute");
-      return;
-    }
-    let L = (b == null ? void 0 : b.src.replace("/widget.js", "")) || "",
-      S = `klyro_${u}`,
-      e = null,
-      m = !1,
-      l = [],
-      d = null,
-      k = !1,
-      x = null,
-      T = null;
-    function H() {
-      try {
-        let o = localStorage.getItem(S);
-        if (o) {
-          let n = JSON.parse(o);
-          return (
-            (l = n.messages || []),
-            (d = n.sessionId || null),
-            console.log("[Klyro] Loaded persisted chat:", l.length, "messages"),
-            !0
-          );
-        }
-      } catch (o) {
-        console.error("[Klyro] Failed to load persisted chat:", o);
-      }
-      return !1;
-    }
-    function C() {
-      try {
-        let o = {
-          messages: l,
-          sessionId: d,
-          lastUpdated: new Date().toISOString(),
-        };
-        localStorage.setItem(S, JSON.stringify(o));
-      } catch (o) {
-        console.error("[Klyro] Failed to persist chat:", o);
-      }
-    }
-    function O() {
-      try {
-        localStorage.removeItem(S);
-      } catch (o) {
-        console.error("[Klyro] Failed to clear persisted chat:", o);
-      }
-    }
-    function q() {
-      if (l.length === 0) return;
-      let o = (e == null ? void 0 : e.headerTitle) || "Chat Transcript",
-        n = new Date().toLocaleString(),
-        t = `${o}
-`;
-      ((t += `Downloaded: ${n}
-`),
-        (t +=
-          "=".repeat(50) +
-          `
+"use strict";(()=>{var _=(E,b,u)=>new Promise((L,S)=>{var e=d=>{try{l(u.next(d))}catch(k){S(k)}},m=d=>{try{l(u.throw(d))}catch(k){S(k)}},l=d=>d.done?L(d.value):Promise.resolve(d.value).then(e,m);l((u=u.apply(E,b)).next())});(function(){"use strict";console.log("[Klyro] Widget script loaded, version:","2.3.1");let b=document.currentScript,u=b==null?void 0:b.getAttribute("data-widget-key");if(console.log("[Klyro] Widget key:",u),!u){console.error("Klyro: Missing data-widget-key attribute");return}let L=(b==null?void 0:b.src.replace("/widget.js",""))||"",S=`klyro_${u}`,e=null,m=!1,l=[],d=null,k=!1,x=null,T=null;function H(){try{let o=localStorage.getItem(S);if(o){let n=JSON.parse(o);return l=n.messages||[],d=n.sessionId||null,console.log("[Klyro] Loaded persisted chat:",l.length,"messages"),!0}}catch(o){console.error("[Klyro] Failed to load persisted chat:",o)}return!1}function C(){try{let o={messages:l,sessionId:d,lastUpdated:new Date().toISOString()};localStorage.setItem(S,JSON.stringify(o))}catch(o){console.error("[Klyro] Failed to persist chat:",o)}}function O(){try{localStorage.removeItem(S)}catch(o){console.error("[Klyro] Failed to clear persisted chat:",o)}}function q(){if(l.length===0)return;let o=(e==null?void 0:e.headerTitle)||"Chat Transcript",n=new Date().toLocaleString(),t=`${o}
+`;t+=`Downloaded: ${n}
+`,t+="=".repeat(50)+`
 
-`),
-        l.forEach((s, y) => {
-          let a =
-            s.role === "user"
-              ? "You"
-              : (e == null ? void 0 : e.headerTitle) || "Assistant";
-          t += `${a}:
+`,l.forEach((s,y)=>{let a=s.role==="user"?"You":(e==null?void 0:e.headerTitle)||"Assistant";t+=`${a}:
 ${s.content}
 
-`;
-        }));
-      let c = new Blob([t], { type: "text/plain" }),
-        r = URL.createObjectURL(c),
-        f = document.createElement("a");
-      ((f.href = r),
-        (f.download = `chat-transcript-${new Date().toISOString().split("T")[0]}.txt`),
-        document.body.appendChild(f),
-        f.click(),
-        document.body.removeChild(f),
-        URL.revokeObjectURL(r));
-    }
-    let U = `
+`});let c=new Blob([t],{type:"text/plain"}),r=URL.createObjectURL(c),f=document.createElement("a");f.href=r,f.download=`chat-transcript-${new Date().toISOString().split("T")[0]}.txt`,document.body.appendChild(f),f.click(),document.body.removeChild(f),URL.revokeObjectURL(r)}let U=`
     .klyro-widget * {
       box-sizing: border-box;
       margin: 0;
@@ -639,8 +538,8 @@ ${s.content}
         left: 16px !important;
         right: 16px !important;
         bottom: 90px;
-        height: calc(100vh - 120px);
-        max-height: calc(100vh - 120px);
+        height: calc(100vh - 180px);
+        max-height: calc(100vh - 180px);
       }
     }
 
@@ -744,126 +643,16 @@ ${s.content}
     .klyro-widget.dark .klyro-popover-btn.cancel:hover {
       background: #475569;
     }
-  `,
-      I =
-        '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>',
-      W =
-        '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
-      A =
-        '<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>',
-      z =
-        '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',
-      D =
-        '<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
-      N =
-        '<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
-    function R(o) {
-      if (!o || o.length === 0) return !0;
-      let n = window.location.pathname;
-      for (let t of o) {
-        let c = t.trim();
-        if (c === n) return !0;
-        if (c.endsWith("/*")) {
-          let r = c.slice(0, -2);
-          if (n === r || n.startsWith(r + "/")) return !0;
-        }
-        if (c === "/" && n === "/") return !0;
-      }
-      return !1;
-    }
-    function K() {
-      if (!x || !e) return;
-      let o = window.location.pathname;
-      if (o === T) return;
-      if (((T = o), R(e.allowedRoutes)))
-        ((x.style.display = ""),
-          console.log("[Klyro] Widget shown on route:", o));
-      else {
-        if (((x.style.display = "none"), m)) {
-          m = !1;
-          let t = x.querySelector(".klyro-panel");
-          t && t.classList.remove("open");
-        }
-        console.log("[Klyro] Widget hidden on route:", o);
-      }
-    }
-    function F() {
-      ((T = window.location.pathname),
-        window.addEventListener("popstate", () => {
-          (console.log("[Klyro] Popstate detected"), K());
-        }));
-      let o = history.pushState;
-      history.pushState = function (...t) {
-        (o.apply(this, t),
-          console.log("[Klyro] PushState detected"),
-          setTimeout(K, 0));
-      };
-      let n = history.replaceState;
-      ((history.replaceState = function (...t) {
-        (n.apply(this, t),
-          console.log("[Klyro] ReplaceState detected"),
-          setTimeout(K, 0));
-      }),
-        console.log("[Klyro] Route change listeners set up"));
-    }
-    function B() {
-      return _(this, null, function* () {
-        console.log("[Klyro] Initializing, API_BASE:", L);
-        try {
-          let o = `${L}/api/widget/${u}`;
-          console.log("[Klyro] Fetching config from:", o);
-          let n = yield fetch(o);
-          if ((console.log("[Klyro] Response status:", n.status), !n.ok))
-            throw new Error("Widget not found");
-          ((e = yield n.json()),
-            console.log("[Klyro] Config loaded:", e),
-            H(),
-            l.length > 0 &&
-              e.welcomeMessage &&
-              l[0].role === "assistant" &&
-              l[0].content === e.welcomeMessage &&
-              (console.log(
-                "[Klyro] Removing legacy welcome message from history",
-              ),
-              l.shift(),
-              C()),
-            V(),
-            F(),
-            !R(e.allowedRoutes) &&
-              x &&
-              ((x.style.display = "none"),
-              console.log(
-                "[Klyro] Widget hidden on initial route:",
-                window.location.pathname,
-              )));
-        } catch (o) {
-          console.error("Klyro: Failed to load widget", o);
-        }
-      });
-    }
-    function V() {
-      console.log("[Klyro] Rendering widget...");
-      let o = document.createElement("style");
-      ((o.textContent = U), document.head.appendChild(o));
-      let n = e.theme;
-      n === "auto" &&
-        (n = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light");
-      let t = document.createElement("div");
-      ((t.className = `klyro-widget ${n}`),
-        t.style.setProperty("--primary-color", e.primaryColor));
-      let c = e.launcherMode === "text" && e.launcherText;
-      ((t.innerHTML = `
-      <button class="klyro-button ${e.position} ${c ? "text-mode" : ""}" style="background: ${e.primaryColor}">
+  `,I='<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>',W='<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',A='<svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>',z='<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>',D='<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',N='<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';function R(o){if(!o||o.length===0)return!0;let n=window.location.pathname;for(let t of o){let c=t.trim();if(c===n)return!0;if(c.endsWith("/*")){let r=c.slice(0,-2);if(n===r||n.startsWith(r+"/"))return!0}if(c==="/"&&n==="/")return!0}return!1}function K(){if(!x||!e)return;let o=window.location.pathname;if(o===T)return;if(T=o,R(e.allowedRoutes))x.style.display="",console.log("[Klyro] Widget shown on route:",o);else{if(x.style.display="none",m){m=!1;let t=x.querySelector(".klyro-panel");t&&t.classList.remove("open")}console.log("[Klyro] Widget hidden on route:",o)}}function F(){T=window.location.pathname,window.addEventListener("popstate",()=>{console.log("[Klyro] Popstate detected"),K()});let o=history.pushState;history.pushState=function(...t){o.apply(this,t),console.log("[Klyro] PushState detected"),setTimeout(K,0)};let n=history.replaceState;history.replaceState=function(...t){n.apply(this,t),console.log("[Klyro] ReplaceState detected"),setTimeout(K,0)},console.log("[Klyro] Route change listeners set up")}function B(){return _(this,null,function*(){console.log("[Klyro] Initializing, API_BASE:",L);try{let o=`${L}/api/widget/${u}`;console.log("[Klyro] Fetching config from:",o);let n=yield fetch(o);if(console.log("[Klyro] Response status:",n.status),!n.ok)throw new Error("Widget not found");e=yield n.json(),console.log("[Klyro] Config loaded:",e),H(),l.length>0&&e.welcomeMessage&&l[0].role==="assistant"&&l[0].content===e.welcomeMessage&&(console.log("[Klyro] Removing legacy welcome message from history"),l.shift(),C()),V(),F(),!R(e.allowedRoutes)&&x&&(x.style.display="none",console.log("[Klyro] Widget hidden on initial route:",window.location.pathname))}catch(o){console.error("Klyro: Failed to load widget",o)}})}function V(){console.log("[Klyro] Rendering widget...");let o=document.createElement("style");o.textContent=U,document.head.appendChild(o);let n=e.theme;n==="auto"&&(n=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");let t=document.createElement("div");t.className=`klyro-widget ${n}`,t.style.setProperty("--primary-color",e.primaryColor);let c=e.launcherMode==="text"&&e.launcherText;t.innerHTML=`
+      <button class="klyro-button ${e.position} ${c?"text-mode":""}" style="background: ${e.primaryColor}">
         ${I}
-        ${c ? `<span class="klyro-button-text">${w(e.launcherText)}</span>` : ""}
+        ${c?`<span class="klyro-button-text">${w(e.launcherText)}</span>`:""}
       </button>
       <div class="klyro-panel ${e.position}">
         <div class="klyro-header" style="background: ${e.primaryColor}">
           <div class="klyro-header-icon">${z}</div>
           <div class="klyro-header-text">
-            <h3>${w(e.headerTitle || "Chat Assistant")}</h3>
+            <h3>${w(e.headerTitle||"Chat Assistant")}</h3>
             <p>Your personal guide to this site</p>
           </div>
           <div class="klyro-header-actions">
@@ -897,194 +686,24 @@ ${s.content}
           </div>
         </div>
       </div>
-    `),
-        document.body.appendChild(t),
-        (x = t));
-      let r = t.querySelector(".klyro-button"),
-        f = t.querySelector(".klyro-panel"),
-        s = t.querySelector(".klyro-messages"),
-        y = t.querySelector(".klyro-input"),
-        a = t.querySelector(".klyro-send"),
-        p = t.querySelector(".reset-btn"),
-        g = t.querySelector(".download-btn"),
-        v = t.querySelector(".klyro-popover-overlay"),
-        G = v.querySelector(".confirm"),
-        J = v.querySelector(".cancel");
-      ($(),
-        r.addEventListener("click", () => {
-          ((m = !m), f.classList.toggle("open", m));
-          let h = e.launcherMode === "text" && e.launcherText;
-          m
-            ? ((r.innerHTML = W),
-              r.classList.remove("text-mode"),
-              y.focus(),
-              $())
-            : ((r.innerHTML =
-                I +
-                (h
-                  ? `<span class="klyro-button-text">${w(e.launcherText)}</span>`
-                  : "")),
-              h && r.classList.add("text-mode"));
-        }),
-        p.addEventListener("click", () => {
-          v.classList.add("open");
-        }),
-        J.addEventListener("click", () => {
-          v.classList.remove("open");
-        }),
-        G.addEventListener("click", () => {
-          ((l = []), (d = null), O(), $(), v.classList.remove("open"));
-        }),
-        g.addEventListener("click", q));
-      function P(h) {
-        return _(this, null, function* () {
-          let i = h || y.value.trim();
-          if (!(!i || k)) {
-            (l.push({ role: "user", content: i }),
-              h || (y.value = ""),
-              $(),
-              C(),
-              (k = !0),
-              $());
-            try {
-              let M = yield fetch(`${L}/api/chat`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    message: i,
-                    widgetKey: u,
-                    sessionId: d,
-                  }),
-                }),
-                j = yield M.json();
-              ((k = !1),
-                M.ok
-                  ? ((d = j.sessionId),
-                    l.push({ role: "assistant", content: j.response }),
-                    C())
-                  : l.push({
-                      role: "assistant",
-                      content:
-                        "Sorry, I encountered an error. Please try again.",
-                    }));
-            } catch (M) {
-              ((k = !1),
-                l.push({
-                  role: "assistant",
-                  content: "Unable to connect. Please try again later.",
-                }));
-            }
-            $();
-          }
-        });
-      }
-      (a.addEventListener("click", () => P()),
-        y.addEventListener("keypress", (h) => {
-          h.key === "Enter" && P();
-        }));
-      function $() {
-        let h = l.filter(
-          (i, M) =>
-            !(
-              M === 0 &&
-              i.role === "assistant" &&
-              e.welcomeMessage &&
-              i.content.trim() === e.welcomeMessage.trim()
-            ),
-        );
-        if (((g.disabled = h.length === 0), h.length === 0)) {
-          let i = (e.headerTitle || "Assistant").split(" ")[0];
-          s.innerHTML = `
+    `,document.body.appendChild(t),x=t;let r=t.querySelector(".klyro-button"),f=t.querySelector(".klyro-panel"),s=t.querySelector(".klyro-messages"),y=t.querySelector(".klyro-input"),a=t.querySelector(".klyro-send"),p=t.querySelector(".reset-btn"),g=t.querySelector(".download-btn"),v=t.querySelector(".klyro-popover-overlay"),G=v.querySelector(".confirm"),J=v.querySelector(".cancel");$(),r.addEventListener("click",()=>{m=!m,f.classList.toggle("open",m);let h=e.launcherMode==="text"&&e.launcherText;m?(r.innerHTML=W,r.classList.remove("text-mode"),y.focus(),$()):(r.innerHTML=I+(h?`<span class="klyro-button-text">${w(e.launcherText)}</span>`:""),h&&r.classList.add("text-mode"))}),p.addEventListener("click",()=>{v.classList.add("open")}),J.addEventListener("click",()=>{v.classList.remove("open")}),G.addEventListener("click",()=>{l=[],d=null,O(),$(),v.classList.remove("open")}),g.addEventListener("click",q);function P(h){return _(this,null,function*(){let i=h||y.value.trim();if(!(!i||k)){l.push({role:"user",content:i}),h||(y.value=""),$(),C(),k=!0,$();try{let M=yield fetch(`${L}/api/chat`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:i,widgetKey:u,sessionId:d})}),j=yield M.json();k=!1,M.ok?(d=j.sessionId,l.push({role:"assistant",content:j.response}),C()):l.push({role:"assistant",content:"Sorry, I encountered an error. Please try again."})}catch(M){k=!1,l.push({role:"assistant",content:"Unable to connect. Please try again later."})}$()}})}a.addEventListener("click",()=>P()),y.addEventListener("keypress",h=>{h.key==="Enter"&&P()});function $(){let h=l.filter((i,M)=>!(M===0&&i.role==="assistant"&&e.welcomeMessage&&i.content.trim()===e.welcomeMessage.trim()));if(g.disabled=h.length===0,h.length===0){let i=(e.headerTitle||"Assistant").split(" ")[0];s.innerHTML=`
           <div class="klyro-empty-state">
             <div class="klyro-empty-icon" style="background: ${e.primaryColor}20">
               ${z}
             </div>
-            <p style="font-size: 16px; font-weight: 500; line-height: 1.5; color: inherit; opacity: 0.9; white-space: pre-wrap;">${w(e.welcomeMessage || `Hey! I'm ${w(i)}'s copilot. I can help answer questions about them.`)}</p>
+            <h4>Hey! I'm ${w(i)}'s copilot</h4>
+            <p>I can help answer questions about them</p>
           </div>
-        `;
-        } else
-          s.innerHTML = h
-            .map(
-              (i) => `
-          <div class="klyro-message ${i.role}" ${i.role === "user" ? `style="background: ${e.primaryColor}"` : ""}>
-            ${i.role === "assistant" ? Y(i.content) : w(i.content)}
+        `}else s.innerHTML=h.map(i=>`
+          <div class="klyro-message ${i.role}" ${i.role==="user"?`style="background: ${e.primaryColor}"`:""}>
+            ${i.role==="assistant"?Y(i.content):w(i.content)}
           </div>
-        `,
-            )
-            .join("");
-        (k &&
-          (s.innerHTML += `
+        `).join("");k&&(s.innerHTML+=`
           <div class="klyro-typing">
             <span style="background: ${e.primaryColor}"></span>
             <span style="background: ${e.primaryColor}"></span>
             <span style="background: ${e.primaryColor}"></span>
           </div>
-        `),
-          (s.scrollTop = s.scrollHeight),
-          (a.disabled = k));
-      }
-    }
-    function Y(o) {
-      if (!o) return "";
-      console.log("[Klyro] formatMessage called with:", o.substring(0, 100));
-      let n = [],
-        t = o.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (a, p, g) => {
-          let v = `__LINK_${n.length}__`;
-          return (n.push({ text: p, url: g }), v);
-        }),
-        c = [];
-      t = t.replace(/(https?:\/\/[^\s<\]]+)/g, (a, p) => {
-        if (a.includes("__LINK_")) return a;
-        console.log("[Klyro] Found raw URL:", p);
-        let g = `__URL_${c.length}__`;
-        return (c.push(p), g);
-      });
-      let r = w(t);
-      (n.forEach((a, p) => {
-        let g = w(a.text);
-        r = r.replace(
-          `__LINK_${p}__`,
-          `<a href="${a.url}" target="_blank" rel="noopener noreferrer">${g}</a>`,
-        );
-      }),
-        c.forEach((a, p) => {
-          r = r.replace(
-            `__URL_${p}__`,
-            `<a href="${a}" target="_blank" rel="noopener noreferrer">${a}</a>`,
-          );
-        }),
-        (r = r.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")),
-        (r = r.replace(
-          new RegExp("(?<!^|\\n)\\*([^*\\n]+)\\*", "g"),
-          "<em>$1</em>",
-        )));
-      let f = r.split(`
-`),
-        s = !1,
-        y = [];
-      for (let a = 0; a < f.length; a++) {
-        let p = f[a],
-          g = p.match(/^[\s]*[•\-\*]\s+(.+)$/);
-        g
-          ? (s || (y.push("<ul>"), (s = !0)), y.push(`<li>${g[1]}</li>`))
-          : (s && (y.push("</ul>"), (s = !1)), y.push(p));
-      }
-      return (
-        s && y.push("</ul>"),
-        (r = y.join(`
-`)),
-        (r = r.replace(/\n(?!<\/?[uo]l|<\/?li)/g, "<br>")),
-        (r = r.replace(/\n/g, "")),
-        console.log("[Klyro] formatMessage result:", r.substring(0, 100)),
-        r
-      );
-    }
-    function w(o) {
-      let n = document.createElement("div");
-      return ((n.textContent = o), n.innerHTML);
-    }
-    document.readyState === "loading"
-      ? document.addEventListener("DOMContentLoaded", B)
-      : B();
-  })();
-})();
+        `),s.scrollTop=s.scrollHeight,a.disabled=k}}function Y(o){if(!o)return"";console.log("[Klyro] formatMessage called with:",o.substring(0,100));let n=[],t=o.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,(a,p,g)=>{let v=`__LINK_${n.length}__`;return n.push({text:p,url:g}),v}),c=[];t=t.replace(/(https?:\/\/[^\s<\]]+)/g,(a,p)=>{if(a.includes("__LINK_"))return a;console.log("[Klyro] Found raw URL:",p);let g=`__URL_${c.length}__`;return c.push(p),g});let r=w(t);n.forEach((a,p)=>{let g=w(a.text);r=r.replace(`__LINK_${p}__`,`<a href="${a.url}" target="_blank" rel="noopener noreferrer">${g}</a>`)}),c.forEach((a,p)=>{r=r.replace(`__URL_${p}__`,`<a href="${a}" target="_blank" rel="noopener noreferrer">${a}</a>`)}),r=r.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"),r=r.replace(new RegExp("(?<!^|\\n)\\*([^*\\n]+)\\*","g"),"<em>$1</em>");let f=r.split(`
+`),s=!1,y=[];for(let a=0;a<f.length;a++){let p=f[a],g=p.match(/^[\s]*[•\-\*]\s+(.+)$/);g?(s||(y.push("<ul>"),s=!0),y.push(`<li>${g[1]}</li>`)):(s&&(y.push("</ul>"),s=!1),y.push(p))}return s&&y.push("</ul>"),r=y.join(`
+`),r=r.replace(/\n(?!<\/?[uo]l|<\/?li)/g,"<br>"),r=r.replace(/\n/g,""),console.log("[Klyro] formatMessage result:",r.substring(0,100)),r}function w(o){let n=document.createElement("div");return n.textContent=o,n.innerHTML}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",B):B()})();})();

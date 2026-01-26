@@ -636,8 +636,8 @@
         left: 16px !important;
         right: 16px !important;
         bottom: 90px;
-        height: calc(100vh - 120px);
-        max-height: calc(100vh - 120px);
+        height: calc(100vh - 180px);
+        max-height: calc(100vh - 180px);
       }
     }
 
