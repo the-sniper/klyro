@@ -536,6 +536,18 @@ ${h.content}
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(0, 0, 0, 0.05);
     }
+
+    .klyro-message.assistant a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
+
+    .klyro-message.assistant a:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
     
     .klyro-typing {
       display: flex;
@@ -698,6 +710,14 @@ ${h.content}
       background: #111;
       color: #e5e7eb;
       border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .klyro-widget.dark .klyro-message.assistant a {
+      color: #60a5fa;
+    }
+
+    .klyro-widget.dark .klyro-message.assistant a:hover {
+      color: #93c5fd;
     }
 
     .klyro-widget.dark .klyro-typing {

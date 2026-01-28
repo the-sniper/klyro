@@ -173,7 +173,7 @@ const TOOLS: ChatCompletionTool[] = [
     function: {
       name: "get_available_slots",
       description:
-        "Fetch specific available timeslots for a given meeting type. Use this when the user asks for available times on a specific day or week.",
+        "Fetch available timeslots for a meeting type. Call this whenever the user asks about scheduling availability, what times are free, or asks to book/schedule a meeting. ALWAYS call this to check real availability before saying slots are or aren't available.",
       parameters: {
         type: "object",
         properties: {
@@ -305,7 +305,7 @@ ${behaviors}${personalityCheck}`;
   // Add scheduling awareness to the persona instructions
   const schedulingContext =
     persona?.access_permissions?.can_schedule_calls && persona?.calendly_token
-      ? `\nSCHEDULING: You have active Calendly event types provided in the [CALENDLY CONFIGURATION] section of your context. (1) Use this information to suggest meeting types. (2) If a user asks for specific available times or dates, use get_available_slots with the corresponding meeting URI to show them real-time availability.`
+      ? `\nSCHEDULING: You have active Calendly event types provided in the [CALENDLY CONFIGURATION] section of your context. (1) Use this information to suggest meeting types. (2) IMPORTANT: Whenever a user asks about scheduling, booking, meeting availability, or "what times are available", you MUST call get_available_slots with the corresponding meeting URI to check real-time availability. Never say "no slots available" without first calling get_available_slots to verify.`
       : persona?.access_permissions?.can_schedule_calls
         ? `\nSCHEDULING: While the owner allows scheduling calls, no Calendly account has been connected yet. If someone asks to book a call, explain that you don't have a scheduling link ready yet but they can reach out via email or phone.`
         : "";
@@ -980,12 +980,13 @@ export async function generateResponse(
                 toolResult += `\n**${date}**: ${(times as string[]).join(", ")}`;
               }
               
-              toolResult += `\n\nINSTRUCTIONS FOR AI (Follow Strictness):
-1. The list above contains ALL available slots.
-2. IF this is the FIRST time sharing times: list only the first 6-8 slots, then add "I also have availability in the [afternoon/evening]."
-3. IF the user specifically asks for "evening", "afternoon", "late", or "more" times: YOU MUST IGNORE THE LIMIT and list those specific slots from the data above.
-4. If the user asks "Are there evening slots?" and you see slots like 5:00 PM or later in the raw data, YOU MUST SAY YES and list them. Do no say "I don't have evening slots" if they are in the data.
-5. Always provide the "Schedule a Meeting" link.`;
+              toolResult += `\n\nSTRICT INSTRUCTIONS FOR AI:
+1. The list above contains ALL available slots - ONLY these times exist.
+2. When sharing times: list the first 6-8 slots to avoid overwhelming the user.
+3. If there are MORE slots available beyond what you listed, you may say "I have more slots available if these don't work."
+4. NEVER fabricate times. Do NOT say "until X PM" unless that exact time appears above.
+5. If user asks for a specific time (e.g., "8pm") and it's NOT in the data above, say that time is not available.
+6. Always provide the "Schedule a Meeting" link.`;
 
               messages.push({
                 tool_call_id: toolCall.id,
