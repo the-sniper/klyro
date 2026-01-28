@@ -146,6 +146,7 @@
       width: 28px;
       height: 28px;
       fill: white;
+      stroke: white;
       flex-shrink: 0;
     }
 
@@ -624,6 +625,7 @@
       width: 20px;
       height: 20px;
       fill: white;
+      stroke: white;
     }
 
     .klyro-branding {
