@@ -48,6 +48,7 @@ export async function GET(
       launcherMode: data.launcher_mode || 'icon',
       launcherText: data.launcher_text || '',
       allowedRoutes: data.allowed_routes || [],
+      logoUrl: data.logo_url || null,
     }, { headers: corsHeaders });
   } catch (error) {
     console.error('Error fetching widget:', error);
@@ -89,6 +90,7 @@ export async function PUT(
     if (body.launcherMode !== undefined) updateData.launcher_mode = body.launcherMode;
     if (body.launcherText !== undefined) updateData.launcher_text = body.launcherText || null;
     if (body.allowedRoutes !== undefined) updateData.allowed_routes = body.allowedRoutes;
+    if (body.logoUrl !== undefined) updateData.logo_url = body.logoUrl || null;
 
     
     const { data, error } = await supabase

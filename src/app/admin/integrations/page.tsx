@@ -14,9 +14,13 @@ import {
   ToggleLeft,
   ToggleRight,
   HelpCircle,
+  Upload,
+  Image as ImageIcon,
+  Loader,
 } from "lucide-react";
 import type { Widget } from "@/types";
 import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
+import { getSupabase } from "@/lib/supabase/client";
 
 export default function IntegrationsPage() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
@@ -25,6 +29,9 @@ export default function IntegrationsPage() {
   const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Lock body scroll when modal is open
   useBodyScrollLock(isModalOpen);
@@ -42,7 +49,54 @@ export default function IntegrationsPage() {
     launcherText: "Chat with me",
     isActive: true,
     allowedRoutes: "",
+    logoUrl: "",
   });
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Logo must be less than 2MB");
+        return;
+      }
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadLogo = async (widgetKey: string) => {
+    if (!logoFile) return logoPreview;
+
+    setUploadingLogo(true);
+    try {
+      const supabase = getSupabase();
+      const fileExt = logoFile.name.split(".").pop();
+      const fileName = `${widgetKey}-${Date.now()}.${fileExt}`;
+      const filePath = fileName;
+
+      const { error: uploadError } = await supabase.storage
+        .from("logos")
+        .upload(filePath, logoFile);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("logos").getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading logo:", error);
+      alert("Failed to upload logo. Please try again.");
+      return null;
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   useEffect(() => {
     fetchWidgets();
@@ -82,7 +136,10 @@ export default function IntegrationsPage() {
         launcherText: widget.launcher_text || "Chat with me",
         isActive: widget.is_active !== false,
         allowedRoutes: widget.allowed_routes?.join(", ") || "",
+        logoUrl: widget.logo_url || "",
       });
+      setLogoPreview(widget.logo_url || null);
+      setLogoFile(null);
     } else {
       setEditingWidget(null);
       setFormData({
@@ -98,7 +155,10 @@ export default function IntegrationsPage() {
         launcherText: "Chat with me",
         isActive: true,
         allowedRoutes: "",
+        logoUrl: "",
       });
+      setLogoPreview(null);
+      setLogoFile(null);
     }
     setIsModalOpen(true);
   }
@@ -108,6 +168,20 @@ export default function IntegrationsPage() {
     setSubmitting(true);
 
     try {
+      let finalLogoUrl = formData.logoUrl;
+
+      if (logoFile) {
+        // We need a widget key. If creating, we might need to upload after creation
+        // or generate the key first. Let's assume we use a temporary ID or wait.
+        // Actually, for consistency, let's upload it with a unique name if editing.
+        // If creating, we'll use a random slug.
+        const tempKey = editingWidget
+          ? editingWidget.widget_key
+          : `new-${Math.random().toString(36).substring(7)}`;
+        const uploadedUrl = await uploadLogo(tempKey);
+        if (uploadedUrl) finalLogoUrl = uploadedUrl;
+      }
+
       const payload = {
         name: formData.name,
         headerTitle: formData.headerTitle,
@@ -127,6 +201,7 @@ export default function IntegrationsPage() {
           .split(",")
           .map((r) => r.trim())
           .filter(Boolean),
+        logoUrl: finalLogoUrl,
       };
 
       if (editingWidget) {
@@ -441,6 +516,55 @@ export default function IntegrationsPage() {
                   }
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Custom Logo</label>
+                <div className="logo-upload-container">
+                  <div className="logo-preview-frame">
+                    {logoPreview ? (
+                      <img
+                        src={logoPreview}
+                        alt="Logo preview"
+                        className="logo-preview-image"
+                      />
+                    ) : (
+                      <div className="logo-placeholder">
+                        <ImageIcon size={24} className="text-muted" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="logo-upload-actions">
+                    <label className="btn btn-secondary logo-upload-btn">
+                      <Upload size={14} />
+                      <span>{logoPreview ? "Change Logo" : "Upload Logo"}</span>
+                      <input
+                        type="file"
+                        className="hidden-file-input"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                      />
+                    </label>
+                    {logoPreview && (
+                      <button
+                        type="button"
+                        className="btn-remove-logo"
+                        onClick={() => {
+                          setLogoFile(null);
+                          setLogoPreview(null);
+                          setFormData({ ...formData, logoUrl: "" });
+                        }}
+                        title="Remove Logo"
+                      >
+                        <Trash2 size={14} />
+                        <span>Remove</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <p className="field-hint">
+                  Recommended size: 72x72px. Supports PNG, JPG, SVG. Max 2MB.
+                </p>
               </div>
 
               <div className="form-group">

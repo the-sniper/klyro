@@ -107,6 +107,7 @@ export interface Widget {
     currency?: string;
     open_for_negotiation?: boolean;
   };
+  logo_url: string | null;
   calendly_token: string | null;
   created_at: string;
   updated_at: string;
