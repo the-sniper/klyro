@@ -34,3 +34,6 @@ next-env.d.ts
 # Markdown (except README)
 *.md
 !README.md
+
+
+package-lock.json
