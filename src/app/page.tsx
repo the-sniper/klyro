@@ -58,12 +58,17 @@ export default function LandingPage() {
     if (isPaused) return;
     const timer = setInterval(() => {
       setActivePersona((prev) => (prev + 1) % 3);
-    }, 5000);
+    }, 7000);
     return () => clearInterval(timer);
   }, [isPaused]);
 
   return (
     <main className="landing-page">
+      <div className="premium-bg-container">
+        <div className="dot-mesh"></div>
+        <div className="hero-rings"></div>
+        <div className="nebula-cloud"></div>
+      </div>
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="landing-container nav-content">
@@ -198,17 +203,6 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-
-        <div
-          className="auth-bg-blob-1 float-animation"
-          style={{
-            width: "40%",
-            height: "40%",
-            top: "20%",
-            left: "30%",
-            opacity: 0.3,
-          }}
-        ></div>
       </section>
 
       {/* Product Demo Section */}
@@ -609,7 +603,6 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-        <div className="auth-bg-blob-2 float-animation cta-blob"></div>
       </section>
 
       {/* Footer */}
