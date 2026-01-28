@@ -678,7 +678,7 @@
     .klyro-widget.dark .klyro-header-text p { color: #9ca3af; }
     
     .klyro-widget.dark .klyro-header-btn { background: rgba(255, 255, 255, 0.1); }
-    .klyro-widget.dark .klyro-header-btn svg { fill: #d1d5db; }
+    .klyro-widget.dark .klyro-header-btn svg { stroke: #d1d5db; }
 
     .klyro-widget.dark .klyro-empty-state h1 { color: #f9fafb; }
     .klyro-widget.dark .klyro-empty-state h1 span { color: #4b5563; }
