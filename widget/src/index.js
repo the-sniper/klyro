@@ -741,6 +741,8 @@
         border-radius: 0;
       }
       .klyro-button {
+      }
+      .expand-toggle-btn {
         display: none;
       }
     }
