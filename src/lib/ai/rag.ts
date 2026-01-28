@@ -936,7 +936,11 @@ export async function generateResponse(
 
         if (token && event_type_uri) {
           try {
-            const { getAvailableSlots } = await import("./calendly");
+            const { getAvailableSlots, getCalendlyUser } = await import("./calendly");
+
+            // Get user's timezone for proper formatting
+            const calendlyUser = await getCalendlyUser(token);
+            const userTimezone = calendlyUser?.resource?.timezone || "America/New_York";
 
             const start = new Date();
             // Start 15 minutes in the future to avoid "start_time must be in the future" errors and give users buffer
@@ -946,7 +950,7 @@ export async function generateResponse(
             // Add buffer to ensure we cover full working days. 
             end.setDate(end.getDate() + Math.min(days_ahead + 2, 14));
 
-            console.log(`[Calendly] Fetching slots from ${start.toISOString()} to ${end.toISOString()}`);
+            console.log(`[Calendly] Fetching slots from ${start.toISOString()} to ${end.toISOString()} (timezone: ${userTimezone})`);
 
             const slots = await getAvailableSlots(
               token,
@@ -956,20 +960,22 @@ export async function generateResponse(
             );
 
             if (slots.length > 0) {
-              // Group by day for readability
+              // Group by day for readability - use user's timezone for formatting
               const grouped = slots.reduce((acc: any, slot: any) => {
                 const d = new Date(slot.start_time);
                 const dateKey = d.toLocaleDateString("en-US", {
                   weekday: "short",
                   month: "short",
                   day: "numeric",
+                  timeZone: userTimezone,
                 });
                 if (!acc[dateKey]) acc[dateKey] = [];
-                // Capture all slots
+                // Capture all slots - format in user's timezone
                 acc[dateKey].push(
                   d.toLocaleTimeString("en-US", {
                     hour: "numeric",
                     minute: "2-digit",
+                    timeZone: userTimezone,
                   }),
                 );
                 return acc;
