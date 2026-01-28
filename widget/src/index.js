@@ -1295,7 +1295,7 @@
         // ... show empty state ...
         messagesContainer.innerHTML = `
           <div class="klyro-empty-state">
-            <h1>Hey there!<span>How can I help?</span></h1>
+            <h1>Hey there!<span>${escapeHtml(config.welcomeHeadline || "How can I help?")}</span></h1>
             <p>${escapeHtml(config.welcomeMessage || "I can help answer questions about my background and experience")}</p>
           </div>
         `;
