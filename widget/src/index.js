@@ -448,12 +448,12 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0 32px 60px;
+      padding: 0 20px 60px;
       text-align: center;
     }
 
     .klyro-empty-state h1 {
-      font-size: 32px;
+      font-size: 28px;
       font-weight: 700;
       color: #111827;
       line-height: 1.1;
