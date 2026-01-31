@@ -1,15 +1,16 @@
 {
   "name": "klyro",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:widget": "node widget/build.js"
+    "build:widget": "node widget/build.js && cp widget/dist/widget.js public/widget.js"
   },
   "dependencies": {
+    "@klyro/widget": "^2.0.0",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.78.0",
     "@tailwindcss/postcss": "^4.1.18",

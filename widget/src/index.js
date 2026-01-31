@@ -1,25 +1,44 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.3.1"; // Version for cache debugging - SPA route change detection
-  console.log("[Klyro] Widget script loaded, version:", WIDGET_VERSION);
+  const WIDGET_VERSION = "2.3.2";
+  let widgetKey = null;
+  let API_BASE = "";
+  let STORAGE_KEY = "";
 
-  // Get widget configuration from script tag
-  const currentScript = document.currentScript;
-  const widgetKey = currentScript?.getAttribute("data-widget-key");
+  // Export for module systems
+  const Klyro = {
+    init: initKlyro,
+  };
 
-  console.log("[Klyro] Widget key:", widgetKey);
+  /**
+   * Initialize Klyro Widget
+   * @param {Object} options - Configuration options
+   * @param {string} options.key - Unique widget key
+   * @param {string} [options.apiBase] - API base URL
+   */
+  async function initKlyro(options = {}) {
+    if (typeof options === "string") {
+      options = { key: options };
+    }
 
-  if (!widgetKey) {
-    console.error("Klyro: Missing data-widget-key attribute");
-    return;
+    widgetKey = options.key || options.widgetKey;
+    if (!widgetKey) {
+      console.error("[Klyro] Missing widget key in initKlyro");
+      return;
+    }
+
+    API_BASE = options.apiBase || "https://klyro-pro.vercel.app";
+    STORAGE_KEY = `klyro_${widgetKey}`;
+
+    console.log("[Klyro] Initializing with version:", WIDGET_VERSION);
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
   }
-
-  // Configuration
-  const API_BASE = currentScript?.src.replace("/widget.js", "") || "";
-
-  // Storage key for persistence
-  const STORAGE_KEY = `klyro_${widgetKey}`;
 
   // State
   let config = null;
@@ -1422,15 +1441,30 @@
   }
 
   function escapeHtml(text) {
+    if (typeof document === "undefined") return text;
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
   }
 
-  // Start
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+  // Auto-init for script tag
+  if (typeof document !== "undefined") {
+    const currentScript = document.currentScript;
+    if (currentScript) {
+      const key = currentScript.getAttribute("data-widget-key");
+      if (key) {
+        initKlyro({
+          key: key,
+          apiBase: currentScript.src.replace("/widget.js", ""),
+        });
+      }
+    }
+  }
+
+  // Exports
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { initKlyro };
   } else {
-    init();
+    window.initKlyro = initKlyro;
   }
 })();

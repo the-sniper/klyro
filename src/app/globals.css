@@ -3016,7 +3016,7 @@ html {
 
 /* Content Container */
 .content-container {
-  max-width: 1200px;
+  max-width: 1400px;
 }
 
 /* Section Title with Divider */
@@ -3477,6 +3477,116 @@ html {
   font-size: 12px;
   font-weight: 700;
   color: var(--text-secondary);
+}
+
+.embed-header-tabs {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+}
+
+.install-tabs {
+  width: fit-content !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  padding: 3px !important;
+  display: flex !important;
+}
+
+.install-tabs .toggle-btn {
+  padding: 6px 20px !important;
+  font-size: 12px !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  min-width: 140px;
+  justify-content: center;
+}
+
+.embed-header-tabs {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.npm-header-link {
+  display: none;
+}
+
+.npm-registry-btn {
+  margin-top: 12px;
+  width: fit-content;
+  font-size: 13px !important;
+  color: var(--text-primary) !important;
+}
+
+.npm-help {
+  background: rgba(59, 130, 246, 0.05) !important;
+}
+
+.npm-install-content {
+  padding: 0;
+}
+
+.npm-install-content .embed-code-wrapper {
+  padding: 24px;
+  padding-right: 70px;
+}
+
+.npm-link-wrapper {
+  padding: 0 24px 20px;
+  margin-top: -8px;
+}
+
+.npm-package-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-primary) !important;
+  opacity: 0.8;
+  transition: all 0.2s;
+}
+
+.npm-package-link:hover {
+  opacity: 1;
+  text-decoration: underline !important;
+}
+
+.usage-instructions {
+  padding: 24px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.usage-instructions .example-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+.usage-instructions .embed-code-wrapper {
+  padding: 0;
+  padding-right: 60px;
+  background: transparent;
+}
+
+.usage-instructions .example-code {
+  font-size: 13px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--accent-primary);
 }
 
 .embed-code-wrapper {

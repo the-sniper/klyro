@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import { Outfit } from "next/font/google";
@@ -7,7 +8,7 @@ import {
   ServiceWorkerRegistration,
 } from "@/components/pwa";
 import "./globals.css";
-import Script from "next/script";
+import KlyroWidget from "@/components/chat/KlyroWidget";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -151,11 +152,7 @@ export default function RootLayout({
             }}
           />
         </PWAProvider>
-        <Script
-          src="https://klyro-pro.vercel.app/widget.js"
-          // src="http://localhost:3000/widget.js"
-          data-widget-key="MnK1XElbACpl"
-        />
+        <KlyroWidget />
       </body>
     </html>
   );

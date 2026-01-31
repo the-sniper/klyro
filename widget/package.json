@@ -1,0 +1,27 @@
+{
+  "name": "@klyro/widget",
+  "version": "2.0.0",
+  "description": "Klyro Chat Widget - An AI-powered chat widget for your website.",
+  "main": "dist/index.js",
+  "types": "index.d.ts",
+  "files": [
+    "dist",
+    "index.d.ts"
+  ],
+  "scripts": {
+    "build": "node build.js"
+  },
+  "keywords": [
+    "klyro",
+    "chat",
+    "widget",
+    "ai",
+    "customer-support"
+  ],
+  "author": "Areef Syed",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "dependencies": {}
+}

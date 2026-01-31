@@ -35,7 +35,7 @@ An embeddable AI chatbot platform for portfolio websites. Let visitors ask quest
 
 ### Widget & Integration
 
-- **Effortless Embedding** – A lightweight (~25KB), performant JS widget (v2.3.1) that can be added to any site with a single script tag.
+- **Effortless Embedding** – A lightweight (~25KB), performant JS widget (v2.0.0) that can be added to any site via script tag or NPM.
 - **Customizable Widget Options:**
   - Position (bottom-right, bottom-left)
   - Theme (light, dark, auto)
@@ -126,19 +126,19 @@ klyro/
 
 ## Tech Stack
 
-| Category            | Technology                                      |
-| ------------------- | ----------------------------------------------- |
-| **Framework**       | Next.js 14 (App Router)                         |
-| **Language**        | TypeScript 5.0                                  |
-| **Database**        | Supabase (PostgreSQL + pgvector)                |
-| **AI/LLM**          | OpenAI (GPT-4o-mini & Text Embeddings 3 Small)  |
-| **Auth**            | Custom cookie-based sessions with bcrypt        |
-| **Styling**         | Tailwind CSS 4.1 + Custom CSS Variables         |
-| **File Processing** | Mammoth (DOCX), UnPDF (PDF)                     |
-| **Widget Bundler**  | esbuild                                         |
-| **Icons**           | Lucide React                                    |
-| **Notifications**   | React Hot Toast                                 |
-| **Markdown**        | React Markdown                                  |
+| Category            | Technology                                     |
+| ------------------- | ---------------------------------------------- |
+| **Framework**       | Next.js 14 (App Router)                        |
+| **Language**        | TypeScript 5.0                                 |
+| **Database**        | Supabase (PostgreSQL + pgvector)               |
+| **AI/LLM**          | OpenAI (GPT-4o-mini & Text Embeddings 3 Small) |
+| **Auth**            | Custom cookie-based sessions with bcrypt       |
+| **Styling**         | Tailwind CSS 4.1 + Custom CSS Variables        |
+| **File Processing** | Mammoth (DOCX), UnPDF (PDF)                    |
+| **Widget Bundler**  | esbuild                                        |
+| **Icons**           | Lucide React                                   |
+| **Notifications**   | React Hot Toast                                |
+| **Markdown**        | React Markdown                                 |
 
 ---
 
@@ -206,8 +206,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Add the chat widget to any website with a single script tag:
 
 ```html
-<script 
-  src="https://your-klyro-domain.com/widget.js" 
+<script
+  src="https://your-klyro-domain.com/widget.js"
   data-widget-key="your-widget-key"
   defer
 ></script>
@@ -217,29 +217,29 @@ Add the chat widget to any website with a single script tag:
 
 Configure your widget through the admin dashboard:
 
-| Option            | Description                                      |
-| ----------------- | ------------------------------------------------ |
-| Position          | bottom-right or bottom-left                      |
-| Theme             | light, dark, or auto                             |
-| Primary Color     | Hex color for accent elements                    |
-| Header Title      | Custom title shown in chat header                |
-| Welcome Message   | First message displayed to users                 |
-| Launcher Mode     | Icon-only or text button                         |
-| Launcher Text     | Custom text for text launcher mode               |
-| Allowed Domains   | Whitelist of domains where widget can run        |
-| Allowed Routes    | Specific routes where widget should display      |
+| Option          | Description                                 |
+| --------------- | ------------------------------------------- |
+| Position        | bottom-right or bottom-left                 |
+| Theme           | light, dark, or auto                        |
+| Primary Color   | Hex color for accent elements               |
+| Header Title    | Custom title shown in chat header           |
+| Welcome Message | First message displayed to users            |
+| Launcher Mode   | Icon-only or text button                    |
+| Launcher Text   | Custom text for text launcher mode          |
+| Allowed Domains | Whitelist of domains where widget can run   |
+| Allowed Routes  | Specific routes where widget should display |
 
 ---
 
 ## Scripts
 
-| Command               | Description                        |
-| --------------------- | ---------------------------------- |
-| `npm run dev`         | Start development server           |
-| `npm run build`       | Build for production               |
-| `npm run start`       | Start production server            |
-| `npm run lint`        | Run ESLint                         |
-| `npm run build:widget`| Build the embeddable chat widget   |
+| Command                | Description                      |
+| ---------------------- | -------------------------------- |
+| `npm run dev`          | Start development server         |
+| `npm run build`        | Build for production             |
+| `npm run start`        | Start production server          |
+| `npm run lint`         | Run ESLint                       |
+| `npm run build:widget` | Build the embeddable chat widget |
 
 ---
 
@@ -260,10 +260,11 @@ The application uses the following main tables:
 
 ## Version History
 
-| Version      | Date       | Changes                                                                                     |
-| ------------ | ---------- | ------------------------------------------------------------------------------------------- |
-| v0.2.0-alpha | 2026-01-25 | PWA support, Tailwind CSS integration, Calendly integration, persona presets, user profiles |
-| v0.1.0-alpha | 2026-01-21 | Initial alpha release with RAG engine, admin dashboard, and widget integration              |
+| Version      | Date       | Changes                                                                                               |
+| ------------ | ---------- | ----------------------------------------------------------------------------------------------------- |
+| v1.0.0-alpha | 2026-01-31 | Official @klyro/widget NPM package release, tabbed installation interface, and documentation updates. |
+| v0.2.0-alpha | 2026-01-25 | PWA support, Tailwind CSS integration, Calendly integration, persona presets, user profiles           |
+| v0.1.0-alpha | 2026-01-21 | Initial alpha release with RAG engine, admin dashboard, and widget integration                        |
 
 ---
 

@@ -17,6 +17,9 @@ import {
   Upload,
   Image as ImageIcon,
   Loader,
+  Terminal,
+  Package,
+  ExternalLink,
 } from "lucide-react";
 import type { Widget } from "@/types";
 import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
@@ -32,6 +35,9 @@ export default function IntegrationsPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [activeTabs, setActiveTabs] = useState<
+    Record<string, "script" | "npm">
+  >({});
 
   // Lock body scroll when modal is open
   useBodyScrollLock(isModalOpen);
@@ -415,60 +421,171 @@ export default function IntegrationsPage() {
                 </div>
 
                 <div className="embed-section">
-                  <div className="embed-header">
-                    <Globe size={14} className="text-muted" />
-                    <span className="embed-label">Installation Code</span>
-                  </div>
-                  <div className="embed-code-wrapper">
-                    <pre className="embed-code">
-                      {`<script\n  src="${typeof window !== "undefined" ? window.location.origin : ""}/widget.js"\n  data-widget-key="${widget.widget_key}"\n></script>`}
-                    </pre>
-                    <button
-                      className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
-                      onClick={() => copyEmbedCode(widget)}
-                    >
-                      {copiedKey === widget.widget_key ? (
-                        <Check size={16} />
-                      ) : (
-                        <Copy size={16} />
-                      )}
-                    </button>
-                  </div>
-                  <div className="install-help">
-                    <div className="install-help-header">
-                      <HelpCircle size={14} className="text-accent" />
-                      <span>How to Install</span>
+                  <div className="embed-header-tabs">
+                    <div className="toggle-group install-tabs">
+                      <button
+                        className={`toggle-btn ${activeTabs[widget.widget_key] !== "npm" ? "active" : ""}`}
+                        onClick={() =>
+                          setActiveTabs({
+                            ...activeTabs,
+                            [widget.widget_key]: "script",
+                          })
+                        }
+                      >
+                        <Globe size={14} />
+                        <span>Script Tag</span>
+                      </button>
+                      <button
+                        className={`toggle-btn ${activeTabs[widget.widget_key] === "npm" ? "active" : ""}`}
+                        onClick={() =>
+                          setActiveTabs({
+                            ...activeTabs,
+                            [widget.widget_key]: "npm",
+                          })
+                        }
+                      >
+                        <Package size={14} />
+                        <span>NPM Package</span>
+                      </button>
                     </div>
-                    <div className="install-help-content">
-                      <p>
-                        <strong>1. Copy the code</strong> — Click the copy
-                        button above to copy the script tag.
-                      </p>
-                      <p>
-                        <strong>2. Paste before &lt;/body&gt;</strong> — Add the
-                        code just before the closing <code>&lt;/body&gt;</code>{" "}
-                        tag in your HTML file.
-                      </p>
-                      <p>
-                        <strong>3. Works everywhere</strong> — Compatible with
-                        HTML, React, Next.js, WordPress, Webflow, Squarespace,
-                        and more.
-                      </p>
-                    </div>
-                    <div className="install-help-example">
-                      <span className="example-label">Example placement:</span>
-                      <pre className="example-code">{`<!DOCTYPE html>
+                  </div>
+
+                  {activeTabs[widget.widget_key] === "npm" ? (
+                    <>
+                      <div className="npm-install-content">
+                        <div className="embed-code-wrapper">
+                          <pre className="embed-code">
+                            {`npm install @klyro/widget`}
+                          </pre>
+                          <button
+                            className={`copy-btn ${copiedKey === widget.widget_key + "-npm-install" ? "copied" : ""}`}
+                            onClick={() => {
+                              navigator.clipboard.writeText(
+                                "npm install @klyro/widget",
+                              );
+                              setCopiedKey(widget.widget_key + "-npm-install");
+                              setTimeout(() => setCopiedKey(null), 2000);
+                            }}
+                          >
+                            {copiedKey ===
+                            widget.widget_key + "-npm-install" ? (
+                              <Check size={16} />
+                            ) : (
+                              <Copy size={16} />
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="usage-instructions">
+                          <span className="example-label">
+                            Usage in React/Next.js:
+                          </span>
+                          <div className="embed-code-wrapper">
+                            <pre className="example-code">
+                              {`"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({ key: "${widget.widget_key}" });\n  }, []);\n\n  return children;\n}`}
+                            </pre>
+                            <button
+                              className={`copy-btn ${copiedKey === widget.widget_key + "-npm-usage" ? "copied" : ""}`}
+                              onClick={() => {
+                                const code = `"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({ key: "${widget.widget_key}" });\n  }, []);\n\n  return children;\n}`;
+                                navigator.clipboard.writeText(code);
+                                setCopiedKey(widget.widget_key + "-npm-usage");
+                                setTimeout(() => setCopiedKey(null), 2000);
+                              }}
+                            >
+                              {copiedKey ===
+                              widget.widget_key + "-npm-usage" ? (
+                                <Check size={16} />
+                              ) : (
+                                <Copy size={16} />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="install-help npm-help">
+                        <div className="install-help-header">
+                          <Package size={14} className="text-accent" />
+                          <span>Release Information</span>
+                        </div>
+                        <div className="install-help-content">
+                          <p>
+                            The <code>@klyro/widget</code> package is published
+                            on the public NPM registry and can be used with any
+                            JavaScript bundler.
+                          </p>
+                          <a
+                            href="https://www.npmjs.com/package/@klyro/widget"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-secondary btn-sm npm-registry-btn"
+                          >
+                            <ExternalLink size={14} />
+                            <span>View on NPM Registry</span>
+                          </a>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="embed-code-wrapper">
+                        <pre className="embed-code">
+                          {`<script\n  src="https://unpkg.com/@klyro/widget/dist/widget.js"\n  data-widget-key="${widget.widget_key}"\n  async\n></script>`}
+                        </pre>
+                        <button
+                          className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
+                          onClick={() => copyEmbedCode(widget)}
+                        >
+                          {copiedKey === widget.widget_key ? (
+                            <Check size={16} />
+                          ) : (
+                            <Copy size={16} />
+                          )}
+                        </button>
+                      </div>
+                      <div className="install-help">
+                        <div className="install-help-header">
+                          <HelpCircle size={14} className="text-accent" />
+                          <span>How to Install</span>
+                        </div>
+                        <div className="install-help-content">
+                          <p>
+                            <strong>1. Copy the code</strong> — Click the copy
+                            button above to copy the script tag.
+                          </p>
+                          <p>
+                            <strong>2. Paste before &lt;/body&gt;</strong> — Add
+                            the code just before the closing{" "}
+                            <code>&lt;/body&gt;</code> tag in your HTML file.
+                          </p>
+                          <p>
+                            <strong>3. Works everywhere</strong> — Compatible
+                            with HTML, React, Next.js, WordPress, Webflow,
+                            Squarespace, and more.
+                          </p>
+                        </div>
+                        <div className="install-help-example">
+                          <span className="example-label">
+                            Example placement:
+                          </span>
+                          <pre className="example-code">{`<!DOCTYPE html>
 <html>
   <head>...</head>
   <body>
     <!-- Your website content -->
     
     <!-- Paste widget code here -->
-    <script src=".../widget.js" data-widget-key="..."></script>
+    <script 
+      src="https://unpkg.com/@klyro/widget/dist/widget.js" 
+      data-widget-key="${widget.widget_key}"
+      async
+    ></script>
   </body>
 </html>`}</pre>
-                    </div>
-                  </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             ))}
