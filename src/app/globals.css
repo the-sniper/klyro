@@ -2752,7 +2752,7 @@ html {
 }
 
 .demo-widget-input-area {
-  padding: 24px 20px;
+  padding: 24px 20px 40px; /* Added 40px bottom padding */
   z-index: 10;
 }
 
@@ -3965,8 +3965,8 @@ body:has(.sidebar-overlay.open) {
   }
 
   .modal-glass {
-    max-height: calc(100dvh - 200px);
-    padding-bottom: 120px;
+    max-height: calc(100vh - 120px);
+    padding-bottom: 0;
   }
 }
 
@@ -6270,7 +6270,7 @@ body:has(.sidebar-overlay.open) {
   .modal-footer {
     flex-direction: column-reverse !important;
     gap: 12px !important;
-    padding: 12px 24px 60px !important;
+    padding: 12px 24px 24px !important;
   }
 
   .modal-footer .btn {
@@ -7229,9 +7229,441 @@ body:has(.sidebar-overlay.open) {
   }
 }
 
-@media (max-width: 768px) {
+/* --- FINAL RESPONSIVE OVERRIDES & FIXES --- */
+
+/* Global Overflow Fix */
+html,
+body {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+.landing-page {
+  width: 100% !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+@media (max-width: 500px) {
+  section.landing-section {
+    padding: 80px 0 60px !important;
+  }
+  .landing-container .demo-widget-container {
+    height: 500px !important;
+  }
+  .landing-container .custom-instructions-box {
+    padding: 16px;
+    border-radius: 16px;
+    min-height: 90px;
+  }
+}
+
+/* Tablet & Smaller Laptops (stacking hero and early grid breaks) */
+@media (max-width: 1105px) {
+  .hero-content-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: center !important;
+    gap: 30px !important;
+    padding-top: 30px !important;
+    padding-bottom: 50px !important;
+  }
+
+  .persona-carousel-wrapper {
+    order: -1 !important; /* Forces cards above EVERYTHING */
+    width: 100% !important;
+    margin-bottom: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .hero-text-content {
+    order: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
+  .hero-text-content .badge {
+    display: none !important; /* Remove badge */
+  }
+
   .hero-title {
-    font-size: 48px;
-    letter-spacing: -2px;
+    font-size: 38px !important;
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .hero-subtitle {
+    margin: 0 auto 20px !important;
+    font-size: 15px !important;
+    max-width: 90% !important;
+  }
+
+  .hero-buttons {
+    order: 10 !important;
+    width: 100% !important;
+  }
+
+  .scrolling-ticker {
+    display: none !important;
+  }
+
+  /* Grid Stacking for all sections */
+  .demo-grid,
+  .traits-grid,
+  .knowledge-grid,
+  .features-grid {
+    grid-template-columns: 1fr !important;
+    gap: 48px !important;
+    width: 100% !important;
+  }
+
+  .demo-feature-card {
+    max-width: 100% !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* Mobile Devices */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 90px 0 40px !important;
+  }
+
+  .hero-title {
+    font-size: 36px !important;
+    letter-spacing: -1px !important;
+  }
+
+  .hero-subtitle {
+    font-size: 15px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .hero-buttons {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .hero-buttons .btn {
+    width: 100% !important;
+    max-width: 300px !important;
+  }
+
+  .persona-stack-container {
+    transform: scale(0.65) !important;
+    height: 380px !important;
+    margin-top: -30px !important;
+    margin-bottom: 0 !important;
+  }
+
+  .persona-card {
+    width: 320px !important;
+    padding: 32px !important;
+  }
+
+  .pos-left {
+    transform: translateX(-160px) translateY(25px) rotate(-12deg) scale(0.85) !important;
+    opacity: 0.65 !important;
+    z-index: 1 !important;
+  }
+
+  .pos-right {
+    transform: translateX(160px) translateY(25px) rotate(12deg) scale(0.85) !important;
+    opacity: 0.65 !important;
+    z-index: 1 !important;
+  }
+
+  .pos-active {
+    z-index: 2 !important;
+  }
+
+  .carousel-indicators {
+    display: none !important;
+  }
+
+  .showcase-widget-inner,
+  .knowledge-sources-container {
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+  }
+
+  .showcase-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  .showcase-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 24px 12px !important;
+    gap: 12px !important;
+  }
+
+  .showcase-card-name {
+    font-size: 14px !important;
+  }
+
+  .showcase-card-desc {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Smaller Phones */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 30px !important;
+  }
+
+  .landing-container {
+    padding: 0 16px !important;
+  }
+
+  /* .nav-logo img {
+    width: 50px !important;
+  } */
+
+  .persona-card {
+    width: 260px !important;
+    padding: 20px !important;
+  }
+
+  .persona-stack-container {
+    height: 340px !important;
+  }
+
+  /* Prevent persona cards from going off-screen */
+  .pos-left {
+    transform: translateX(-120px) translateY(20px) rotate(-10deg) scale(0.8) !important;
+    opacity: 0.6 !important;
+    z-index: 1 !important;
+  }
+
+  .pos-right {
+    transform: translateX(120px) translateY(20px) rotate(10deg) scale(0.8) !important;
+    opacity: 0.6 !important;
+    z-index: 1 !important;
+  }
+
+  .knowledge-source-card {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .landing-container {
+    padding: 0 20px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+
+  .landing-section {
+    padding: 60px 0 100px !important; /* Increased padding bottom */
+    text-align: left !important; /* Left align everything by default on mobile */
+  }
+}
+
+/* Aggressive Grid Stacking for Mobile (Winning Override) */
+@media (max-width: 992px) {
+  .demo-grid,
+  .traits-grid,
+  .knowledge-grid,
+  .features-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+    padding: 0 10px !important;
+  }
+
+  .demo-widget-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 40px !important;
+    display: flex !important;
+    justify-content: center !important;
+    order: 2 !important; /* Move widget below features */
+  }
+
+  .demo-widget-container {
+    width: 100% !important;
+    max-width: 380px !important;
+    height: 480px !important;
+    margin: 0 auto !important;
+  }
+
+  .demo-feature-card,
+  .feature-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 32px 24px !important;
+    margin: 0 !important;
+    text-align: left !important; /* Left align feature cards */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+
+  .demo-feature-title,
+  .feature-card-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin-bottom: 12px !important;
+    line-height: 1.3 !important;
+  }
+
+  .demo-feature-desc,
+  .feature-card-desc {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    color: var(--text-secondary) !important;
+  }
+
+  .feature-card-icon {
+    margin-bottom: 20px !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .flex-col-gap-20 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .section-title {
+    text-align: center !important;
+    font-size: 32px !important;
+    margin-bottom: 16px !important;
+    line-height: 1.2 !important;
+    width: 100% !important;
+  }
+
+  .section-desc {
+    text-align: center !important;
+    margin: 0 auto 32px !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
+  }
+
+  .badge {
+    text-align: center !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .landing-section {
+    padding: 80px 0 120px !important;
+  }
+
+  /* Left align typing in chat widget */
+  .demo-widget-input {
+    text-align: left !important;
+    padding-left: 0 !important;
+  }
+
+  .demo-widget-greeting,
+  .demo-widget-subgreeting,
+  .demo-prompt-box {
+    text-align: left !important;
+  }
+
+  /* Force left alignment for all badges and labels in these grids */
+  .demo-grid,
+  .traits-grid,
+  .knowledge-grid,
+  .features-grid {
+    align-items: flex-start !important;
+  }
+
+  .badge {
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .form-label,
+  .trait-suggestion-label {
+    text-align: left !important;
+    width: 100% !important;
+  }
+
+  /* Knowledge Sources - MATCH IMAGE 317_0 */
+  .knowledge-source-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    gap: 10px !important;
+    padding: 20px !important;
+    width: 100% !important; /* Force full width */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .knowledge-source-inner {
+    order: 2 !important; /* Name at bottom */
+    width: 100% !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+  }
+
+  .knowledge-source-status {
+    order: 1 !important; /* Status at top */
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  /* Clean up any conflicting styles for feature cards */
+  .demo-feature-card,
+  .feature-card {
+    text-align: left !important;
+    align-items: flex-start !important;
+  }
+
+  .feature-card-icon {
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+  }
+
+  /* Compact Nav User Profile for Mobile */
+  .nav-profile-trigger {
+    padding: 4px 10px 4px 4px !important;
+    gap: 8px !important;
+  }
+
+  .nav-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+  }
+
+  .nav-user-name {
+    font-size: 13px !important;
+  }
+
+  .nav-chevron {
+    width: 14px !important;
+    height: 14px !important;
   }
 }

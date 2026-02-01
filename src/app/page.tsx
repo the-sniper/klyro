@@ -937,7 +937,8 @@ export default function LandingPage() {
               <div className="modal-header-text">
                 <h2 className="modal-title">Sign Out</h2>
                 <p className="modal-subtitle">
-                  Are you sure you want to log out of your account?
+                  You&apos;ll need to sign back in to access your dashboard and
+                  manage your AI personas.
                 </p>
               </div>
               <button
@@ -949,9 +950,8 @@ export default function LandingPage() {
             </div>
 
             <div className="modal-body" style={{ padding: "0 32px 32px" }}>
-              <p style={{ color: "var(--text-secondary)", fontSize: "15px" }}>
-                You'll need to sign back in to access your dashboard and manage
-                your AI personas.
+              <p style={{ color: "var(--text-secondary)" }}>
+                Are you sure you want to log out of your account?
               </p>
             </div>
 
