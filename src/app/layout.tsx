@@ -180,12 +180,12 @@ export default function RootLayout({
             }}
           />
         </PWAProvider>
-        {/* <KlyroWidget /> */}
-        <script
+        <KlyroWidget />
+        {/* <script
           src="http://localhost:3000/widget.js"
           data-widget-key="MnK1XElbACpl"
           async
-        ></script>
+        ></script> */}
         {process.env.NEXT_PUBLIC_GA_ID && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         )}

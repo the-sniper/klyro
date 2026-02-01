@@ -216,12 +216,6 @@ export default function LandingPage() {
   };
   return (
     <main className="landing-page">
-      <div
-        className="flashlight-bg"
-        style={
-          { "--x": `${flashlightPos.x}%`, "--y": `${flashlightPos.y}%` } as any
-        }
-      />
       <div className="premium-bg-container">
         <div className="bg-mesh-container">
           <div className="mesh-blob blob-1"></div>
@@ -231,6 +225,12 @@ export default function LandingPage() {
         <div className="noise-overlay"></div>
         <div className="subtle-grid"></div>
       </div>
+      <div
+        className="flashlight-bg"
+        style={
+          { "--x": `${flashlightPos.x}%`, "--y": `${flashlightPos.y}%` } as any
+        }
+      />
       {/* Navigation */}
       <nav
         className={`landing-nav ${scrolled ? "nav-scrolled" : ""}`}
