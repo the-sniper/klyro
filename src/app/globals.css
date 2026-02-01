@@ -1499,7 +1499,7 @@ select:-webkit-autofill:focus {
   border-radius: 24px;
   /* border-radius: var(--radius-xl); */
   overflow: hidden;
-  height: 520px;
+  height: 550px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -2745,7 +2745,7 @@ html {
 }
 
 .demo-prompt-box {
-  background: #000;
+  background: #111;
   padding: 16px 24px;
   border-radius: 20px;
   font-size: 14px;
@@ -5890,7 +5890,7 @@ body:has(.sidebar-overlay.open) {
 @media (max-width: 640px) {
   .demo-widget-container {
     width: 100%;
-    height: 540px;
+    /* height: 540px; */
     transform: none !important; /* Disable 3D tilt on mobile for better usability */
   }
   .trait-badge {
@@ -7190,8 +7190,8 @@ body:has(.sidebar-overlay.open) {
 
 .glass-premium {
   background: rgba(255, 255, 255, 0.02);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
-  backdrop-filter: blur(20px) saturate(120%) !important;
+  -webkit-backdrop-filter: blur(35px) saturate(120%);
+  backdrop-filter: blur(35px) saturate(120%) !important;
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   transform: translateZ(0);
@@ -7257,9 +7257,9 @@ body {
   section.landing-section {
     padding: 80px 0 60px !important;
   }
-  .landing-container .demo-widget-container {
+  /* .landing-container .demo-widget-container {
     height: 500px !important;
-  }
+  } */
   .landing-container .custom-instructions-box {
     padding: 16px;
     border-radius: 16px;
@@ -7508,7 +7508,7 @@ body {
   .demo-widget-container {
     width: 100% !important;
     max-width: 380px !important;
-    height: 480px !important;
+    /* height: 480px !important; */
     margin: 0 auto !important;
   }
 
