@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.3.2";
+  const WIDGET_VERSION = "2.3.3";
   let widgetKey = null;
   let API_BASE = "";
   let STORAGE_KEY = "";
