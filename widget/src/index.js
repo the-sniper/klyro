@@ -1458,15 +1458,22 @@
         // Otherwise, if script is NOT from unpkg, try to infer base from src.
         // Falls back to default in initKlyro if both are null.
         let apiBase = dataApiBase;
-        if (
-          !apiBase &&
-          currentScript.src &&
-          !currentScript.src.includes("unpkg.com")
-        ) {
-          apiBase = currentScript.src.replace("/widget.js", "");
-          // Handle cases where src is just "widget.js"
-          if (apiBase === "widget.js" || apiBase === "") {
-            apiBase = window.location.origin;
+        if (!apiBase && currentScript.src) {
+          try {
+            const scriptUrl = new URL(currentScript.src);
+            // If it's not a common CDN, we can try to use its origin as the API base
+            if (
+              !scriptUrl.hostname.includes("unpkg.com") &&
+              !scriptUrl.hostname.includes("jsdelivr.net")
+            ) {
+              apiBase = scriptUrl.origin;
+            }
+          } catch (e) {
+            // Fallback for relative paths or invalid URLs
+            apiBase = currentScript.src.replace("/widget.js", "");
+            if (apiBase === "widget.js" || apiBase === "") {
+              apiBase = window.location.origin;
+            }
           }
         }
 

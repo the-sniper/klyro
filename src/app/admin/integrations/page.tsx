@@ -251,14 +251,11 @@ export default function IntegrationsPage() {
       ? `${window.location.origin}/widget.js`
       : "https://unpkg.com/@klyro/widget/dist/widget.js";
 
-    let tag = `<script\n  src="${scriptSrc}"\n  data-widget-key="${widgetKey}"`;
-
-    // In local development, explicitly add api-base to ensure it hits the local server
-    if (isLocal) {
-      tag += `\n  data-api-base="${window.location.origin}"`;
-    }
-
-    tag += `\n  async\n></script>`;
+    const apiBase =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "https://klyro-pro.vercel.app";
+    let tag = `<script\n  src="${scriptSrc}"\n  data-widget-key="${widgetKey}"\n  data-api-base="${apiBase}"\n  async\n></script>`;
     return tag;
   }
 
