@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@klyro/widget": "file:./widget",
+    "@next/third-parties": "^16.1.6",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.78.0",
     "@tailwindcss/postcss": "^4.1.18",

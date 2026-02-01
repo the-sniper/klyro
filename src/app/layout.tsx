@@ -2,6 +2,7 @@ import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import { Outfit } from "next/font/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import {
   PWAProvider,
   InstallBanner,
@@ -158,6 +159,9 @@ export default function RootLayout({
           data-widget-key="Tp9UTfM83M1I"
           async
         ></script>
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        )}
       </body>
     </html>
   );
