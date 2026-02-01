@@ -70,22 +70,27 @@ export default function LandingPage() {
         <div className="nebula-cloud"></div>
       </div>
       {/* Navigation */}
-      <nav className="landing-nav">
+      <nav className="landing-nav" aria-label="Main navigation">
         <div className="landing-container nav-content">
-          <Link href="/" className="nav-logo">
+          <Link href="/" className="nav-logo" aria-label="Klyro Home">
             <Image
               src="/logo.svg"
               alt="Klyro Logo"
               width={120}
               height={40}
               className="nav-logo-img"
+              priority
             />
           </Link>
           <div className="nav-actions">
             <Link href="/login" className="btn-secondary nav-btn">
               Login
             </Link>
-            <Link href="/signup" className="btn-primary nav-btn">
+            <Link
+              href="/signup"
+              className="btn-primary nav-btn"
+              aria-label="Get started for free"
+            >
               Get Started
             </Link>
           </div>
@@ -93,7 +98,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="hero-section">
+      <section className="hero-section" aria-labelledby="hero-heading">
         <div className="landing-container">
           <div className="hero-content-wrapper">
             <div className="hero-text-content">
@@ -101,7 +106,10 @@ export default function LandingPage() {
                 <Sparkles size={14} style={{ marginRight: "8px" }} />
                 The next generation of portfolio engagement
               </div> */}
-              <h1 className="hero-title animate-fade-in animation-delay-1">
+              <h1
+                id="hero-heading"
+                className="hero-title animate-fade-in animation-delay-1"
+              >
                 Define Your Persona, Let AI Tell Your Story.
               </h1>
               <p className="hero-subtitle animate-fade-in animation-delay-2">
@@ -110,8 +118,12 @@ export default function LandingPage() {
                 custom AI persona trained on your unique journey.
               </p>
               <div className="hero-buttons animate-fade-in animation-delay-3">
-                <Link href="/signup" className="btn btn-primary hero-main-btn">
-                  Start for Free <ArrowRight size={18} />
+                <Link
+                  href="/signup"
+                  className="btn btn-primary hero-main-btn"
+                  aria-label="Sign up for Klyro for free"
+                >
+                  Start for Free <ArrowRight size={18} aria-hidden="true" />
                 </Link>
               </div>
             </div>
@@ -121,11 +133,14 @@ export default function LandingPage() {
               className="persona-carousel-wrapper"
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
+              aria-label="AI Persona Showcases"
             >
               <div
                 className="persona-stack-container animate-fade-in"
                 style={{ animationDelay: "0.4s", cursor: "pointer" }}
                 onClick={() => setActivePersona((prev) => (prev + 1) % 3)}
+                role="region"
+                aria-live="polite"
               >
                 {[
                   {
@@ -172,12 +187,13 @@ export default function LandingPage() {
                         e.stopPropagation();
                         setActivePersona(i);
                       }}
+                      aria-current={isActive ? "true" : "false"}
                     >
                       <div className="persona-glow-bg"></div>
                       <div className="persona-avatar-container">
                         <img
                           src={persona.avatar}
-                          alt={persona.name}
+                          alt={`${persona.name} Persona Avatar`}
                           className="persona-avatar-image"
                         />
                       </div>
@@ -197,6 +213,7 @@ export default function LandingPage() {
                       e.stopPropagation();
                       setActivePersona(i);
                     }}
+                    aria-label={`Show persona ${i + 1}`}
                   />
                 ))}
               </div>
@@ -206,11 +223,15 @@ export default function LandingPage() {
       </section>
 
       {/* Product Demo Section */}
-      <section id="demo" className="landing-section">
+      <section
+        id="demo"
+        className="landing-section"
+        aria-labelledby="demo-heading"
+      >
         <div className="landing-container">
           <div className="demo-grid">
             <div>
-              <h2 className="section-title">
+              <h2 id="demo-heading" className="section-title">
                 An intelligent assistant that truly knows you.
               </h2>
               <p className="section-desc">
@@ -221,10 +242,10 @@ export default function LandingPage() {
               <div className="flex-col-gap-20">
                 <div className="glass-hover demo-feature-card">
                   <div className="icon-wrapper icon-wrapper-primary">
-                    <Shield size={24} />
+                    <Shield size={24} aria-hidden="true" />
                   </div>
                   <div>
-                    <h4 className="demo-feature-title">Privacy First</h4>
+                    <h3 className="demo-feature-title">Privacy First</h3>
                     <p className="demo-feature-desc">
                       Your data is encrypted and only used to train your
                       personal model.
@@ -233,10 +254,10 @@ export default function LandingPage() {
                 </div>
                 <div className="glass-hover demo-feature-card">
                   <div className="icon-wrapper icon-wrapper-secondary">
-                    <Zap size={24} />
+                    <Zap size={24} aria-hidden="true" />
                   </div>
                   <div>
-                    <h4 className="demo-feature-title">Ultra Fast Retrieval</h4>
+                    <h3 className="demo-feature-title">Ultra Fast Retrieval</h3>
                     <p className="demo-feature-desc">
                       Sub-second response times using optimized vector Search.
                     </p>
@@ -250,6 +271,7 @@ export default function LandingPage() {
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
               ref={widgetRef}
+              aria-label="Klyro Chat Widget Preview"
             >
               <div
                 className="demo-widget-container"
@@ -339,11 +361,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-section">
+      <section
+        className="landing-section"
+        aria-labelledby="customization-heading"
+      >
         <div className="landing-container">
           <div className="text-center">
             <span className="section-label">Personas & Customization</span>
-            <h2 className="section-title">Your bot, your personality.</h2>
+            <h2 id="customization-heading" className="section-title">
+              Your bot, your personality.
+            </h2>
             <p className="section-desc mb-0">
               Adjust tone, style, and branding to make the assistant feel like
               an extension of yourself.
@@ -355,6 +382,7 @@ export default function LandingPage() {
             onMouseMove={handleConfigMouseMove}
             onMouseLeave={handleConfigMouseLeave}
             ref={configWidgetRef}
+            aria-label="Persona Customization Preview"
           >
             <div
               className="glass showcase-widget-inner"
@@ -366,80 +394,46 @@ export default function LandingPage() {
                     : "transform 0.15s ease-out",
               }}
             >
-              {/* Persona Selection Strategy */}
               <div>
-                {/* <div
-                  style={{
-                    textAlign: "center",
-                    position: "relative",
-                    marginBottom: "40px",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: 0,
-                      right: 0,
-                      height: "1px",
-                      background: "rgba(255,255,255,0.05)",
-                      zIndex: 0,
-                    }}
-                  ></div>
-                  <span
-                    style={{
-                      position: "relative",
-                      background: "var(--bg-secondary)",
-                      padding: "0 20px",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      color: "var(--text-muted)",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                      zIndex: 1,
-                    }}
-                  >
-                    OR CUSTOMIZE YOUR OWN
-                  </span>
-                </div> */}
-
-                <div className="showcase-grid">
+                <div className="showcase-grid" role="list">
                   {[
                     {
                       name: "Friendly",
-                      icon: <Smile size={20} />,
+                      icon: <Smile size={20} aria-hidden="true" />,
                       desc: "Warm, approachable, uses casual language",
                       active: true,
                     },
                     {
                       name: "Professional",
-                      icon: <Briefcase size={20} />,
+                      icon: <Briefcase size={20} aria-hidden="true" />,
                       desc: "Polished but personable, balanced tone",
                     },
                     {
                       name: "Casual",
-                      icon: <Coffee size={20} />,
+                      icon: <Coffee size={20} aria-hidden="true" />,
                       desc: "Super relaxed, like texting a friend",
                     },
                     {
                       name: "Formal",
-                      icon: <Award size={20} />,
+                      icon: <Award size={20} aria-hidden="true" />,
                       desc: "Precise, articulate, no slang",
                     },
                     {
                       name: "Enthusiastic",
-                      icon: <Zap size={20} />,
+                      icon: <Zap size={20} aria-hidden="true" />,
                       desc: "High energy, excited about everything",
                     },
                     {
                       name: "Calm & Thoughtful",
-                      icon: <Leaf size={20} />,
+                      icon: <Leaf size={20} aria-hidden="true" />,
                       desc: "Measured, reflective, takes time to explain",
                     },
                   ].map((p, i) => (
                     <div
                       key={i}
                       className={`showcase-card ${p.active ? "active" : ""}`}
+                      role="listitem"
+                      aria-label={`${p.name} personality option`}
                     >
                       <div
                         className={`showcase-icon-wrapper ${p.active ? "showcase-icon-wrapper-active" : "showcase-icon-wrapper-default"}`}
@@ -462,19 +456,30 @@ export default function LandingPage() {
               {/* traits and instructions */}
               <div className="traits-grid">
                 <div>
-                  <label className="form-label form-label-block">
+                  <label
+                    className="form-label form-label-block"
+                    htmlFor="trait-input"
+                  >
                     Personality Traits
                   </label>
                   <div className="trait-input-container">
-                    <div className="glass glass-input-placeholder">
+                    <div
+                      className="glass glass-input-placeholder"
+                      id="trait-input"
+                    >
                       Add a trait...
                     </div>
-                    <div className="trait-add-btn">Add</div>
+                    <button
+                      className="trait-add-btn"
+                      aria-label="Add personality trait"
+                    >
+                      Add
+                    </button>
                   </div>
                   <div className="mb-12">
                     <span className="trait-suggestion-label">Suggestions:</span>
                   </div>
-                  <div className="flex-wrap-gap-8">
+                  <div className="flex-wrap-gap-8" role="list">
                     {[
                       "technical",
                       "creative",
@@ -484,7 +489,11 @@ export default function LandingPage() {
                       "curious",
                       "detail-oriented",
                     ].map((s) => (
-                      <div key={s} className="badge trait-badge">
+                      <div
+                        key={s}
+                        className="badge trait-badge"
+                        role="listitem"
+                      >
                         + {s}
                       </div>
                     ))}
@@ -492,14 +501,20 @@ export default function LandingPage() {
                 </div>
 
                 <div>
-                  <label className="form-label form-label-block">
+                  <label
+                    className="form-label form-label-block"
+                    htmlFor="custom-instructions"
+                  >
                     Custom Instructions
                   </label>
-                  <div className="glass custom-instructions-box">
+                  <div
+                    className="glass custom-instructions-box"
+                    id="custom-instructions"
+                  >
                     Always fetch the project details from my Github
                   </div>
                   <p className="input-hint-text">
-                    Specific guidance for the bot's responses
+                    Specific guidance for the bot&apos;s responses
                   </p>
                 </div>
               </div>
@@ -508,10 +523,17 @@ export default function LandingPage() {
                 <label className="form-label form-label-block mb-20">
                   Connected Knowledge Sources
                 </label>
-                <div className="knowledge-grid">
-                  <div className="glass-hover knowledge-source-card knowledge-source-card-success">
+                <div className="knowledge-grid" role="list">
+                  <div
+                    className="glass-hover knowledge-source-card knowledge-source-card-success"
+                    role="listitem"
+                  >
                     <div className="knowledge-source-inner">
-                      <Check size={18} className="text-success" />
+                      <Check
+                        size={18}
+                        className="text-success"
+                        aria-hidden="true"
+                      />
                       <span className="knowledge-source-name">
                         walter_resume.pdf
                       </span>
@@ -520,9 +542,16 @@ export default function LandingPage() {
                       Processed
                     </span>
                   </div>
-                  <div className="glass-hover knowledge-source-card knowledge-source-card-primary">
+                  <div
+                    className="glass-hover knowledge-source-card knowledge-source-card-primary"
+                    role="listitem"
+                  >
                     <div className="knowledge-source-inner">
-                      <Github size={18} className="text-accent" />
+                      <Github
+                        size={18}
+                        className="text-accent"
+                        aria-hidden="true"
+                      />
                       <span className="knowledge-source-name">
                         github.com/the-sniper/klyro
                       </span>
@@ -533,82 +562,75 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-
-              {/* <div style={{ textAlign: "center" }}>
-                <div
-                  style={{
-                    display: "inline-block",
-                    padding: "16px 48px",
-                    borderRadius: "100px",
-                    cursor: "default",
-                    background: "var(--accent-gradient)",
-                    color: "#fff",
-                    fontWeight: 700,
-                    fontSize: "16px",
-                    pointerEvents: "none",
-                    boxShadow: "0 10px 20px rgba(59, 130, 246, 0.2)",
-                  }}
-                >
-                  Preview Your Configured Assistant
-                </div>
-              </div> */}
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="landing-section">
+      <section className="landing-section" aria-labelledby="features-heading">
         <div className="landing-container">
           <div className="text-center mb-48">
             <span className="section-label">Core Capabilities</span>
-            <h2 className="section-title">Built for builders.</h2>
+            <h2 id="features-heading" className="section-title">
+              Built for builders.
+            </h2>
           </div>
 
           <div className="features-grid">
-            <div className="card glass-hover feature-card">
+            <article className="card glass-hover feature-card">
               <div className="feature-card-icon text-accent">
-                <Shield size={32} />
+                <Shield size={32} aria-hidden="true" />
               </div>
               <h3 className="feature-card-title">RAG Engine</h3>
               <p className="feature-card-desc">
                 Retrieval Augmented Generation ensures your AI only speaks from
                 your data sources.
               </p>
-            </div>
-            <div className="card glass-hover feature-card">
+            </article>
+            <article className="card glass-hover feature-card">
               <div className="feature-card-icon text-accent-secondary">
-                <Github size={32} />
+                <Github size={32} aria-hidden="true" />
               </div>
               <h3 className="feature-card-title">GitHub Sync</h3>
               <p className="feature-card-desc">
                 Automatically sync your repositories to keep the AI updated on
                 your latest projects.
               </p>
-            </div>
-            <div className="card glass-hover feature-card">
+            </article>
+            <article className="card glass-hover feature-card">
               <div className="feature-card-icon text-success">
-                <Zap size={32} />
+                <Zap size={32} aria-hidden="true" />
               </div>
               <h3 className="feature-card-title">One-Tag Install</h3>
               <p className="feature-card-desc">
                 Embed your assistant on any site by simply adding a single line
                 of JavaScript.
               </p>
-            </div>
+            </article>
           </div>
         </div>
       </section>
 
-      <section className="landing-section cta-section">
+      <section
+        className="landing-section cta-section"
+        aria-labelledby="cta-heading"
+      >
         <div className="landing-container text-center">
-          <h2 className="cta-title">Ready to elevate your portfolio?</h2>
+          <h2 id="cta-heading" className="cta-title">
+            Ready to elevate your portfolio?
+          </h2>
           <p className="section-desc cta-desc">
             Use Klyro to define your persona and create a lasting impression.
           </p>
           <div className="hero-buttons cta-buttons">
-            <Link href="/signup" className="btn btn-primary cta-btn-rounded">
-              Get Started for Free <ArrowRight size={20} className="ml-12" />
+            <Link
+              href="/signup"
+              className="btn btn-primary cta-btn-rounded"
+              aria-label="Get started for free today"
+            >
+              Get Started for Free{" "}
+              <ArrowRight size={20} className="ml-12" aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -618,7 +640,11 @@ export default function LandingPage() {
       <footer className="landing-footer landing-footer-styled">
         <div className="landing-container footer-content landing-footer-container">
           <div className="flex-col-gap-24">
-            <Link href="/" className="footer-logo footer-logo-link">
+            <Link
+              href="/"
+              className="footer-logo footer-logo-link"
+              aria-label="Klyro Home"
+            >
               <Image
                 src="/logo.svg"
                 alt="Klyro Logo"
@@ -632,10 +658,10 @@ export default function LandingPage() {
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block transition-transform hover:scale-105"
-              style={{ marginTop: "15px" }}
+              aria-label="Klyro on Product Hunt"
             >
               <img
-                alt="Klyro - Turn your site into an AI assistant that tells your story. | Product Hunt"
+                alt="Klyro - Featured on Product Hunt"
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1071040&amp;theme=neutral&amp;t=1769929255109"
                 style={{ width: "180px", height: "auto" }}
                 width="180"

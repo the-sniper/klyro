@@ -2662,6 +2662,12 @@ html {
   gap: 20px;
 }
 
+.flex-col-gap-24 {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
 /* Section Header Component */
 .section-icon-wrapper {
   width: 44px;
@@ -6409,14 +6415,21 @@ body:has(.sidebar-overlay.open) {
     flex-direction: column !important;
     text-align: center !important;
     justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .flex-col-gap-24 {
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .footer-copyright {
     text-align: center !important;
+    margin-top: 10px !important;
   }
 
   .landing-footer {
-    padding: 28px 0 !important;
+    padding: 32px 0 !important;
   }
 }
 @media (max-width: 480px) {

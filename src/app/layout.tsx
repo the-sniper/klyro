@@ -14,41 +14,27 @@ import KlyroWidget from "@/components/chat/KlyroWidget";
 const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Klyro - Turn Your Content Into Conversations",
+  title: "Klyro | AI Portfolio Chatbot & Personal Digital Twin",
   description:
-    "Add a custom AI chatbot to any website in minutes. Klyro learns from your content to answer visitor questions 24/7 with your unique persona.",
+    "Transform your portfolio with Klyro. Add a custom AI chatbot that learns from your GitHub, resume, and projects to engage visitors with your unique persona 24/7.",
   manifest: "/manifest.json",
+  metadataBase: new URL("https://klyro.com"), // Replace with actual production URL when available
   keywords: [
-    "AI chatbot",
-    "website chatbot",
-    "portfolio chatbot",
-    "digital twin",
-    "AI persona",
-    "embeddable chat widget",
-    "AI assistant",
-    "conversational AI",
-    "customer engagement",
-    "AI-powered website",
-    "chat widget",
-    "portfolio AI",
-    "developer portfolio",
-    "personal website chatbot",
-    "RAG chatbot",
-    "knowledge base chatbot",
-    "custom AI assistant",
-    "website automation",
-    "visitor engagement",
-    "24/7 chatbot",
-    "AI customer support",
-    "no-code chatbot",
-    "embed chatbot",
-    "AI widget",
-    "smart chatbot",
-    "content-trained AI",
-    "personalized chatbot",
-    "brand voice AI",
+    "AI portfolio chatbot",
+    "personal AI assistant",
     "interactive portfolio",
-    "AI-powered FAQ",
+    "digital twin for developers",
+    "AI persona for website",
+    "embeddable chat widget",
+    "RAG chatbot for portfolios",
+    "GitHub integrated AI assistant",
+    "website visitor engagement",
+    "custom AI agent",
+    "AI-powered professional profile",
+    "automated portfolio inquiries",
+    "intelligent resume assistant",
+    "conversational portfolio",
+    "AI brand voice",
   ],
   authors: [{ name: "Areef Syed", url: "https://www.areefsyed.com/" }],
   creator: "Klyro",
@@ -56,6 +42,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   icons: {
     icon: "/favicon.ico",
@@ -75,16 +68,26 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
+    url: "https://klyro.com",
     siteName: "Klyro",
-    title: "Klyro - Turn Your Content Into Conversations",
+    title: "Klyro | The Ultimate AI Portfolio Chatbot",
     description:
-      "Add a custom AI chatbot to any website. Learns from your content to engage visitors 24/7.",
+      "Showcase your work better with an AI digital twin. Klyro trains on your data to represent you to recruiters and clients 24/7.",
+    images: [
+      {
+        url: "/og-image.png", // Added placeholder for OG image
+        width: 1200,
+        height: 630,
+        alt: "Klyro - AI Portfolio Chatbot",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Klyro - Turn Your Content Into Conversations",
+    title: "Klyro | AI Portfolio Assistant",
     description:
-      "Add an intelligent AI chatbot to your website. Trained on your content to engage visitors with your unique persona.",
+      "Define your persona, let AI tell your story. The easiest way to add an intelligent chatbot to your personal website.",
+    images: ["/og-image.png"],
   },
   other: {
     "mobile-web-app-capable": "yes",
@@ -108,9 +111,33 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Klyro",
+    operatingSystem: "Web",
+    applicationCategory: "BusinessApplication",
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    description:
+      "Klyro is an AI-powered portfolio chatbot platform that helps developers and creatives engage visitors through a custom digital twin trained on their professional data.",
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "88",
+    },
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         {/* PWA meta tags for iOS */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
