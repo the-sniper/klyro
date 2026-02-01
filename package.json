@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:widget && next build",
     "start": "next start",
     "lint": "next lint",
     "build:widget": "node widget/build.js && cp widget/dist/widget.js public/widget.js"
   },
   "dependencies": {
-    "@klyro/widget": "^2.0.0",
+    "@klyro/widget": "file:./widget",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.78.0",
     "@tailwindcss/postcss": "^4.1.18",

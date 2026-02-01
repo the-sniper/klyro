@@ -261,24 +261,32 @@ export default function LandingPage() {
                       : "transform 0.15s ease-out",
                 }}
               >
+                <div className="demo-widget-bg">
+                  <div className="demo-widget-blob demo-widget-blob-1"></div>
+                  <div className="demo-widget-blob demo-widget-blob-2"></div>
+                  <div className="demo-widget-blob demo-widget-blob-3"></div>
+                </div>
+
                 {/* Widget Header */}
                 <div className="demo-widget-header">
-                  <div className="demo-widget-avatar">
-                    <Check size={24} />
-                  </div>
-                  <div className="demo-widget-info">
-                    <div className="demo-widget-title">Walter's Assistant</div>
-                    <div className="demo-widget-subtitle">
-                      Your personal guide to this site
-                    </div>
-                  </div>
-                  <div className="demo-widget-actions">
+                  <div className="demo-widget-actions-top">
                     <div className="demo-widget-action-btn">
-                      <Download size={16} />
+                      <RotateCcw size={14} />
                     </div>
                     <div className="demo-widget-action-btn">
-                      <RotateCcw size={16} />
+                      <Plus size={14} style={{ transform: "rotate(45deg)" }} />
                     </div>
+                  </div>
+                  <div className="demo-widget-header-center">
+                    <div className="demo-widget-avatar">
+                      <img
+                        src="/icons/icon-128x128.png"
+                        alt="Klyro"
+                        width="32"
+                        height="32"
+                      />
+                    </div>
+                    <div className="demo-widget-title">Klyro Assistant</div>
                   </div>
                 </div>
 
@@ -286,17 +294,17 @@ export default function LandingPage() {
                 <div className="demo-widget-chat">
                   {/* Empty State Visual */}
                   <div className="demo-widget-empty-state">
-                    <div className="demo-widget-empty-icon">
-                      <Check size={26} />
-                    </div>
-                    <div className="demo-widget-empty-title">
-                      Hey! I'm Walter's copilot
-                    </div>
-                    <div className="demo-widget-empty-subtitle">
-                      I can help answer questions about them
+                    <h1 className="demo-widget-greeting">Hey there!</h1>
+                    <h2 className="demo-widget-subgreeting">
+                      I am Klyro&apos;s assistant.
+                    </h2>
+                    <div className="demo-prompt-box">
+                      What would you like to know about Klyro?
                     </div>
                   </div>
 
+                  {/* Messages (Hidden in initial state, but kept for structure) */}
+                  {/*
                   <div className="demo-chat-user">
                     Tell me about your experience with machine learning.
                   </div>
@@ -304,13 +312,14 @@ export default function LandingPage() {
                     Walter has 3+ years of experience. He recently built a RAG
                     pipeline in his Chat Assistant project.
                   </div>
+                  */}
                 </div>
 
                 {/* Input Area */}
                 <div className="demo-widget-input-area">
                   <div className="demo-widget-input-row">
                     <div className="demo-widget-input">
-                      <span>Type a message...</span>
+                      <span>Type your question</span>
                     </div>
                     <div className="demo-widget-send-btn">
                       <Send size={16} />
@@ -320,9 +329,9 @@ export default function LandingPage() {
 
                 {/* Branding Footer */}
                 <div className="demo-widget-footer">
-                  <Layers size={14} className="text-accent" />
-                  Powered by{" "}
-                  <span className="text-accent font-bold">Klyro</span>
+                  <span>
+                    Powered by <span className="font-bold">Klyro</span>
+                  </span>
                 </div>
               </div>
             </div>

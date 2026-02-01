@@ -244,16 +244,29 @@ export default function IntegrationsPage() {
     }
   }
 
-  function copyEmbedCode(widget: Widget) {
-    const appUrl = typeof window !== "undefined" ? window.location.origin : "";
-    const code = `<script
-  src="${appUrl}/widget.js"
-  data-widget-key="${widget.widget_key}"
-></script>`;
+  function getScriptTag(widgetKey: string) {
+    const isLocal =
+      typeof window !== "undefined" && window.location.hostname === "localhost";
+    const scriptSrc = isLocal
+      ? `${window.location.origin}/widget.js`
+      : "https://unpkg.com/@klyro/widget/dist/widget.js";
 
-    navigator.clipboard.writeText(code);
-    setCopiedKey(widget.widget_key);
-    setTimeout(() => setCopiedKey(null), 2000);
+    let tag = `<script\n  src="${scriptSrc}"\n  data-widget-key="${widgetKey}"`;
+
+    // In local development, explicitly add api-base to ensure it hits the local server
+    if (isLocal) {
+      tag += `\n  data-api-base="${window.location.origin}"`;
+    }
+
+    tag += `\n  async\n></script>`;
+    return tag;
+  }
+
+  function getApiBase() {
+    return typeof window !== "undefined" &&
+      window.location.hostname === "localhost"
+      ? window.location.origin
+      : "https://klyro-pro.vercel.app";
   }
 
   if (loading) {
@@ -482,12 +495,12 @@ export default function IntegrationsPage() {
                           </span>
                           <div className="embed-code-wrapper">
                             <pre className="example-code">
-                              {`"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({ key: "${widget.widget_key}" });\n  }, []);\n\n  return children;\n}`}
+                              {`"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({\n      key: "${widget.widget_key}",\n      apiBase: "${getApiBase()}"\n    });\n  }, []);\n\n  return children;\n}`}
                             </pre>
                             <button
                               className={`copy-btn ${copiedKey === widget.widget_key + "-npm-usage" ? "copied" : ""}`}
                               onClick={() => {
-                                const code = `"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({ key: "${widget.widget_key}" });\n  }, []);\n\n  return children;\n}`;
+                                const code = `"use client";\nimport { useEffect } from "react";\nimport { initKlyro } from "@klyro/widget";\n\nexport default function Layout({ children }) {\n  useEffect(() => {\n    initKlyro({\n      key: "${widget.widget_key}",\n      apiBase: "${getApiBase()}"\n    });\n  }, []);\n\n  return children;\n}`;
                                 navigator.clipboard.writeText(code);
                                 setCopiedKey(widget.widget_key + "-npm-usage");
                                 setTimeout(() => setCopiedKey(null), 2000);
@@ -530,11 +543,16 @@ export default function IntegrationsPage() {
                     <>
                       <div className="embed-code-wrapper">
                         <pre className="embed-code">
-                          {`<script\n  src="https://unpkg.com/@klyro/widget/dist/widget.js"\n  data-widget-key="${widget.widget_key}"\n  async\n></script>`}
+                          {getScriptTag(widget.widget_key)}
                         </pre>
                         <button
                           className={`copy-btn ${copiedKey === widget.widget_key ? "copied" : ""}`}
-                          onClick={() => copyEmbedCode(widget)}
+                          onClick={() => {
+                            const code = getScriptTag(widget.widget_key);
+                            navigator.clipboard.writeText(code);
+                            setCopiedKey(widget.widget_key);
+                            setTimeout(() => setCopiedKey(null), 2000);
+                          }}
                         >
                           {copiedKey === widget.widget_key ? (
                             <Check size={16} />
@@ -575,11 +593,7 @@ export default function IntegrationsPage() {
     <!-- Your website content -->
     
     <!-- Paste widget code here -->
-    <script 
-      src="https://unpkg.com/@klyro/widget/dist/widget.js" 
-      data-widget-key="${widget.widget_key}"
-      async
-    ></script>
+    ${getScriptTag(widget.widget_key).replace(/\n/g, "\n    ")}
   </body>
 </html>`}</pre>
                         </div>

@@ -1452,10 +1452,27 @@
     const currentScript = document.currentScript;
     if (currentScript) {
       const key = currentScript.getAttribute("data-widget-key");
+      const dataApiBase = currentScript.getAttribute("data-api-base");
       if (key) {
+        // If data-api-base is provided, use it.
+        // Otherwise, if script is NOT from unpkg, try to infer base from src.
+        // Falls back to default in initKlyro if both are null.
+        let apiBase = dataApiBase;
+        if (
+          !apiBase &&
+          currentScript.src &&
+          !currentScript.src.includes("unpkg.com")
+        ) {
+          apiBase = currentScript.src.replace("/widget.js", "");
+          // Handle cases where src is just "widget.js"
+          if (apiBase === "widget.js" || apiBase === "") {
+            apiBase = window.location.origin;
+          }
+        }
+
         initKlyro({
           key: key,
-          apiBase: currentScript.src.replace("/widget.js", ""),
+          apiBase: apiBase,
         });
       }
     }
