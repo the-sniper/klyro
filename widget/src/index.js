@@ -518,6 +518,7 @@
       gap: 16px;
       scrollbar-width: thin;
       scrollbar-color: rgba(0,0,0,0.1) transparent;
+      position: relative;
     }
 
     .klyro-messages::-webkit-scrollbar {
@@ -1342,7 +1343,22 @@
         `;
       }
 
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      const displayMessagesForDeepScroll = displayMessages; // to avoid closure issues if any, though not needed here
+      if (!isLoading && displayMessagesForDeepScroll.length > 0) {
+        const lastMsg =
+          displayMessagesForDeepScroll[displayMessagesForDeepScroll.length - 1];
+        if (lastMsg.role === "assistant") {
+          const lastMessageElement = messagesContainer.lastElementChild;
+          if (lastMessageElement) {
+            // Scroll to the start of the last message
+            messagesContainer.scrollTop = lastMessageElement.offsetTop - 20;
+          }
+        } else {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      } else {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
       sendBtn.disabled = isLoading;
     }
   }
