@@ -318,10 +318,10 @@ export default function LandingPage() {
         <div className="landing-container">
           <div className="hero-content-wrapper">
             <div className="hero-text-content">
-              <div className="badge animate-fade-in">
+              {/* <div className="badge animate-fade-in">
                 <Sparkles size={14} style={{ marginRight: "8px" }} />
                 Your AI-Powered Digital Twin
-              </div>
+              </div> */}
               <h1
                 id="hero-heading"
                 className="hero-title animate-fade-in animation-delay-1"
