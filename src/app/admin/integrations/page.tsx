@@ -255,7 +255,7 @@ export default function IntegrationsPage() {
       typeof window !== "undefined"
         ? window.location.origin
         : "https://klyro-pro.vercel.app";
-    let tag = `<script\n  src="${scriptSrc}"\n  data-widget-key="${widgetKey}"\n  data-api-base="${apiBase}"\n  async\n></script>`;
+    let tag = `<script\n  src="${scriptSrc}"\n  data-widget-key="${widgetKey}"\n async\n></script>`;
     return tag;
   }
 

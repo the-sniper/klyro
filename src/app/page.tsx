@@ -617,15 +617,32 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="landing-footer landing-footer-styled">
         <div className="landing-container footer-content landing-footer-container">
-          <Link href="/" className="footer-logo footer-logo-link">
-            <Image
-              src="/logo.svg"
-              alt="Klyro Logo"
-              width={100}
-              height={32}
-              className="footer-logo-img"
-            />
-          </Link>
+          <div className="flex-col-gap-24">
+            <Link href="/" className="footer-logo footer-logo-link">
+              <Image
+                src="/logo.svg"
+                alt="Klyro Logo"
+                width={100}
+                height={32}
+                className="footer-logo-img"
+              />
+            </Link>
+            <a
+              href="https://www.producthunt.com/products/klyro?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-klyro"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block transition-transform hover:scale-105"
+              style={{ marginTop: "15px" }}
+            >
+              <img
+                alt="Klyro - Turn your site into an AI assistant that tells your story. | Product Hunt"
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1071040&amp;theme=neutral&amp;t=1769929255109"
+                style={{ width: "180px", height: "auto" }}
+                width="180"
+                height="40"
+              />
+            </a>
+          </div>
           <p className="footer-copyright footer-copyright-text">
             © {new Date().getFullYear()} Klyro. All rights reserved.{" "}
             <br className="mobile-only" /> Built with ❤️ for the community.
