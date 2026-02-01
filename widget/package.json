@@ -1,6 +1,6 @@
 {
   "name": "@klyro/widget",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Klyro Chat Widget - An AI-powered chat widget for your website.",
   "main": "dist/index.js",
   "types": "index.d.ts",

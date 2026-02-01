@@ -13,8 +13,8 @@ function getOpenAI(): OpenAI {
   return openaiClient;
 }
 
-const CHUNK_SIZE = 500; // tokens (approximately 4 chars per token)
-const CHUNK_OVERLAP = 100; // tokens
+const CHUNK_SIZE = 300; // Reduced from 500 for sharper embeddings in dense docs like resumes
+const CHUNK_OVERLAP = 50; // tokens
 
 /**
  * Split text into overlapping chunks for embedding

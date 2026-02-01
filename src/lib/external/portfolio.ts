@@ -133,7 +133,7 @@ function parsePortfolioContent(html: string, textContent: string): PortfolioInfo
   // Extract skills
   const skills = extractSection(textContent, [
     'skills', 'technologies', 'tech stack', 'expertise', 'proficient',
-    'languages', 'frameworks', 'tools'
+    'languages', 'frameworks', 'tools', 'frontend', 'backend'
   ]);
 
   // Extract projects
@@ -333,7 +333,7 @@ function extractWorkSection(text: string): string[] {
     }
   }
   
-  return [...new Set(results)].slice(0, 10);
+  return [...new Set(results)].slice(0, 20); // Increased from 10 to 20
 }
 
 /**
@@ -358,7 +358,7 @@ function extractSection(text: string, keywords: string[]): string[] {
     }
   }
   
-  return [...new Set(results)].slice(0, 5);
+  return [...new Set(results)].slice(0, 15); // Increased from 5 to 15
 }
 
 /**

@@ -410,9 +410,11 @@ LINK FORMATTING (very important):
 
 CONVERSATIONAL CONTINUITY & PROGRESSION:
 - ALWAYS prioritize information you just mentioned in the chat history over generic snippets from the knowledge base when expanding on a topic.
+- **TECHNICAL SKILLS & EXPERIENCE: If a user asks about a specific technology (like Next.js, React, etc.), search your context and tool results exhaustively. If you see a mention in a list or project description, confirm that the experience exists.**
 - **HOWEVER, if the user asks for "other", "another", or "something else", they want NEW information. In this case, ignore what you just talked about and find a different project, skill, or experience from your context that hasn't been mentioned yet.**
 - If you have already described all available projects or skills, explicitly state: "That covers all the [projects/skills] I have details on right now."
 - Use history to resolve pronouns ("it", "this", "that") to the specific subject discussed.
+- IF THE SEARCH CONTEXT DOES NOT HAVE THE ANSWER: (1) Check if the user's question can be answered by calling tools like fetch_latest_projects or fetch_url_content. (2) If tools are available, you MUST try calling them before saying you don't have the information.
 
 MISSING INFO PROTOCOL:
 - If asked about projects/GitHub but 'external_links.github' is missing from your system context, say: "I haven't been connected to a GitHub profile yet to show my latest projects. You can add one in the Klyro settings!"
@@ -557,7 +559,7 @@ CRITICAL RULES:
 5. **CONVERSATIONAL PROGRESSION: If the user asks for "other", "another", "something else", or "besides [Subject]", your rewritten query MUST include "excluding [Subject]" or "different from [Subject]" to ensure vector search finds NEW information.**
 6. For brief follow-ups (e.g., "tech stack?", "tell me more"), rewrite it to include the specific subject discussed in the immediately preceding message.
 
-Output ONLY the rewritten query.`,
+Output ONLY the rewritten query. For technical questions, explicitly include the technology name and terms like "experience", "technical skills", or "projects".`,
         },
         {
           role: "user",
@@ -620,12 +622,32 @@ export async function generateResponse(
   });
 
   // 2. Retrieve relevant chunks using the optimized query (filtered by user_id)
+  // Retrieve more chunks initially for re-ranking
   const chunks = await retrieveRelevantChunks(
     optimizedQuery,
     persona?.userId,
-    5,
-    0.2,
+    15, // Increased retrieval count for re-ranking
+    0.1, // Lowered threshold even further to find raw keyword matches
   );
+
+  // 3. Keyword-based Re-ranking for technical precision
+  // Extract potential technical keywords (simple words with capital letters or specific tech patterns)
+  const technicalKeywords = optimizedQuery.match(/[A-Z][A-Za-z0-9.]+|Next\.js|React|Node\.js|Tailwind|Supabase|TypeScript/g) || [];
+  
+  const reRankedChunks = chunks.map(chunk => {
+    let boost = 1;
+    const lowerContent = chunk.content.toLowerCase();
+    
+    // Boost chunks that have exact keyword matches
+    technicalKeywords.forEach(kw => {
+      if (lowerContent.includes(kw.toLowerCase())) {
+        boost += 0.5; // Significant boost for keyword presence
+      }
+    });
+    
+    return { ...chunk, redirectedSimilarity: chunk.similarity * boost };
+  }).sort((a, b) => b.redirectedSimilarity - a.redirectedSimilarity)
+    .slice(0, 10); // Keep top 10 after boosting
 
   // Get document names for sources and context building
   const documentIds = [...new Set(chunks.map((c) => c.document_id))];
@@ -636,8 +658,8 @@ export async function generateResponse(
 
   const documentMap = new Map(documents?.map((d) => [d.id, d.name]) || []);
 
-  // Build context with document names
-  const context = buildContext(chunks, documentMap);
+  // Build context with document names using the re-ranked chunks
+  const context = buildContext(reRankedChunks as any, documentMap);
 
   // Generate system prompt with persona
   const systemPrompt = strictMode
@@ -1035,8 +1057,8 @@ export async function generateResponse(
     .replace(/\u2014/g, ", ") // Replace em-dashes with comma+space
     .replace(/\u2013/g, "-"); // Replace en-dashes with hyphens
 
-  // Build source references
-  const sources: SourceReference[] = chunks.map((chunk) => ({
+  // Build source references using the re-ranked chunks
+  const sources: SourceReference[] = (reRankedChunks as any[]).map((chunk) => ({
     document_id: chunk.document_id,
     document_name: documentMap.get(chunk.document_id) || "Unknown",
     chunk_content:
