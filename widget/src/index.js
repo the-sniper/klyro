@@ -161,12 +161,22 @@
       left: 20px;
     }
     
-    .klyro-button svg {
+    .klyro-button svg,
+    .klyro-button img {
       width: 28px;
       height: 28px;
-      fill: white;
-      stroke: white;
       flex-shrink: 0;
+      object-fit: contain;
+    }
+
+    .klyro-button svg {
+      fill: currentColor;
+    }
+
+    .klyro-header-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: currentColor;
     }
 
     .klyro-button.text-mode {
@@ -868,7 +878,12 @@
   `;
 
   // Icons
-  const chatIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"/></svg>`;
+  const chatIcon = `<svg width="61" height="61" viewBox="0 0 61 61" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M1.3291 25.79C3.72534 9.8844 18.5612 -1.06685 34.4668 1.3291C50.3724 3.72528 61.3248 18.562 58.9287 34.4678C56.5322 50.3732 41.6956 61.325 25.79 58.9287C21.22 58.2404 17.0553 56.5196 13.498 54.042L5.32715 57.21C4.45869 57.5464 3.47321 57.3566 2.79297 56.7197V56.7188C2.11349 56.0819 1.85878 55.1125 2.1377 54.2236L5.05078 44.9385C1.76075 39.3741 0.291129 32.6801 1.3291 25.79ZM33.7451 6.12402C20.4879 4.12683 8.12122 13.2555 6.12402 26.5127C5.20675 32.6021 6.63403 38.4979 9.73242 43.2939C10.1238 43.8995 10.2257 44.6483 10.0098 45.3359L8.27344 50.8662L12.9805 49.043C13.7705 48.7368 14.6631 48.8648 15.335 49.3818H15.3359C18.4907 51.8106 22.2884 53.4965 26.5117 54.1328C39.7692 56.1301 52.1357 47.0023 54.1328 33.7451C56.1301 20.488 47.0022 8.12141 33.7451 6.12402Z" fill="currentColor"/>
+    <rect x="21" y="22" width="20" height="3" rx="1.5" fill="currentColor"/>
+    <rect x="21" y="29" width="20" height="3" rx="1.5" fill="currentColor"/>
+    <rect x="21" y="35" width="8" height="3" rx="1.5" fill="currentColor"/>
+  </svg>`;
   const closeIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
   const sendIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>`;
   const botIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>`;
@@ -1078,7 +1093,7 @@
       : klyroLogo;
 
     container.innerHTML = `
-      <button class="klyro-button ${config.position} ${isTextMode ? "text-mode" : ""}" style="background: ${config.primaryColor}">
+      <button class="klyro-button ${config.position} ${isTextMode ? "text-mode" : ""}" style="background: ${config.primaryColor}; color: white;">
         ${chatIcon}
         ${isTextMode ? `<span class="klyro-button-text">${escapeHtml(config.launcherText)}</span>` : ""}
       </button>
