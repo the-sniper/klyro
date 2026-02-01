@@ -152,7 +152,12 @@ export default function RootLayout({
             }}
           />
         </PWAProvider>
-        <KlyroWidget />
+        {/* <KlyroWidget /> */}
+        <script
+          src="http://localhost:3000/widget.js"
+          data-widget-key="Tp9UTfM83M1I"
+          async
+        ></script>
       </body>
     </html>
   );

@@ -164,6 +164,7 @@ ${p.content}
       align-items: center;
       text-align: center;
       position: relative;
+      z-index: 10;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -433,6 +434,16 @@ ${p.content}
       border-bottom-left-radius: 4px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .klyro-message ul {
+      margin: 8px 0;
+      padding-left: 20px;
+      list-style-type: disc;
+    }
+
+    .klyro-message li {
+      margin-bottom: 4px;
     }
     
     .klyro-typing {
