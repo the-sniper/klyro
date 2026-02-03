@@ -38,17 +38,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for recent OTP requests to prevent abuse (max 3 per 15 minutes)
-    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+    // Check for recent OTP requests to prevent abuse (max 3 per 1 minute)
+    const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
     const { data: recentOTPs } = await adminClient
       .from('email_verifications')
       .select('id')
       .eq('email', email.toLowerCase())
-      .gte('created_at', fifteenMinutesAgo);
+      .gte('created_at', oneMinuteAgo);
 
     if (recentOTPs && recentOTPs.length >= 3) {
       return NextResponse.json(
-        { error: 'Too many OTP requests. Please try again in 15 minutes.' },
+        { error: 'Too many OTP requests. Please try again in 1 minute.' },
         { status: 429 }
       );
     }
