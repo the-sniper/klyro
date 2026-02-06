@@ -161,7 +161,7 @@ export default function RootLayout({
           <InstallBanner />
           <ServiceWorkerRegistration />
           <Toaster
-            position="bottom-right"
+            position="top-right"
             toastOptions={{
               duration: 4000,
               className: "toast-container",
