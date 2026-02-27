@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Database,
   MessageSquare,
+  MessageCircle,
   Code2,
   Fingerprint,
   LogOut,
@@ -15,10 +16,11 @@ import {
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/knowledge", label: "Knowledge Base", icon: Database },
   { href: "/admin/persona", label: "AI Persona", icon: Fingerprint },
+  { href: "/admin/knowledge", label: "Knowledge Base", icon: Database },
   { href: "/admin/test-chat", label: "Test Chat", icon: MessageSquare },
   { href: "/admin/integrations", label: "Integrations", icon: Code2 },
+  { href: "/admin/conversations", label: "Conversations", icon: MessageCircle },
 ];
 
 export function AdminSidebar({
