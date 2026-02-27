@@ -72,6 +72,7 @@ export interface Widget {
   theme: WidgetTheme;
   welcome_message: string;
   welcome_headline: string | null; // Customizable empty state headline
+  welcome_title: string | null; // Customizable empty state title
   header_title: string; // Customizable chat header title
   allowed_domains: string[];
   primary_color: string;

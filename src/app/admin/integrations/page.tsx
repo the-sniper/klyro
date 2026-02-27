@@ -45,6 +45,7 @@ export default function IntegrationsPage() {
   const [formData, setFormData] = useState({
     name: "",
     headerTitle: "Chat Assistant",
+    welcomeTitle: "Hey there!",
     welcomeHeadline: "",
     welcomeMessage: "Hi! How can I help you learn more about me?",
     position: "bottom-right",
@@ -132,6 +133,7 @@ export default function IntegrationsPage() {
       setFormData({
         name: widget.name,
         headerTitle: widget.header_title || "Chat Assistant",
+        welcomeTitle: widget.welcome_title || "Hey there!",
         welcomeHeadline: widget.welcome_headline || "",
         welcomeMessage: widget.welcome_message,
         position: widget.position,
@@ -151,6 +153,7 @@ export default function IntegrationsPage() {
       setFormData({
         name: "",
         headerTitle: "Chat Assistant",
+        welcomeTitle: "Hey there!",
         welcomeHeadline: "",
         welcomeMessage: "Hi! How can I help you learn more about me?",
         position: "bottom-right",
@@ -191,6 +194,7 @@ export default function IntegrationsPage() {
       const payload = {
         name: formData.name,
         headerTitle: formData.headerTitle,
+        welcomeTitle: formData.welcomeTitle,
         welcomeHeadline: formData.welcomeHeadline,
         welcomeMessage: formData.welcomeMessage,
         position: formData.position,
@@ -712,22 +716,42 @@ export default function IntegrationsPage() {
               </div>
 
               <div className="form-group">
+                <label className="form-label">Empty State Title</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="e.g., Hey there!"
+                  maxLength={30}
+                  value={formData.welcomeTitle}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      welcomeTitle: e.target.value.slice(0, 30),
+                    })
+                  }
+                />
+                <p className="field-hint">
+                  The main title shown in the empty state. Max 30 characters.
+                </p>
+              </div>
+
+              <div className="form-group">
                 <label className="form-label">Welcome Headline</label>
                 <input
                   type="text"
                   className="form-input"
                   placeholder="e.g., Hey! I'm John's copilot"
-                  maxLength={30}
+                  maxLength={100}
                   value={formData.welcomeHeadline}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      welcomeHeadline: e.target.value.slice(0, 30),
+                      welcomeHeadline: e.target.value.slice(0, 100),
                     })
                   }
                 />
                 <p className="field-hint">
-                  The headline shown in the empty state. Max 30 characters.
+                  The sub-headline shown in the empty state. Max 100 characters.
                 </p>
               </div>
 
@@ -736,16 +760,16 @@ export default function IntegrationsPage() {
                 <textarea
                   className="form-textarea mini"
                   placeholder="Hi! How can I help you learn about my experience?"
-                  maxLength={50}
+                  maxLength={200}
                   value={formData.welcomeMessage}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      welcomeMessage: e.target.value.slice(0, 50),
+                      welcomeMessage: e.target.value.slice(0, 200),
                     })
                   }
                 />
-                <p className="field-hint">Max 50 characters.</p>
+                <p className="field-hint">Max 200 characters.</p>
               </div>
 
               <div className="form-row">
