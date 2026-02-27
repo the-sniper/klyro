@@ -12,6 +12,7 @@ import {
   Fingerprint,
   LogOut,
   User,
+  Sparkles,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,9 @@ const navItems = [
   { href: "/admin/conversations", label: "Conversations", icon: MessageCircle },
 ];
 
+import { WhatsNewModal } from "./WhatsNewModal";
+import { useState } from "react";
+
 export function AdminSidebar({
   isOpen,
   onClose,
@@ -32,6 +36,7 @@ export function AdminSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -86,6 +91,22 @@ export function AdminSidebar({
         ))}
       </nav>
       <div style={{ marginTop: "auto", paddingTop: "24px" }}>
+        {/* NEW: What's New Button */}
+        <button
+          onClick={() => setIsWhatsNewOpen(true)}
+          className="sidebar-link w-full"
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            textAlign: "left",
+            width: "100%",
+          }}
+        >
+          <Sparkles size={22} className="text-warning text-accent" />
+          <span>What's New</span>
+        </button>
+
         <Link
           href="/admin/profile"
           className={`sidebar-link ${pathname === "/admin/profile" ? "active" : ""}`}
@@ -112,6 +133,11 @@ export function AdminSidebar({
           <span>Logout</span>
         </button>
       </div>
+      {/* NEW: The Modal Itself */}
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onClose={() => setIsWhatsNewOpen(false)}
+      />
     </aside>
   );
 }
