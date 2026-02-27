@@ -310,21 +310,21 @@
     .klyro-header-icon {
       width: 72px;
       height: 72px;
-      border-radius: 18px;
+      border-radius: 50%;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 20px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       flex-shrink: 0;
+      background: transparent;
     }
 
     .klyro-header.chat-active .klyro-header-icon {
       width: 32px;
       height: 32px;
-      border-radius: 8px;
+      border-radius: 50%;
       margin-bottom: 0;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
@@ -340,6 +340,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      border-radius: 50%;
     }
     
     .klyro-header-text h3 {
@@ -1343,7 +1344,7 @@
         // ... show empty state ...
         messagesContainer.innerHTML = `
           <div class="klyro-empty-state">
-            <h1>Hey there!<span>${escapeHtml(config.welcomeHeadline || "How can I help?")}</span></h1>
+            <h1>${escapeHtml(config.welcomeTitle || "Hey there!")}<span>${escapeHtml(config.welcomeHeadline || "How can I help?")}</span></h1>
             <p>${escapeHtml(config.welcomeMessage || "I can help answer questions about my background and experience")}</p>
           </div>
         `;
