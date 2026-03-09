@@ -207,7 +207,6 @@ ${p.content}
       height: 32px;
       border-radius: 50%;
       margin-bottom: 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
     .klyro-header-icon svg {
