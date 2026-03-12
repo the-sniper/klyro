@@ -1,11 +1,11 @@
 {
-  "name": "Klyro - AI Chatbot",
+  "name": "Klyro - AI Website Copilot",
   "short_name": "Klyro",
-  "description": "Turn your content into conversations with a custom AI chatbot",
+  "description": "Train an embeddable AI copilot on your content, shape its persona, and deploy it across your website.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#050816",
+  "theme_color": "#050816",
   "orientation": "portrait-primary",
   "scope": "/",
   "icons": [

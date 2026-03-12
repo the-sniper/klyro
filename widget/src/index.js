@@ -30,6 +30,8 @@
 
     API_BASE = options.apiBase || "https://klyro-pro.vercel.app";
     STORAGE_KEY = `klyro_${widgetKey}`;
+    inlineMode = !!(options.inline);
+    inlineContainer = options.container || null;
 
     console.log("[Klyro] Initializing with version:", WIDGET_VERSION);
 
@@ -50,6 +52,9 @@
   let lastCheckedPath = null; // Track last path for route change detection
   let isExpanded = false;
   let isMenuOpen = false;
+  let inlineMode = false;
+  let inlineContainer = null; // CSS selector or DOM element to mount into
+  let _sendMessageFn = null; // exposed for external callers
 
   // Load persisted chat from localStorage
   function loadPersistedChat() {
@@ -228,6 +233,30 @@
     
     .klyro-panel.bottom-left {
       left: 20px;
+    }
+
+    /* ── Inline / embedded mode ── */
+    .klyro-widget.klyro-inline {
+      display: block;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .klyro-widget.klyro-inline .klyro-button {
+      display: none !important;
+    }
+    .klyro-widget.klyro-inline .klyro-panel {
+      position: relative !important;
+      display: flex !important;
+      bottom: auto !important;
+      right: auto !important;
+      left: auto !important;
+      top: auto !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 100% !important;
+      border-radius: inherit !important;
+      animation: none !important;
     }
     
     @keyframes klyroSlideUp {
@@ -1084,7 +1113,7 @@
 
     // Create container
     const container = document.createElement("div");
-    container.className = `klyro-widget ${theme}`;
+    container.className = `klyro-widget ${theme}${inlineMode ? " klyro-inline" : ""}`;
     container.style.setProperty("--primary-color", config.primaryColor);
 
     const isTextMode = config.launcherMode === "text" && config.launcherText;
@@ -1154,7 +1183,20 @@
       </div>
     `;
 
-    document.body.appendChild(container);
+    // Mount: inline into a provided container, or default to body
+    if (inlineMode && inlineContainer) {
+      const mountEl = typeof inlineContainer === "string"
+        ? document.querySelector(inlineContainer)
+        : inlineContainer;
+      if (mountEl) {
+        mountEl.style.position = "relative";
+        mountEl.appendChild(container);
+      } else {
+        document.body.appendChild(container);
+      }
+    } else {
+      document.body.appendChild(container);
+    }
 
     // Store reference to container for route visibility control
     widgetContainer = container;
@@ -1182,6 +1224,15 @@
 
     // Initial render
     renderMessages();
+
+    // Auto-open panel in inline mode
+    if (inlineMode) {
+      isOpen = true;
+      panel.classList.add("open");
+    }
+
+    // Expose sendMessage for external callers (used by landing page demo)
+    _sendMessageFn = sendMessage;
 
     // Event listeners
     button.addEventListener("click", () => {
@@ -1528,9 +1579,14 @@
   }
 
   // Exports
+  function klyroSendMessage(text) {
+    if (_sendMessageFn) _sendMessageFn(text);
+  }
+
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { initKlyro };
+    module.exports = { initKlyro, sendMessage: klyroSendMessage };
   } else {
     window.initKlyro = initKlyro;
+    window.klyroSendMessage = klyroSendMessage;
   }
 })();

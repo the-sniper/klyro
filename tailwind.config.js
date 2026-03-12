@@ -3,12 +3,20 @@ module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Sora", "Inter", "system-ui", "sans-serif"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        background: "var(--bg-primary)",
+        foreground: "var(--text-primary)",
         // Design system colors mapped from CSS variables
-        primary: "var(--accent-primary)",
-        secondary: "var(--accent-secondary)",
+        accent: {
+          DEFAULT: "var(--accent-primary)",
+          secondary: "var(--accent-secondary)",
+          low: "var(--accent-low)",
+          border: "var(--accent-border)",
+        },
         success: "var(--success)",
         warning: "var(--warning)",
         error: "var(--error)",
@@ -37,6 +45,7 @@ module.exports = {
         DEFAULT: "var(--radius)",
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
+        full: "var(--radius-full)",
       },
       boxShadow: {
         sm: "var(--shadow-sm)",

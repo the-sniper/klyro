@@ -50,7 +50,7 @@ export default function IntegrationsPage() {
     welcomeMessage: "Hi! How can I help you learn more about me?",
     position: "bottom-right",
     theme: "dark",
-    primaryColor: "#6366f1",
+    primaryColor: "#3b82f6",
     allowedDomains: "",
     launcherMode: "icon",
     launcherText: "Chat with me",

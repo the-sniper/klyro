@@ -1,991 +1,1013 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+/**
+ * Klyro Landing Page — Cinematic Scroll Story
+ *
+ * Architecture (Bible §5, §12, §13):
+ *   LAYER 0: Fixed 3D canvas (z-0) — reacts to scrollProgress ref
+ *   LAYER 1: Scroll-pinned story sections (z-10) — text that overlays 3D
+ *   LAYER 2: Sticky nav + footer (z-50)
+ *
+ * GSAP ScrollTrigger scrubs scrollProgress 0→1 across five pinned chapters.
+ * The canvas reads this ref every frame — no React state, no re-renders.
+ */
+
+import dynamic from "next/dynamic";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Bot,
-  Zap,
-  Shield,
-  Github,
-  Sparkles,
-  Check,
-  RotateCcw,
-  Send,
-  Download,
-  Layers,
-  Smile,
-  Briefcase,
-  Coffee,
-  Award,
-  Leaf,
-  Plus,
-  User as UserIcon,
-  ChevronDown,
-  LogOut,
-  Settings,
-  X,
-  Loader2,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  avatar_url: string | null;
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── SSR-safe Scene import ───────────────────────────────────────────────── */
+const Scene = dynamic(() => import("@/components/3d/Scene"), {
+  ssr: false,
+  loading: () => null,
+});
+
+/* ── Animation variants ──────────────────────────────────────────────────── */
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 32 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  },
+};
+
+const staggerContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+
+const itemVariant: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.97 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.55, ease: "easeOut" as const },
+  },
+};
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+const C = {
+  bg:        "var(--bg-primary)",
+  accent:    "var(--accent-primary)",
+  accentLow: "var(--accent-low)",
+  accentBrd: "var(--accent-border)",
+  surface:   "var(--glass-bg)",
+  border:    "var(--glass-border)",
+  primary:   "var(--text-primary)",
+  secondary: "var(--text-secondary)",
+  muted:     "var(--text-muted)",
+};
+
+/* ── Nav links ───────────────────────────────────────────────────────────── */
+const NAV_LINKS = [
+  { href: "#story",    label: "The story" },
+  { href: "#features", label: "Features" },
+  { href: "#deploy",   label: "Deploy" },
+];
+
+/*
+ * Story architecture (brand-storytelling skill):
+ *
+ * The visitor is Luke. Klyro is the lightsaber. You are Obi-Wan.
+ *
+ * ELEPHANT first: something is at stake (every visitor who leaves without
+ * an answer is a conversation that never happened).
+ *
+ * Arc: world-that-IS → five-second realization → world-that-COULD-BE
+ *
+ * Movement: "Your website finally speaks for you."
+ */
+
+/* ── Story chapters ──────────────────────────────────────────────────────── */
+const CHAPTERS = [
+  {
+    id:       "hero",
+    eyebrow:  "The problem",
+    headline: "Visitors leave.\nQuestions\nunanswered.",
+    sub:      "They had something to ask. You weren't there. So they left and took their trust with them. Klyro changes that.",
+    cta:      { label: "Fix this →", href: "/signup" },
+    ctaGhost: { label: "See how", href: "#story" },
+    align:    "center" as const,
+  },
+  {
+    id:       "persona",
+    eyebrow:  "Act I — Your voice",
+    headline: "It sounds\nlike you.\nNot a bot.",
+    sub:      "Define the tone, the personality, and the guardrails. It introduces itself the way you would. It knows what you'd share and what you wouldn't.",
+    align:    "left" as const,
+  },
+  {
+    id:       "knowledge",
+    eyebrow:  "Act II — Your knowledge",
+    headline: "It knows\neverything\nyou've built.",
+    sub:      "Your GitHub. Your resume. Your writing. Your docs. Every answer it gives is grounded in your actual work, not invented.",
+    align:    "right" as const,
+  },
+  {
+    id:       "test",
+    eyebrow:  "Act III — Proof",
+    headline: "You verify\nbefore\nit goes live.",
+    sub:      "Run the conversation yourself first. Push it. Find the edges. Enable strict mode so it only speaks from what you gave it.",
+    align:    "left" as const,
+  },
+  {
+    id:       "deploy",
+    eyebrow:  "The world that could be",
+    headline: "Your website\nfinally speaks\nfor you.",
+    sub:      "One tag. Any site. Every visitor gets a real answer in your voice, from your knowledge, even when you're asleep.",
+    cta:      { label: "Make it happen →", href: "/signup" },
+    align:    "center" as const,
+  },
+];
+
+/* ── Features for bottom grid ────────────────────────────────────────────── */
+const FEATURES = [
+  {
+    title: "Answers from your real work, not from thin air",
+    body:  "Connect GitHub repos, upload PDFs, and paste URLs. Every response is retrieved from what you actually gave it. Hallucinations are off by default.",
+    tags:  ["RAG retrieval", "Strict mode", "Source trail"],
+    span:  7,
+  },
+  {
+    title: "A persona, not a chatbot template",
+    body:  "Traits, a tone, scheduling links, and what to share or withhold. It feels like you because you shaped it.",
+    tags:  ["Custom instructions", "Calendly booking"],
+    span:  5,
+  },
+  {
+    title: "You talk to it before your visitors do",
+    body:  "A private test chat so you can break it yourself first. Enable strict mode to lock responses to your sources only.",
+    tags:  ["Sandbox", "Strict mode"],
+    span:  4,
+  },
+  {
+    title: "It wears your brand, not ours",
+    body:  "Logo, colors, domains, and launch text. The widget belongs to your site, not us.",
+    tags:  ["Custom branding", "Domain rules"],
+    span:  4,
+  },
+  {
+    title: "Know what every visitor asked",
+    body:  "Full transcript history. See the questions, the answers, and the sources that backed each one.",
+    tags:  ["Transcript history", "Source attribution"],
+    span:  4,
+  },
+];
+
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COMPONENTS
+══════════════════════════════════════════════════════════════════════════ */
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="eyebrow">
+      <div className="eyebrow-dot" />
+      <span className="eyebrow-text">{children}</span>
+    </div>
+  );
 }
 
-export default function LandingPage() {
-  const router = useRouter();
-  // State for interactive effects
-  const [flashlightPos, setFlashlightPos] = useState({ x: 50, y: 50 });
-  const [scrolled, setScrolled] = useState(false);
-  const [typingText, setTypingText] = useState("");
-  const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
-
-  // User state
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  // Lock body scroll when modal is open
-  useBodyScrollLock(isLogoutModalOpen);
-
-  // Persona and Widget state
-  const [activePersona, setActivePersona] = useState(1);
-  const [isPaused, setIsPaused] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [configMousePos, setConfigMousePos] = useState({ x: 0, y: 0 });
-
-  // Refs
-  const widgetRef = React.useRef<HTMLDivElement>(null);
-  const configWidgetRef = React.useRef<HTMLDivElement>(null);
-
-  const prompts = [
-    "Tell me about your tech stack.",
-    "How do I integrate Klyro into my site?",
-    "Show me your most impactful project.",
-    "What are your pricing plans?",
-    "Can I customize the bot's persona?",
-    "What is your typical design process?",
-    "How does Klyro handle data security?",
-    "Show me your latest work.",
-  ];
-
-  // Global listeners and intersections
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      setFlashlightPos({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    window.addEventListener("scroll", handleScroll);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-
-    document
-      .querySelectorAll(".reveal-on-scroll")
-      .forEach((el) => observer.observe(el));
-
-    return () => {
-      window.removeEventListener("mousemove", handleGlobalMouseMove);
-      window.removeEventListener("scroll", handleScroll);
-      observer.disconnect();
-    };
-  }, []);
-
-  // Robust Simulated Typing Effect
-  const [charIndex, setCharIndex] = useState(0);
-
-  useEffect(() => {
-    const fullText = prompts[currentPromptIndex];
-
-    if (charIndex < fullText.length) {
-      const timeout = setTimeout(() => {
-        setTypingText(fullText.slice(0, charIndex + 1));
-        setCharIndex((prev) => prev + 1);
-      }, 50);
-      return () => clearTimeout(timeout);
-    } else {
-      const waitTimeout = setTimeout(() => {
-        setCharIndex(0);
-        setTypingText("");
-        setCurrentPromptIndex((prev) => (prev + 1) % prompts.length);
-      }, 3000);
-      return () => clearTimeout(waitTimeout);
-    }
-  }, [charIndex, currentPromptIndex]);
-
-  // Fetch user session
-  useEffect(() => {
-    async function checkUser() {
-      try {
-        const res = await fetch("/api/profile");
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data);
-        }
-      } catch (error) {
-        console.error("Failed to check user session:", error);
-      }
-    }
-    checkUser();
-  }, []);
-
-  const handleLogoutConfirm = async () => {
-    setIsLoggingOut(true);
-    try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      setUser(null);
-      setIsLogoutModalOpen(false);
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
-
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-
-  // Close dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        isDropdownOpen &&
-        !(e.target as Element).closest(".nav-user-profile")
-      ) {
-        setIsDropdownOpen(false);
-      }
-    };
-    window.addEventListener("mousedown", handleClickOutside);
-    return () => window.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen]);
-
-  // Persona auto-rotation
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(() => {
-      setActivePersona((prev: number) => (prev + 1) % 3);
-    }, 7000);
-    return () => clearInterval(timer);
-  }, [isPaused]);
-
-  // Handlers
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!widgetRef.current) return;
-    const rect = widgetRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMousePos({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
-  };
-
-  const handleConfigMouseMove = (e: React.MouseEvent) => {
-    if (!configWidgetRef.current) return;
-    const rect = configWidgetRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setConfigMousePos({ x, y });
-  };
-
-  const handleConfigMouseLeave = () => {
-    setConfigMousePos({ x: 0, y: 0 });
-  };
+function GlassCard({
+  children,
+  style = {},
+  className = "",
+}: {
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  className?: string;
+}) {
   return (
-    <main className="landing-page">
-      <div className="premium-bg-container">
-        <div className="bg-mesh-container">
-          <div className="mesh-blob blob-1"></div>
-          <div className="mesh-blob blob-2"></div>
-          <div className="mesh-blob blob-3"></div>
-        </div>
-        <div className="noise-overlay"></div>
-        <div className="subtle-grid"></div>
-      </div>
-      <div
-        className="flashlight-bg"
-        style={
-          { "--x": `${flashlightPos.x}%`, "--y": `${flashlightPos.y}%` } as any
-        }
-      />
-      {/* Navigation */}
-      <nav
-        className={`landing-nav ${scrolled ? "nav-scrolled" : ""}`}
-        aria-label="Main navigation"
-      >
-        <div className="landing-container nav-content">
-          <Link href="/" className="nav-logo" aria-label="Klyro Home">
-            <Image
-              src="/logo.svg"
-              alt="Klyro Logo"
-              width={120}
-              height={40}
-              className="nav-logo-img"
-              priority
-            />
-          </Link>
-          <div className="nav-actions">
-            {user ? (
-              <div className="nav-user-profile">
-                <button
-                  className="nav-profile-trigger"
-                  onClick={toggleDropdown}
-                  aria-expanded={isDropdownOpen}
-                >
-                  <div className="nav-avatar">
-                    {user.full_name
-                      ? user.full_name
-                          .split(" ")
-                          .filter(Boolean)
-                          .map((n) => n[0].toUpperCase())
-                          .filter(
-                            (_, i, arr) => i === 0 || i === arr.length - 1,
-                          )
-                          .join("")
-                      : user.email.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="nav-user-name">
-                    {user.full_name?.split(" ")[0] || "User"}
-                  </span>
-                  <ChevronDown
-                    size={16}
-                    className={`nav-chevron ${isDropdownOpen ? "open" : ""}`}
-                  />
-                </button>
+    <motion.div
+      className={`glass-card ${className}`}
+      style={style}
+      whileHover={{
+        y:           -4,
+        borderColor: "rgba(59, 130, 246, 0.38)",
+        boxShadow:   "0 0 40px rgba(59, 130, 246, 0.12), 0 24px 60px rgba(0, 0, 0, 0.5)",
+      }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
-                {isDropdownOpen && (
-                  <div className="nav-dropdown-menu glass animate-fade-in">
-                    <Link href="/admin" className="dropdown-item">
-                      <Settings size={18} />
-                      <span>Dashboard</span>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setIsLogoutModalOpen(true);
-                        setIsDropdownOpen(false);
-                      }}
-                      className="dropdown-item text-danger"
-                    >
-                      <LogOut size={18} />
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+/* ══════════════════════════════════════════════════════════════════════════
+   DEMO SECTION — inline widget + floating question chips
+══════════════════════════════════════════════════════════════════════════ */
+const DEMO_QUESTIONS = [
+  "What if it says something wrong about me?",
+  "Will it sound like a generic AI?",
+  "How do I add it to my site?",
+  "What can I feed it?",
+];
+
+const chipPositions: React.CSSProperties[] = [
+  { top: "12%",  right: "calc(100% + 40px)" },
+  { top: "38%", right: "calc(100% + 80px)" },
+  { bottom: "38%", left: "calc(100% + 80px)" },
+  { bottom: "12%",  left: "calc(100% + 40px)" },
+];
+
+function DemoChip({
+  text,
+  active,
+  delay,
+  onClick,
+  style,
+}: {
+  text: string;
+  active: boolean;
+  delay: number;
+  onClick: () => void;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.96 }}
+      style={{
+        padding:        "14px 26px",
+        borderRadius:   999,
+        border:         active
+          ? "1px solid rgba(59, 130, 246, 0.7)"
+          : "1px solid rgba(147, 197, 253, 0.25)",
+        background:     active
+          ? "rgba(59, 130, 246, 0.2)"
+          : "rgba(10, 15, 30, 0.7)",
+        backdropFilter: "blur(16px)",
+        color:          active ? "#bfdbfe" : "rgba(219, 234, 254, 0.85)",
+        fontSize:       15,
+        fontWeight:     500,
+        letterSpacing:  "-0.01em",
+        cursor:         "pointer",
+        transition:     "border-color 0.3s, background 0.3s, color 0.3s, box-shadow 0.3s",
+        boxShadow:      active
+          ? "0 0 28px rgba(59, 130, 246, 0.25), inset 0 0 12px rgba(59, 130, 246, 0.08)"
+          : "0 2px 16px rgba(0,0,0,0.25)",
+        whiteSpace:     "nowrap",
+        ...style,
+      }}
+    >
+      {text}
+    </motion.button>
+  );
+}
+
+function DemoSection() {
+  const mountRef = useRef<HTMLDivElement>(null);
+  const sendRef = useRef<((t: string) => void) | null>(null);
+  const initializedRef = useRef(false);
+  const [activeQ, setActiveQ] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (initializedRef.current || !mountRef.current) return;
+    initializedRef.current = true;
+
+    const isLocal = window.location.hostname === "localhost";
+
+    import("@klyro/widget").then((mod) => {
+      const init = mod.initKlyro || mod.default?.initKlyro || mod.default;
+      const send = mod.sendMessage || mod.default?.sendMessage;
+      if (send) sendRef.current = send;
+
+      if (typeof init === "function") {
+        init({
+          key: "MnK1XElbACpl",
+          apiBase: isLocal ? "http://localhost:3000" : "https://klyro-pro.vercel.app",
+          inline: true,
+          container: mountRef.current,
+        });
+      }
+    });
+  }, []);
+
+  const handleChipClick = useCallback((idx: number) => {
+    setActiveQ(idx);
+    const text = DEMO_QUESTIONS[idx];
+    if (sendRef.current) {
+      sendRef.current(text);
+    } else if (typeof (window as any).klyroSendMessage === "function") {
+      (window as any).klyroSendMessage(text);
+    }
+  }, []);
+
+  return (
+    <section style={{ padding: "0 clamp(24px,5vw,80px) 128px", maxWidth: 1100, margin: "0 auto", overflow: "visible", position: "relative", zIndex: 1 }}>
+      <motion.div
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-60px" }}
+        style={{ textAlign: "center", marginBottom: 56 }}
+      >
+        <Eyebrow>See it live</Eyebrow>
+        <h2 className="section-h2" style={{ marginTop: 16, color: C.primary }}>
+          Don&apos;t take our word for it.
+        </h2>
+            <p style={{ marginTop: 14, fontSize: 16, color: C.muted, maxWidth: "44ch", margin: "14px auto 0" }}>
+              Tap a question. Watch Klyro answer it from real knowledge, in its own voice.
+            </p>
+          </motion.div>
+
+      <motion.div
+        className="demo-stage"
+        variants={fadeUp}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-60px" }}
+        style={{ position: "relative", display: "flex", justifyContent: "center" }}
+      >
+        <div className="demo-glow" />
+
+        {/* Question chips floating around the widget */}
+        <div style={{ position: "relative" }}>
+          {DEMO_QUESTIONS.map((q, i) => (
+            <DemoChip
+              key={q}
+              text={q}
+              active={activeQ === i}
+              delay={0.3 + i * 0.1}
+              onClick={() => handleChipClick(i)}
+              style={{
+                position: "absolute",
+                ...chipPositions[i],
+                zIndex: 10,
+              }}
+            />
+          ))}
+
+          {/* Widget container */}
+          <div
+            ref={mountRef}
+            style={{
+              width:        "420px",
+              height:       "680px",
+              position:     "relative",
+              overflow:     "hidden",
+              borderRadius: "20px",
+              background:   "rgba(10,12,25,0.85)",
+              border:       "1px solid rgba(59,130,246,0.18)",
+              boxShadow:    "0 8px 60px rgba(59,130,246,0.18), 0 0 0 1px rgba(59,130,246,0.08)",
+            }}
+          />
+        </div>
+      </motion.div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MAIN PAGE
+══════════════════════════════════════════════════════════════════════════ */
+export default function LandingPage() {
+  const scrollProgress = useRef(0);
+  const storyRef       = useRef<HTMLDivElement>(null!);
+
+  const [scrolled,  setScrolled]  = useState(false);
+  const [menuOpen,  setMenuOpen]  = useState(false);
+  const [user,      setUser]      = useState<{ full_name: string | null } | null>(null);
+  const [chapter,   setChapter]   = useState(0);
+
+  /* Profile */
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.id && setUser(d))
+      .catch(() => null);
+  }, []);
+
+  /* Nav scroll shadow */
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 16);
+    fn();
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  /* ── GSAP ScrollTrigger: scrub scrollProgress across the story section ── */
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      /* Master scrub — drives the 3D scene */
+      ScrollTrigger.create({
+        trigger: storyRef.current,
+        start:   "top top",
+        end:     "bottom bottom",
+        scrub:   1.2,
+        onUpdate: (self) => {
+          scrollProgress.current = self.progress;
+          /* Update chapter label for UI overlays */
+          setChapter(Math.min(4, Math.floor(self.progress * 5)));
+        },
+      });
+
+      /* Individual chapter text animations */
+      const chapterEls = storyRef.current.querySelectorAll(".chapter-content");
+      chapterEls.forEach((el) => {
+        const lines = el.querySelectorAll(".line-reveal");
+        gsap.fromTo(
+          lines,
+          { opacity: 0, y: 24 },
+          {
+            opacity: 1,
+            y:       0,
+            duration: 0.8,
+            stagger:  0.1,
+            ease:    "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start:   "top 75%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <>
+      {/* Noise Overlay applied to body via class */}
+      <div className="noise-overlay" />
+
+      {/* ── LAYER 0: Fixed 3D Canvas ─────────────────────────────────────── */}
+      <Scene scrollProgress={scrollProgress} />
+
+      {/* ── LAYER 1: Scroll content ──────────────────────────────────────── */}
+      <div style={{ position: "relative", zIndex: 10 }}>
+
+        {/* ── NAV ─────────────────────────────────────────────────────────── */}
+        <nav className={`nav-pill ${scrolled ? "" : "at-top"}`}>
+          <Link href="/" aria-label="Klyro" style={{ flexShrink: 0, width: 180 }}>
+            <Image src="/logo.svg" alt="Klyro" width={96} height={28} priority />
+          </Link>
+
+          <ul
+            className="nav-links"
+            style={{ 
+              display: "flex", 
+              gap: 8, 
+              listStyle: "none", 
+              alignItems: "center",
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)"
+            }}
+          >
+            {NAV_LINKS.map((l) => (
+              <li key={l.href}>
+                <a href={l.href} className="nav-pill-link">{l.label}</a>
+              </li>
+            ))}
+          </ul>
+
+          <div className="nav-cta" style={{ display: "flex", gap: 12, alignItems: "center", width: 180, justifyContent: "flex-end" }}>
+            {user ? (
+              <Link href="/admin" className="nav-pill-cta">Dashboard</Link>
             ) : (
               <>
-                <Link href="/login" className="btn-secondary nav-btn">
-                  Login
-                </Link>
-                <Link
-                  href="/signup"
-                  className="btn-primary nav-btn"
-                  aria-label="Get started for free"
-                >
-                  Get Started
-                </Link>
+                <Link href="/login" className="nav-pill-link" style={{ padding: "8px 16px", whiteSpace: "nowrap" }}>Sign in</Link>
+                <Link href="/signup" className="nav-pill-cta">Start free →</Link>
               </>
             )}
           </div>
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="hero-section" aria-labelledby="hero-heading">
-        <div className="landing-container">
-          <div className="hero-content-wrapper">
-            <div className="hero-text-content">
-              {/* <div className="badge animate-fade-in">
-                <Sparkles size={14} style={{ marginRight: "8px" }} />
-                Your AI-Powered Digital Twin
-              </div> */}
-              <h1
-                id="hero-heading"
-                className="hero-title animate-fade-in animation-delay-1"
-              >
-                Define Your Persona, <br />
-                <span>Let AI Tell Your Story.</span>
-              </h1>
-              <p className="hero-subtitle animate-fade-in animation-delay-2">
-                Transform your static portfolio into a dynamic digital twin. Let
-                visitors explore your work, skills, and personality through a
-                custom AI persona trained on your unique journey.
-              </p>
-              <div className="hero-buttons animate-fade-in animation-delay-3">
-                <Link
-                  href="/signup"
-                  className="btn btn-primary hero-main-btn"
-                  aria-label="Sign up for Klyro for free"
-                >
-                  Start Building for Free{" "}
-                  <ArrowRight size={18} aria-hidden="true" />
-                </Link>
-              </div>
+          <button
+            className="nav-menu"
+            onClick={() => setMenuOpen((o) => !o)}
+            style={{
+              display: "none", alignItems: "center", justifyContent: "center",
+              width: 40, height: 40, borderRadius: "50%",
+              border: `1px solid ${C.border}`, background: C.surface,
+              color: C.primary, cursor: "pointer", fontSize: 18,
+            }}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
 
-              {/* Scrolling Ticker */}
-              <div className="scrolling-ticker animate-fade-in animation-delay-3">
-                <div className="ticker-content">
-                  {[
-                    "Personalized AI Persona",
-                    "RAG-Powered Intelligence",
-                    "Instant GitHub Sync",
-                    "Embeddable Widget",
-                    "Custom Branding",
-                    "Privacy First",
-                  ].map((item, idx) => (
-                    <div key={idx} className="ticker-item">
-                      <div className="ticker-dot"></div>
-                      {item}
-                    </div>
-                  ))}
-                  {/* Duplicate for seamless loop */}
-                  {[
-                    "Personalized AI Persona",
-                    "RAG-Powered Intelligence",
-                    "Instant GitHub Sync",
-                    "Embeddable Widget",
-                    "Custom Branding",
-                    "Privacy First",
-                  ].map((item, idx) => (
-                    <div key={`dup-${idx}`} className="ticker-item">
-                      <div className="ticker-dot"></div>
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Persona Showcase Stack */}
-            <div
-              className="persona-carousel-wrapper animate-fade-in"
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-              aria-label="AI Persona Showcases"
-            >
-              <div
-                className="persona-stack-container animate-fade-in"
-                style={{ animationDelay: "0.4s", cursor: "pointer" }}
-                onClick={() => setActivePersona((prev) => (prev + 1) % 3)}
-                role="region"
-                aria-live="polite"
-              >
-                {[
-                  {
-                    id: "architect",
-                    name: "The Architect",
-                    tagline: "Precise & Logistical",
-                    info: "Specializes in technical architecture, system design, and deep-dive technical queries.",
-                    avatar: "/images/avatars/architect_head.png",
-                    color: "#3b82f6",
-                  },
-                  {
-                    id: "strategist",
-                    name: "The Strategist",
-                    tagline: "Results-Driven",
-                    info: "Emphasizes market impact, project ROI, and long-term strategic value of your work.",
-                    avatar: "/images/avatars/strategist_head.png",
-                    color: "#f59e0b",
-                  },
-                  {
-                    id: "muse",
-                    name: "The Muse",
-                    tagline: "Witty & Inspiring",
-                    info: "Focuses on user experience, design philosophy, and creative storytelling of your journey.",
-                    avatar: "/images/avatars/muse_head.png",
-                    color: "#d946ef",
-                  },
-                ].map((persona, i) => {
-                  const isActive = activePersona === i;
-                  const isPrev = i === (activePersona - 1 + 3) % 3;
-                  const isNext = i === (activePersona + 1) % 3;
-
-                  return (
-                    <div
-                      key={persona.id}
-                      className={`persona-card ${isActive ? "active" : ""} ${
-                        isActive
-                          ? "pos-center"
-                          : isPrev
-                            ? "pos-left"
-                            : "pos-right"
-                      }`}
-                      style={{ "--glow-color": persona.color } as any}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActivePersona(i);
-                      }}
-                      aria-current={isActive ? "true" : "false"}
-                    >
-                      <div className="persona-glow-bg"></div>
-                      <div className="persona-avatar-container">
-                        <img
-                          src={persona.avatar}
-                          alt={`${persona.name} Persona Avatar`}
-                          className="persona-avatar-image"
-                        />
-                      </div>
-                      <div className="persona-tagline">{persona.tagline}</div>
-                      <div className="persona-name">{persona.name}</div>
-                      <p className="persona-info">{persona.info}</p>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="carousel-indicators">
-                {[0, 1, 2].map((i) => (
-                  <button
-                    key={i}
-                    className={`indicator ${activePersona === i ? "active" : ""}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActivePersona(i);
-                    }}
-                    aria-label={`Show persona ${i + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Product Demo Section */}
-      <section
-        id="demo"
-        className="landing-section reveal-on-scroll"
-        aria-labelledby="demo-heading"
-      >
-        <div className="landing-container">
-          <div className="demo-grid">
-            <div>
-              <h2 id="demo-heading" className="section-title">
-                An intelligent assistant that{" "}
-                <span className="text-gradient-premium">truly knows you.</span>
-              </h2>
-              <p className="section-desc">
-                Upload your resume, technical documents, or link your GitHub.
-                Klyro uses advanced RAG technology to ensure every response is
-                accurate and based on your verified data.
-              </p>
-              <div className="flex-col-gap-20">
-                <div className="glass-hover demo-feature-card glass-premium p-24 rounded-2xl">
-                  <div className="icon-wrapper icon-wrapper-primary">
-                    <Shield size={24} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="demo-feature-title">Privacy First</h3>
-                    <p className="demo-feature-desc">
-                      Your data is encrypted and only used to train your
-                      personal model.
-                    </p>
-                  </div>
-                </div>
-                <div className="glass-hover demo-feature-card glass-premium p-24 rounded-2xl">
-                  <div className="icon-wrapper icon-wrapper-secondary">
-                    <Zap size={24} aria-hidden="true" />
-                  </div>
-                  <div>
-                    <h3 className="demo-feature-title">Ultra Fast Retrieval</h3>
-                    <p className="demo-feature-desc">
-                      Sub-second response times using optimized vector Search.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              className="animate-fade-in demo-widget-wrapper"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              ref={widgetRef}
-              aria-label="Klyro Chat Widget Preview"
-            >
-              <div
-                className="demo-widget-container glass-premium"
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
                 style={{
-                  transform: `perspective(1200px) rotateY(${mousePos.x * 6}deg) rotateX(${-mousePos.y * 6}deg) translate(${-mousePos.x * 40}px, ${-mousePos.y * 40}px)`,
-                  transition:
-                    mousePos.x === 0 && mousePos.y === 0
-                      ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
-                      : "transform 0.15s ease-out",
+                  position: "absolute",
+                  top: "100%", left: 0, right: 0,
+                  marginTop: 12,
+                  background: "rgba(8,8,15,0.97)",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 24, padding: 16,
+                  backdropFilter: "blur(20px)",
+                  zIndex: 101,
                 }}
               >
-                <div className="demo-widget-bg">
-                  <div className="demo-widget-blob demo-widget-blob-1"></div>
-                  <div className="demo-widget-blob demo-widget-blob-2"></div>
-                  <div className="demo-widget-blob demo-widget-blob-3"></div>
-                </div>
+                {NAV_LINKS.map((l) => (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setMenuOpen(false)}
+                    style={{
+                      display: "block", padding: "12px 16px",
+                      borderRadius: 12, color: C.secondary, fontSize: 15,
+                    }}
+                  >
+                    {l.label}
+                  </a>
+                ))}
+                <div style={{ height: 1, background: C.border, margin: "12px 0" }} />
+                <Link href="/signup" className="nav-pill-cta" style={{ width: "100%", justifyContent: "center" }}>
+                  Start free →
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </nav>
 
-                {/* Widget Header */}
-                <div className="demo-widget-header">
-                  <div className="demo-widget-actions-top">
-                    <div className="demo-widget-action-btn">
-                      <RotateCcw size={14} />
-                    </div>
-                    <div className="demo-widget-action-btn">
-                      <Plus size={14} style={{ transform: "rotate(45deg)" }} />
-                    </div>
-                  </div>
-                  <div className="demo-widget-header-center">
-                    <div className="demo-widget-avatar">
-                      <img
-                        src="/icons/icon-128x128.png"
-                        alt="Klyro"
-                        width="32"
-                        height="32"
-                      />
-                    </div>
-                    <div className="demo-widget-title">Klyro Assistant</div>
-                  </div>
-                </div>
-
-                {/* Chat Area */}
-                <div className="demo-widget-chat">
-                  {/* Empty State Visual */}
-                  <div className="demo-widget-empty-state">
-                    <h1 className="demo-widget-greeting">Hey there!</h1>
-                    <h2 className="demo-widget-subgreeting">
-                      I am Klyro&apos;s assistant.
-                    </h2>
-                    <div className="demo-prompt-box">
-                      What would you like to know about Klyro?
-                    </div>
-                  </div>
-                </div>
-
-                {/* Input Area */}
-                <div className="demo-widget-input-area">
-                  <div className="demo-widget-input-row">
-                    <div className="demo-widget-input">
-                      <span className="typing-cursor">{typingText}</span>
-                    </div>
-                    <div className="demo-widget-send-btn">
-                      <Send size={16} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Branding Footer */}
-                <div className="demo-widget-footer">
-                  <span>
-                    Powered by <span className="font-bold">Klyro</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="landing-section reveal-on-scroll"
-        aria-labelledby="customization-heading"
-      >
-        <div className="landing-container">
-          <div className="text-center">
-            <span className="section-label">Personas & Customization</span>
-            <h2 id="customization-heading" className="section-title">
-              Your bot, your personality.
-            </h2>
-            <p className="section-desc mb-0">
-              Adjust tone, style, and branding to make the assistant feel like
-              an extension of yourself.
-            </p>
-          </div>
-
+        {/* ── STORY: 5 pinned chapters, drives 3D ──────────────────────────── */}
+        <div
+          id="story"
+          ref={storyRef}
+          style={{ position: "relative" }}
+        >
+          {/* Progress dots — fixed right side */}
           <div
-            className="showcase-wrapper animate-fade-in"
-            onMouseMove={handleConfigMouseMove}
-            onMouseLeave={handleConfigMouseLeave}
-            ref={configWidgetRef}
-            aria-label="Persona Customization Preview"
+            style={{
+              position: "fixed",
+              right: 32,
+              top: "50%",
+              transform: "translateY(-50%)",
+              zIndex: 20,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
           >
-            <div
-              className="glass-premium showcase-widget-inner"
+            {CHAPTERS.map((ch, i) => (
+              <div
+                key={ch.id}
+                className={`progress-dot${chapter === i ? " active" : ""}`}
+              />
+            ))}
+          </div>
+
+          {CHAPTERS.map((ch, i) => (
+            <section
+              key={ch.id}
+              id={ch.id}
               style={{
-                transform: `perspective(1500px) rotateY(${configMousePos.x * 2}deg) rotateX(${-configMousePos.y * 2}deg) translate(${-configMousePos.x * 20}px, ${-configMousePos.y * 20}px)`,
-                transition:
-                  configMousePos.x === 0 && configMousePos.y === 0
-                    ? "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)"
-                    : "transform 0.15s ease-out",
+                position:       "relative",
+                minHeight:      "100vh",
+                display:        "flex",
+                alignItems:     "center",
+                justifyContent: ch.align === "right"  ? "flex-end"
+                              : ch.align === "center" ? "center"
+                              :                         "flex-start",
+                /* Horizontal padding: left chapters leave room for 3D; center gets even gutters */
+                paddingLeft:  "clamp(32px, 7vw, 140px)",
+                paddingRight: ch.align === "left" ? "clamp(32px, 42vw, 600px)" : "clamp(32px, 7vw, 140px)",
+                paddingTop:     80,
+                paddingBottom:  80,
               }}
             >
-              <div className="reveal-on-scroll">
-                <div className="badge mb-20">Step 1: Choose Your Tone</div>
-                <div className="showcase-grid" role="list">
-                  {[
-                    {
-                      name: "Friendly",
-                      icon: <Smile size={20} aria-hidden="true" />,
-                      desc: "Warm, approachable, uses casual language",
-                      active: true,
-                    },
-                    {
-                      name: "Professional",
-                      icon: <Briefcase size={20} aria-hidden="true" />,
-                      desc: "Polished but personable, balanced tone",
-                    },
-                    {
-                      name: "Casual",
-                      icon: <Coffee size={20} aria-hidden="true" />,
-                      desc: "Super relaxed, like texting a friend",
-                    },
-                    {
-                      name: "Formal",
-                      icon: <Award size={20} aria-hidden="true" />,
-                      desc: "Precise, articulate, no slang",
-                    },
-                    {
-                      name: "Enthusiastic",
-                      icon: <Zap size={20} aria-hidden="true" />,
-                      desc: "High energy, excited about everything",
-                    },
-                    {
-                      name: "Calm & Thoughtful",
-                      icon: <Leaf size={20} aria-hidden="true" />,
-                      desc: "Measured, reflective, takes time to explain",
-                    },
-                  ].map((p, i) => (
-                    <div
-                      key={i}
-                      className={`showcase-card ${p.active ? "active" : ""}`}
-                      role="listitem"
-                      aria-label={`${p.name} personality option`}
-                    >
-                      <div
-                        className={`showcase-icon-wrapper ${p.active ? "showcase-icon-wrapper-active" : "showcase-icon-wrapper-default"}`}
-                      >
-                        {p.icon}
-                      </div>
-                      <div>
-                        <div
-                          className={`showcase-card-name ${p.active ? "text-white" : ""}`}
-                        >
-                          {p.name}
-                        </div>
-                        <div className="showcase-card-desc">{p.desc}</div>
-                      </div>
-                    </div>
-                  ))}
+              <div
+                className="chapter-content"
+                style={{
+                  maxWidth:  ch.align === "center" ? 720 : 480,
+                  textAlign: ch.align === "center" ? "center" : "left",
+                  width:     "100%",
+                  margin:    ch.align === "center" ? "0 auto" : undefined,
+                }}
+              >
+                <div className="line-reveal">
+                  <Eyebrow>{ch.eyebrow}</Eyebrow>
                 </div>
-              </div>
 
-              {/* traits and instructions */}
-              <div className="traits-grid reveal-on-scroll animation-delay-1">
-                <div>
-                  <div className="badge mb-20">Step 2: Define Traits</div>
-                  <label
-                    className="form-label form-label-block"
-                    htmlFor="trait-input"
+                <div className="line-reveal" style={{ marginTop: 24 }}>
+                  <h1 className={`display${i === 0 ? " gradient-text" : ""}`}>
+                    {ch.headline}
+                  </h1>
+                </div>
+
+                <p
+                  className="line-reveal"
+                  style={{
+                    marginTop:  20,
+                    fontSize:   17,
+                    lineHeight: 1.72,
+                    color:      C.secondary,
+                    maxWidth:   "60ch",
+                    margin:     ch.align === "center" ? "20px auto 0" : "20px 0 0",
+                  }}
+                >
+                  {ch.sub}
+                </p>
+
+                {(ch.cta || ch.ctaGhost) && (
+                  <div
+                    className="line-reveal"
+                    style={{
+                      marginTop:      36,
+                      display:        "flex",
+                      gap:            14,
+                      flexWrap:       "wrap",
+                      justifyContent: ch.align === "center" ? "center" : "flex-start",
+                    }}
                   >
-                    Personality Traits
-                  </label>
-                  <div className="trait-input-container">
-                    <div
-                      className="glass glass-input-placeholder"
-                      id="trait-input"
-                    >
-                      Add a trait...
-                    </div>
-                    <button
-                      className="trait-add-btn"
-                      aria-label="Add personality trait"
-                    >
-                      Add
-                    </button>
+                    {ch.cta && (
+                      <Link href={ch.cta.href} className="cta-primary">
+                        {ch.cta.label}
+                      </Link>
+                    )}
+                    {ch.ctaGhost && (
+                      <a href={ch.ctaGhost.href} className="cta-ghost">
+                        {ch.ctaGhost.label}
+                      </a>
+                    )}
                   </div>
-                  <div className="mb-12">
-                    <span className="trait-suggestion-label">Suggestions:</span>
-                  </div>
-                  <div className="flex-wrap-gap-8" role="list">
+                )}
+
+                {/* Hero only: stats row */}
+                {i === 0 && (
+                  <div
+                    className="line-reveal"
+                    style={{
+                      marginTop:       44,
+                      display:         "flex",
+                      gap:             0,
+                      alignItems:      "center",
+                      justifyContent:  "center",
+                    }}
+                  >
                     {[
-                      "technical",
-                      "creative",
-                      "analytical",
-                      "humble",
-                      "confident",
-                      "curious",
-                      "detail-oriented",
-                    ].map((s) => (
+                      { n: "100%",    l: "grounded in your data" },
+                      { n: "Zero",    l: "hallucinations in strict mode" },
+                      { n: "1 tag",     l: "to transform your site" },
+                    ].map((s, si) => (
                       <div
-                        key={s}
-                        className="badge trait-badge"
-                        role="listitem"
+                        key={s.l}
+                        style={{
+                          display:      "flex",
+                          alignItems:   "center",
+                          paddingRight: si < 2 ? 28 : 0,
+                          marginRight:  si < 2 ? 28 : 0,
+                          borderRight:  si < 2 ? `1px solid rgba(255,255,255,0.08)` : "none",
+                          textAlign:    "center",
+                        }}
                       >
-                        + {s}
+                        <div>
+                          <div
+                            style={{
+                              fontSize:      22,
+                              fontWeight:    300,
+                              color:         C.primary,
+                              fontFamily:    "'Sora', sans-serif",
+                              letterSpacing: "-0.02em",
+                              lineHeight:    1,
+                            }}
+                          >
+                            {s.n}
+                          </div>
+                          <div style={{ fontSize: 11, color: C.muted, marginTop: 5, letterSpacing: "0.02em" }}>
+                            {s.l}
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-
-                <div>
-                  <div className="badge mb-20">Step 3: Custom Guidance</div>
-                  <label
-                    className="form-label form-label-block"
-                    htmlFor="custom-instructions"
-                  >
-                    Custom Instructions
-                  </label>
-                  <div
-                    className="glass custom-instructions-box"
-                    id="custom-instructions"
-                  >
-                    Always fetch the project details from my Github
-                  </div>
-                  <p className="input-hint-text">
-                    Specific guidance for the bot&apos;s responses
-                  </p>
-                </div>
-              </div>
-
-              <div className="knowledge-sources-container reveal-on-scroll animation-delay-2">
-                <div className="badge mb-20">Step 4: Connect Data</div>
-                <label className="form-label form-label-block mb-20">
-                  Connected Knowledge Sources
-                </label>
-                <div className="knowledge-grid" role="list">
-                  <div
-                    className="glass-hover knowledge-source-card knowledge-source-card-success"
-                    role="listitem"
-                  >
-                    <div className="knowledge-source-inner">
-                      <Check
-                        size={18}
-                        className="text-success"
-                        aria-hidden="true"
-                      />
-                      <span className="knowledge-source-name">
-                        walter_resume.pdf
-                      </span>
-                    </div>
-                    <span className="knowledge-source-status text-success">
-                      Processed
-                    </span>
-                  </div>
-                  <div
-                    className="glass-hover knowledge-source-card knowledge-source-card-primary"
-                    role="listitem"
-                  >
-                    <div className="knowledge-source-inner">
-                      <Github
-                        size={18}
-                        className="text-accent"
-                        aria-hidden="true"
-                      />
-                      <span className="knowledge-source-name">
-                        github.com/the-sniper/klyro
-                      </span>
-                    </div>
-                    <span className="knowledge-source-status text-accent">
-                      Synced
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section
-        className="landing-section reveal-on-scroll"
-        aria-labelledby="features-heading"
-      >
-        <div className="landing-container">
-          <div className="text-center mb-48">
-            <span className="section-label">Core Capabilities</span>
-            <h2 id="features-heading" className="section-title">
-              Built for <span className="text-gradient-premium">builders.</span>
-            </h2>
-          </div>
-
-          <div className="features-grid">
-            <article className="card glass-premium feature-card reveal-on-scroll">
-              <div className="feature-card-icon text-accent">
-                <Shield size={32} aria-hidden="true" />
-              </div>
-              <h3 className="feature-card-title">RAG Engine</h3>
-              <p className="feature-card-desc">
-                Retrieval Augmented Generation ensures your AI only speaks from
-                your data sources.
-              </p>
-            </article>
-            <article className="card glass-premium feature-card reveal-on-scroll animation-delay-1">
-              <div className="feature-card-icon text-accent-secondary">
-                <Github size={32} aria-hidden="true" />
-              </div>
-              <h3 className="feature-card-title">GitHub Sync</h3>
-              <p className="feature-card-desc">
-                Automatically sync your repositories to keep the AI updated on
-                your latest projects.
-              </p>
-            </article>
-            <article className="card glass-premium feature-card reveal-on-scroll animation-delay-2">
-              <div className="feature-card-icon text-success">
-                <Zap size={32} aria-hidden="true" />
-              </div>
-              <h3 className="feature-card-title">One-Tag Install</h3>
-              <p className="feature-card-desc">
-                Embed your assistant on any site by simply adding a single line
-                of JavaScript.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="landing-section cta-section reveal-on-scroll"
-        aria-labelledby="cta-heading"
-      >
-        <div className="landing-container text-center">
-          <h2 id="cta-heading" className="cta-title">
-            Ready to elevate your portfolio?
-          </h2>
-          <p className="section-desc cta-desc">
-            Use Klyro to define your persona and create a lasting impression.
-          </p>
-          <div className="hero-buttons cta-buttons">
-            <Link
-              href="/signup"
-              className="btn btn-primary cta-btn-rounded"
-              aria-label="Get started for free today"
-            >
-              Get Started for Free{" "}
-              <ArrowRight size={20} className="ml-12" aria-hidden="true" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="landing-footer landing-footer-styled reveal-on-scroll">
-        <div className="landing-container footer-content landing-footer-container">
-          <div className="flex-col-gap-24">
-            <Link
-              href="/"
-              className="footer-logo footer-logo-link"
-              aria-label="Klyro Home"
-            >
-              <Image
-                src="/logo.svg"
-                alt="Klyro Logo"
-                width={100}
-                height={32}
-                className="footer-logo-img"
-              />
-            </Link>
-            <a
-              href="https://www.producthunt.com/products/klyro?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-klyro"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block transition-transform hover:scale-105"
-              aria-label="Klyro on Product Hunt"
-            >
-              <img
-                alt="Klyro - Featured on Product Hunt"
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1071040&amp;theme=neutral&amp;t=1769929255109"
-                style={{ width: "180px", height: "auto" }}
-                width="180"
-                height="40"
-              />
-            </a>
-          </div>
-          <p className="footer-copyright footer-copyright-text">
-            © {new Date().getFullYear()} Klyro. All rights reserved.{" "}
-            <br className="mobile-only" /> Built with ❤️ for the community.
-          </p>
-        </div>
-      </footer>
-      {/* Logout Confirmation Modal */}
-      {isLogoutModalOpen && (
-        <div
-          className="modal-overlay animate-overlay"
-          onClick={() => setIsLogoutModalOpen(false)}
-        >
-          <div
-            className="modal-glass animate-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="modal-header">
-              <div className="modal-header-text">
-                <h2 className="modal-title">Sign Out</h2>
-                <p className="modal-subtitle">
-                  You&apos;ll need to sign back in to access your dashboard and
-                  manage your AI personas.
-                </p>
-              </div>
-              <button
-                className="modal-close-btn"
-                onClick={() => setIsLogoutModalOpen(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="modal-body" style={{ padding: "0 32px 32px" }}>
-              <p style={{ color: "var(--text-secondary)" }}>
-                Are you sure you want to log out of your account?
-              </p>
-            </div>
-
-            <div className="modal-footer">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setIsLogoutModalOpen(false)}
-                disabled={isLoggingOut}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                style={{
-                  background: "#ef4444",
-                  borderColor: "#ef4444",
-                  boxShadow: "0 0 20px rgba(239, 68, 68, 0.2)",
-                }}
-                onClick={handleLogoutConfirm}
-                disabled={isLoggingOut}
-              >
-                {isLoggingOut ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <>
-                    <LogOut size={18} style={{ marginRight: "8px" }} />
-                    Logout
-                  </>
                 )}
-              </button>
+              </div>
+
+              {/* Scroll hint — bottom center */}
+              {i === 0 && (
+                <div
+                  style={{
+                    position:      "absolute",
+                    bottom:        36,
+                    left:          "50%",
+                    transform:     "translateX(-50%)",
+                    display:       "flex",
+                    flexDirection: "column",
+                    alignItems:    "center",
+                    gap:           8,
+                    color:         "rgba(160,157,184,0.8)",
+                    animation:     "scrollPulse 2.2s ease-in-out infinite",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span style={{ fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500 }}>Scroll</span>
+                  <div style={{ width: 1, height: 44, background: "linear-gradient(to bottom, rgba(160,157,184,0.6), transparent)" }} />
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
+
+        {/* ── FEATURES — below the story ──────────────────────────────────── */}
+        <section
+          id="features"
+          style={{
+            padding:   "128px 40px",
+            maxWidth:  1200,
+            margin:    "0 auto",
+          }}
+        >
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+          >
+            <Eyebrow>How it works</Eyebrow>
+            <h2
+              className="section-h2"
+              style={{ marginTop: 16, color: C.primary }}
+            >
+              Four things between you<br />and a smarter website.
+            </h2>
+            <p
+              style={{
+                marginTop: 16,
+                fontSize:  17,
+                lineHeight: 1.72,
+                color:     C.secondary,
+                maxWidth:  "58ch",
+              }}
+            >
+              Shape the voice. Ground the knowledge. Test it yourself.
+              Ship it. That's the whole loop — and it takes less than a day.
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="bento"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            style={{ marginTop: 48 }}
+          >
+            {FEATURES.map((f) => (
+              <GlassCard
+                key={f.title}
+                className={`bento-${f.span}`}
+                style={{ padding: 32 }}
+              >
+                <motion.div variants={itemVariant}>
+                  <div
+                    style={{
+                      fontSize:   18,
+                      fontWeight: 500,
+                      color:      C.primary,
+                      lineHeight: 1.35,
+                      marginBottom: 10,
+                    }}
+                  >
+                    {f.title}
+                  </div>
+                  <div
+                    style={{
+                      fontSize:   14,
+                      lineHeight: 1.72,
+                      color:      C.muted,
+                      marginBottom: 16,
+                    }}
+                  >
+                    {f.body}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {f.tags.map((t) => (
+                      <span key={t} className="chip">{t}</span>
+                    ))}
+                  </div>
+                </motion.div>
+              </GlassCard>
+            ))}
+          </motion.div>
+        </section>
+
+        {/* ── DEPLOY CODE ──────────────────────────────────────────────────── */}
+        <section
+          id="deploy"
+          style={{ padding: "0 40px 128px", maxWidth: 1200, margin: "0 auto" }}
+        >
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-40px" }}
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+          >
+            <GlassCard style={{ padding: 36 }}>
+              <motion.div variants={itemVariant}>
+                <Eyebrow>Script tag</Eyebrow>
+                <pre
+                  style={{
+                    marginTop:    20,
+                    background:   "rgba(0,0,0,0.45)",
+                    border:       `1px solid ${C.border}`,
+                    borderRadius: 10,
+                    padding:      "18px 22px",
+                    fontFamily:   "'JetBrains Mono', 'Fira Code', monospace",
+                    fontSize:     13,
+                    lineHeight:   1.8,
+                    color:        C.secondary,
+                    overflowX:    "auto",
+                    whiteSpace:   "pre",
+                  }}
+                >{`<script
+  src="https://unpkg.com/@klyro/widget"
+  data-key="YOUR_WIDGET_KEY"
+  async
+></script>`}</pre>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 16 }}>
+                  {["React / Next.js", "Vue", "Static HTML", "PWA"].map((t) => (
+                    <span key={t} className="chip">{t}</span>
+                  ))}
+                </div>
+              </motion.div>
+            </GlassCard>
+
+            <GlassCard style={{ padding: 36 }}>
+              <motion.div variants={itemVariant}>
+                <Eyebrow>What you control</Eyebrow>
+                <ul
+                  style={{
+                    listStyle:     "none",
+                    marginTop:     20,
+                    display:       "flex",
+                    flexDirection: "column",
+                    gap:           10,
+                  }}
+                >
+                  {[
+                    "Widget key generation",
+                    "Launcher style — text or icon",
+                    "Greeting and welcome message",
+                    "Theme color and logo upload",
+                    "Allowed domains and route visibility",
+                  ].map((item) => (
+                    <li
+                      key={item}
+                      style={{
+                        display:    "flex",
+                        alignItems: "center",
+                        gap:        10,
+                        fontSize:   14,
+                        color:      C.secondary,
+                      }}
+                    >
+                      <span
+                        style={{
+                          width:      18,
+                          height:     18,
+                          borderRadius: "50%",
+                          border:     "1px solid rgba(34,211,165,0.4)",
+                          background: "rgba(34,211,165,0.08)",
+                          display:    "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize:   10,
+                          color:      "#22d3a5",
+                          flexShrink: 0,
+                        }}
+                      >
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </GlassCard>
+          </motion.div>
+        </section>
+
+        {/* ── DEMO CHAT ────────────────────────────────────────────────────── */}
+        <DemoSection />
+
+        {/* ── CTA ─────────────────────────────────────────────────────────── */}
+        <section style={{ padding: "0 40px 120px", maxWidth: 1100, margin: "0 auto" }}>
+          <motion.div
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            style={{
+              position:   "relative",
+              background: "rgba(59, 130, 246, 0.06)",
+              border:     `1px solid var(--accent-border)`,
+              borderRadius: 24,
+              padding:    "80px 48px",
+              textAlign:  "center",
+              overflow:   "hidden",
+              boxShadow:  "0 0 80px rgba(59, 130, 246, 0.1)",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute", inset: 0, pointerEvents: "none",
+                background: "radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.2), transparent 65%)",
+              }}
+            />
+            <div style={{ position: "relative" }}>
+              <Eyebrow>Your website. Finally speaking for you.</Eyebrow>
+              <h2
+                className="section-h2"
+                style={{
+                  marginTop:    16,
+                  fontSize:     "clamp(32px, 5vw, 58px)",
+                  maxWidth:     680,
+                  marginLeft:   "auto",
+                  marginRight:  "auto",
+                  color:        C.primary,
+                  letterSpacing: "-0.025em",
+                }}
+              >
+                Every visitor gets an answer.{" "}
+                <span className="gradient-text">In your voice.</span>{" "}
+                Even at 3am.
+              </h2>
+              <p
+                style={{
+                  marginTop:  20,
+                  fontSize:   17,
+                  lineHeight: 1.75,
+                  color:      C.secondary,
+                  maxWidth:   "52ch",
+                  marginLeft: "auto", marginRight: "auto",
+                }}
+              >
+                The conversations that used to not happen because you weren't there
+                now do. That's what Klyro is for.
+              </p>
+              <div
+                style={{
+                  marginTop:      36,
+                  display:        "flex",
+                  justifyContent: "center",
+                  gap:            14,
+                  flexWrap:       "wrap",
+                }}
+              >
+                <Link href="/signup" className="cta-primary">
+                  Start free and deploy today →
+                </Link>
+                <Link href="/login" className="cta-ghost">
+                  Already have an account
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Footer */}
+          <div
+            style={{
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "space-between",
+              flexWrap:       "wrap",
+              gap:            16,
+              marginTop:      48,
+              paddingTop:     32,
+              borderTop:      `1px solid ${C.border}`,
+              fontSize:       13,
+              color:          C.muted,
+            }}
+          >
+            <span>Klyro: grounded AI in your voice, on your site.</span>
+            <div style={{ display: "flex", gap: 24 }}>
+              {NAV_LINKS.map((l) => (
+                <a key={l.href} href={l.href} className="nav-link">{l.label}</a>
+              ))}
             </div>
           </div>
-        </div>
-      )}
-    </main>
+        </section>
+
+      </div>
+    </>
   );
 }

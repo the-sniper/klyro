@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klyro Widget Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+    }
+    #klyro-mount {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="klyro-mount"></div>
+  <script src="/klyro-widget.js"></script>
+  <script>
+    (function () {
+      var isLocal = window.location.hostname === 'localhost';
+      initKlyro({
+        key: 'MnK1XElbACpl',
+        apiBase: isLocal ? 'http://localhost:3000' : 'https://klyro-pro.vercel.app',
+        inline: true,
+        container: document.getElementById('klyro-mount'),
+      });
+    })();
+  </script>
+</body>
+</html>

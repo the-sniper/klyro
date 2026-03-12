@@ -1,7 +1,6 @@
 import React from "react";
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
-import { Outfit } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import {
   PWAProvider,
@@ -11,30 +10,25 @@ import {
 import "./globals.css";
 import KlyroWidget from "@/components/chat/KlyroWidget";
 
-const outfit = Outfit({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "Klyro | AI Portfolio Chatbot & Personal Digital Twin",
+  title: "Klyro | Embeddable AI Website Copilot",
   description:
-    "Transform your portfolio with Klyro. Add a custom AI chatbot that learns from your GitHub, resume, and projects to engage visitors with your unique persona 24/7.",
+    "Train an embeddable AI copilot on your GitHub, resume, docs, and website content. Shape its persona, test every answer, and deploy it anywhere.",
   manifest: "/manifest.json",
   metadataBase: new URL("https://klyro.com"), // Replace with actual production URL when available
   keywords: [
+    "embeddable AI widget",
+    "AI website copilot",
     "AI portfolio chatbot",
-    "personal AI assistant",
-    "interactive portfolio",
-    "digital twin for developers",
+    "website chatbot",
     "AI persona for website",
     "embeddable chat widget",
-    "RAG chatbot for portfolios",
+    "RAG chatbot",
     "GitHub integrated AI assistant",
-    "website visitor engagement",
+    "knowledge based chatbot",
     "custom AI agent",
-    "AI-powered professional profile",
-    "automated portfolio inquiries",
-    "intelligent resume assistant",
-    "conversational portfolio",
     "AI brand voice",
+    "website visitor engagement",
   ],
   authors: [{ name: "Areef Syed", url: "https://www.areefsyed.com/" }],
   creator: "Klyro",
@@ -70,9 +64,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://klyro.com",
     siteName: "Klyro",
-    title: "Klyro | The Ultimate AI Portfolio Chatbot",
+    title: "Klyro | Embeddable AI Website Copilot",
     description:
-      "Showcase your work better with an AI digital twin. Klyro trains on your data to represent you to recruiters and clients 24/7.",
+      "Turn your content into a grounded AI website copilot. Train it on your sources, shape the persona, test it, and deploy it anywhere.",
     images: [
       {
         url: "/og-image.png", // Added placeholder for OG image
@@ -84,9 +78,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Klyro | AI Portfolio Assistant",
+    title: "Klyro | Embeddable AI Website Copilot",
     description:
-      "Define your persona, let AI tell your story. The easiest way to add an intelligent chatbot to your personal website.",
+      "Train an AI copilot on your own content and deploy a polished website widget that answers in your voice.",
     images: ["/og-image.png"],
   },
   other: {
@@ -101,8 +95,8 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+    { media: "(prefers-color-scheme: light)", color: "#050816" },
+    { media: "(prefers-color-scheme: dark)", color: "#050816" },
   ],
 };
 
@@ -117,18 +111,17 @@ export default function RootLayout({
     name: "Klyro",
     operatingSystem: "Web",
     applicationCategory: "BusinessApplication",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
-    },
     description:
-      "Klyro is an AI-powered portfolio chatbot platform that helps developers and creatives engage visitors through a custom digital twin trained on their professional data.",
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "88",
-    },
+      "Klyro is an embeddable AI website copilot that learns from your content, follows your persona, and helps visitors get grounded answers.",
+    featureList: [
+      "Persona configuration",
+      "Knowledge-based answers",
+      "GitHub and URL ingestion",
+      "Test chat with strict mode",
+      "Embeddable website widget",
+      "Conversation transcripts",
+    ],
+    url: "https://klyro.com",
   };
 
   return (
@@ -137,6 +130,13 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        {/* Google Fonts - Sora + Inter */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
         />
         {/* PWA meta tags for iOS */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -152,10 +152,10 @@ export default function RootLayout({
         <meta name="application-name" content="Klyro" />
 
         {/* Microsoft Tiles */}
-        <meta name="msapplication-TileColor" content="#0a0a0a" />
+        <meta name="msapplication-TileColor" content="#050816" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className={outfit.className}>
+      <body className="bg-[#060609] text-white">
         <PWAProvider>
           {children}
           <InstallBanner />
