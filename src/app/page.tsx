@@ -461,8 +461,8 @@ export default function LandingPage() {
 
         {/* ── NAV ─────────────────────────────────────────────────────────── */}
         <nav className={`nav-pill ${scrolled ? "" : "at-top"}`}>
-          <Link href="/" aria-label="Klyro" style={{ flexShrink: 0, width: 180 }}>
-            <Image src="/logo.svg" alt="Klyro" width={96} height={28} priority />
+          <Link href="/" aria-label="Klyro" style={{ flexShrink: 0 }}>
+            <Image src="/logo.svg" alt="Klyro" width={80} height={24} priority />
           </Link>
 
           <ul
@@ -472,9 +472,7 @@ export default function LandingPage() {
               gap: 8, 
               listStyle: "none", 
               alignItems: "center",
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)"
+              margin: "0 auto",
             }}
           >
             {NAV_LINKS.map((l) => (
@@ -484,7 +482,7 @@ export default function LandingPage() {
             ))}
           </ul>
 
-          <div className="nav-cta" style={{ display: "flex", gap: 12, alignItems: "center", width: 180, justifyContent: "flex-end" }}>
+          <div className="nav-cta" style={{ display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
             {user ? (
               <Link href="/admin" className="nav-pill-cta">Dashboard</Link>
             ) : (
@@ -501,51 +499,96 @@ export default function LandingPage() {
             style={{
               display: "none", alignItems: "center", justifyContent: "center",
               width: 40, height: 40, borderRadius: "50%",
-              border: `1px solid ${C.border}`, background: C.surface,
-              color: C.primary, cursor: "pointer", fontSize: 18,
+              border: "1px solid var(--glass-border)", background: "var(--glass-bg)",
+              color: "var(--text-primary)", cursor: "pointer", fontSize: 18,
+              position: "relative", zIndex: 102,
             }}
           >
             {menuOpen ? "✕" : "☰"}
           </button>
+        </nav>
 
-          <AnimatePresence>
-            {menuOpen && (
+        <AnimatePresence>
+          {menuOpen && (
+            <>
+              {/* Backdrop */}
               <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMenuOpen(false)}
                 style={{
-                  position: "absolute",
-                  top: "100%", left: 0, right: 0,
-                  marginTop: 12,
-                  background: "rgba(8,8,15,0.97)",
-                  border: `1px solid ${C.border}`,
-                  borderRadius: 24, padding: 16,
-                  backdropFilter: "blur(20px)",
+                  position: "fixed",
+                  inset: 0,
+                  background: "rgba(0,0,0,0.4)",
+                  backdropFilter: "blur(4px)",
+                  WebkitBackdropFilter: "blur(4px)",
+                  zIndex: 100,
+                }}
+              />
+              
+              {/* Drawer */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                style={{
+                  position: "fixed",
+                  top: 0, right: 0, bottom: 0,
+                  width: "100%",
+                  maxWidth: 300,
+                  background: "#08080b",
+                  borderLeft: "1px solid var(--glass-border)",
+                  padding: "100px 24px 40px",
                   zIndex: 101,
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "-20px 0 60px rgba(0,0,0,0.5)",
                 }}
               >
-                {NAV_LINKS.map((l) => (
-                  <a
-                    key={l.href}
-                    href={l.href}
+                <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                  {NAV_LINKS.map((l) => (
+                    <a
+                      key={l.href}
+                      href={l.href}
+                      onClick={() => setMenuOpen(false)}
+                      style={{
+                        display: "block", padding: "20px 0",
+                        color: "var(--text-primary)", fontSize: 17,
+                        fontWeight: 500,
+                        textDecoration: "none",
+                        borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      }}
+                    >
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+                <div style={{ marginTop: "auto" }}>
+                  <Link 
+                    href="/signup" 
+                    className="nav-pill-cta" 
+                    style={{ width: "100%", height: 52, fontSize: 16 }}
                     onClick={() => setMenuOpen(false)}
-                    style={{
-                      display: "block", padding: "12px 16px",
-                      borderRadius: 12, color: C.secondary, fontSize: 15,
-                    }}
                   >
-                    {l.label}
-                  </a>
-                ))}
-                <div style={{ height: 1, background: C.border, margin: "12px 0" }} />
-                <Link href="/signup" className="nav-pill-cta" style={{ width: "100%", justifyContent: "center" }}>
-                  Start free →
-                </Link>
+                    Start free →
+                  </Link>
+                  <Link 
+                    href="/login" 
+                    style={{ 
+                      display: "block", textAlign: "center", marginTop: 24,
+                      color: "var(--text-secondary)", textDecoration: "none", fontSize: 14 
+                    }}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                </div>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </nav>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* ── STORY: 5 pinned chapters, drives 3D ──────────────────────────── */}
         <div

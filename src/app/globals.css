@@ -308,7 +308,7 @@ a:hover {
 .nav-pill-link {
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none !important;
   padding: 8px 16px;
   border-radius: var(--radius-full);
@@ -316,8 +316,20 @@ a:hover {
 }
 
 .nav-pill-link:hover {
-  color: #fff;
+  color: var(--accent-primary) !important;
   background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-link {
+  font-size: 14px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--accent-primary) !important;
 }
 
 .nav-pill-link.active {
@@ -346,6 +358,18 @@ a:hover {
   background: var(--accent-secondary);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
+}
+
+/* Nav responsive */
+@media (max-width: 820px) {
+  .nav-links { display: none !important; }
+  .nav-cta   { display: none !important; }
+  .nav-menu  { display: flex !important; }
+  
+  .nav-pill {
+    padding: 0 16px;
+    height: 56px;
+  }
 }
 
 .chip {
