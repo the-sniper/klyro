@@ -297,7 +297,7 @@ function DemoSection() {
           key: "MnK1XElbACpl",
           apiBase: isLocal ? "http://localhost:3000" : "https://klyro-pro.vercel.app",
           inline: true,
-          container: mountRef.current,
+          container: mountRef.current as HTMLElement,
         });
       }
     });
