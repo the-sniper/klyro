@@ -1,24 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-
-interface SessionData {
-  userId: string;
-  email: string;
-  exp: number;
-}
-
-function parseSession(cookie: string | undefined): SessionData | null {
-  if (!cookie) return null;
-  
-  try {
-    const data = JSON.parse(Buffer.from(cookie, 'base64').toString());
-    if (data.exp && data.exp > Date.now()) {
-      return data as SessionData;
-    }
-    return null; // Expired
-  } catch {
-    return null;
-  }
-}
+import { parseSession } from '@/lib/auth/session'
 
 export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('session')?.value;

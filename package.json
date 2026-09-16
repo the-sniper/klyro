@@ -7,6 +7,9 @@
     "build": "npm run build:widget && next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "build:widget": "node widget/build.js && cp widget/dist/widget.js public/widget.js"
   },
   "dependencies": {
@@ -42,12 +45,14 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@types/three": "^0.183.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "autoprefixer": "^10.4.23",
     "esbuild": "^0.24.0",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.2.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.10"
   }
 }
