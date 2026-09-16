@@ -94,7 +94,11 @@ Values live in `.env.local` and in the hosting provider. Names only:
 - `SESSION_SECRET` — HMAC key for session cookies, at least 32 characters.
   Missing or short means every session is rejected and nobody can log in.
 - `CRON_SECRET` — bearer token for `/api/cron/*`. Missing means the ingestion
-  reaper refuses to run.
+  reaper refuses to run. It must also exist as a GitHub Actions repository
+  secret, because the schedule lives in
+  `.github/workflows/ingestion-reaper.yml` rather than in `vercel.json`:
+  Vercel's Hobby plan only allows once-daily cron, and a more frequent
+  entry in `vercel.json` makes Vercel reject the whole deployment.
 
 **Optional**
 

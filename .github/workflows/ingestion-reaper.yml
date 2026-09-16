@@ -1,0 +1,53 @@
+name: Ingestion reaper
+
+# Vercel's Hobby plan only permits once-daily cron, so a 10-minute sweep cannot
+# live in vercel.json: including one there makes Vercel reject the entire
+# deployment. The schedule runs here instead and calls the same endpoint, which
+# authenticates itself with CRON_SECRET.
+on:
+  schedule:
+    # Every 10 minutes. GitHub's scheduler is best effort and can drift by a few
+    # minutes under load, which is fine for a recovery sweep.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+# A slow sweep should not pile up behind the next tick.
+concurrency:
+  group: ingestion-reaper
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: Sweep stalled documents
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Call the reaper
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          BASE_URL: ${{ vars.PRODUCTION_URL || 'https://klyro-pro.vercel.app' }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${CRON_SECRET:-}" ]; then
+            echo "::error::CRON_SECRET repository secret is not set; the reaper cannot authenticate."
+            exit 1
+          fi
+
+          # -w appends the status on its own line; the body is the sweep report
+          # and contains no secrets.
+          response=$(curl -sS --max-time 120 -w $'\n%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE_URL}/api/cron/ingestion-reaper")
+
+          status=$(printf '%s' "$response" | tail -n1)
+          body=$(printf '%s' "$response" | sed '$d')
+
+          echo "HTTP ${status}"
+          echo "${body}"
+
+          if [ "$status" != "200" ]; then
+            echo "::error::Reaper returned HTTP ${status}"
+            exit 1
+          fi
