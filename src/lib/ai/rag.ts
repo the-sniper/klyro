@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { createServerClient } from "@/lib/supabase/client";
-import { generateEmbedding } from "./embeddings";
+import { generateEmbeddingWithUsage } from "./embeddings";
+import { DEFAULT_EMBEDDING_MODEL, estimateCostUsd } from "./pricing";
 import type { MatchedChunk, SourceReference, PersonaContext } from "@/types";
 import { fetchLatestRepos } from "../external/github";
 import {
@@ -51,13 +52,27 @@ export interface GenerateResponseOptions {
   onToken?: TokenSink;
 }
 
+/** What one chat request cost and how long it took. */
+export interface RequestMetrics {
+  model: string;
+  promptTokens: number;
+  completionTokens: number;
+  embeddingTokens: number;
+  totalCostUsd: number;
+  /** Time to the first answer token, measured from the start of the pipeline. */
+  ttfbMs: number | null;
+  totalMs: number;
+  retrievedChunks: number;
+  toolCalls: number;
+}
+
 interface CompletionOutcome {
   /** Dash-scrubbed assistant text. */
   content: string;
   toolCalls: ChatCompletionMessageToolCall[];
   usage: CompletionUsage | null;
-  /** Milliseconds from issuing the call to the first content delta. */
-  firstTokenMs: number | null;
+  /** performance.now() at the first content delta, or null if none arrived. */
+  firstTokenAt: number | null;
 }
 
 /**
@@ -75,8 +90,6 @@ async function runChatCompletion(
   params: Omit<ChatCompletionCreateParamsBase, "stream" | "stream_options">,
   onToken?: TokenSink,
 ): Promise<CompletionOutcome> {
-  const startedAt = performance.now();
-
   if (!onToken) {
     const completion = await openai.chat.completions.create({
       ...params,
@@ -88,7 +101,8 @@ async function runChatCompletion(
       content: scrubDashes(message?.content || ""),
       toolCalls: message?.tool_calls ?? [],
       usage: completion.usage ?? null,
-      firstTokenMs: message?.content ? performance.now() - startedAt : null,
+      // Buffered: the whole answer lands at once, so "first token" is now.
+      firstTokenAt: message?.content ? performance.now() : null,
     };
   }
 
@@ -100,7 +114,7 @@ async function runChatCompletion(
 
   let content = "";
   let usage: CompletionUsage | null = null;
-  let firstTokenMs: number | null = null;
+  let firstTokenAt: number | null = null;
   const toolCallsByIndex = new Map<
     number,
     { id: string; name: string; args: string }
@@ -113,7 +127,7 @@ async function runChatCompletion(
     if (!delta) continue;
 
     if (delta.content) {
-      if (firstTokenMs === null) firstTokenMs = performance.now() - startedAt;
+      if (firstTokenAt === null) firstTokenAt = performance.now();
       const scrubbed = scrubDashes(delta.content);
       content += scrubbed;
       onToken(scrubbed);
@@ -145,7 +159,7 @@ async function runChatCompletion(
     }))
     .filter((call) => call.id && call.function.name);
 
-  return { content, toolCalls, usage, firstTokenMs };
+  return { content, toolCalls, usage, firstTokenAt };
 }
 
 /**
@@ -565,11 +579,14 @@ export async function retrieveRelevantChunks(
   userId?: string,
   limit: number = 5,
   threshold: number = 0.4,
+  onEmbeddingTokens?: (tokens: number) => void,
 ): Promise<MatchedChunk[]> {
   const supabase = createServerClient();
 
   // Generate embedding for the query
-  const queryEmbedding = await generateEmbedding(query);
+  const { embedding: queryEmbedding, tokens } =
+    await generateEmbeddingWithUsage(query);
+  onEmbeddingTokens?.(tokens);
 
   // Perform vector similarity search with user filtering
   const { data, error } = await supabase.rpc("match_document_chunks", {
@@ -709,6 +726,7 @@ function buildConversationMessages(
 async function rewriteQuery(
   query: string,
   history: PersonaContext["conversationHistory"],
+  onUsage?: (usage: CompletionUsage | null) => void,
 ): Promise<string> {
   // Always validate the original query first
   if (!query || typeof query !== "string" || query.trim().length === 0) {
@@ -753,6 +771,8 @@ Output ONLY the rewritten query. For technical questions, explicitly include the
       max_tokens: 50,
     });
 
+    onUsage?.(completion.usage ?? null);
+
     const rewritten = completion.choices[0]?.message?.content?.trim();
 
     // Validate the rewritten query before returning
@@ -777,9 +797,24 @@ export async function generateResponse(
   strictMode: boolean = true,
   persona?: PersonaContext,
   options?: GenerateResponseOptions,
-): Promise<{ response: string; sources: SourceReference[] }> {
+): Promise<{
+  response: string;
+  sources: SourceReference[];
+  metrics: RequestMetrics;
+}> {
+  const startedAt = performance.now();
   const supabase = createServerClient();
   const openai = getOpenAI();
+
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let embeddingTokens = 0;
+  let ttfbMs: number | null = null;
+
+  const recordUsage = (outcome: { usage: CompletionUsage | null }) => {
+    promptTokens += outcome.usage?.prompt_tokens ?? 0;
+    completionTokens += outcome.usage?.completion_tokens ?? 0;
+  };
 
   // Safety check for non-string inputs (e.g. from frontend events)
   if (typeof query !== "string") {
@@ -797,6 +832,10 @@ export async function generateResponse(
   const optimizedQuery = await rewriteQuery(
     query,
     persona?.conversationHistory,
+    (usage) => {
+      promptTokens += usage?.prompt_tokens ?? 0;
+      completionTokens += usage?.completion_tokens ?? 0;
+    },
   );
 
   console.log("[RAG] Optimized query for embedding:", {
@@ -812,6 +851,9 @@ export async function generateResponse(
     persona?.userId,
     15, // Increased retrieval count for re-ranking
     0.1, // Lowered threshold even further to find raw keyword matches
+    (tokens) => {
+      embeddingTokens += tokens;
+    },
   );
 
   // 3. Keyword-based Re-ranking for technical precision
@@ -983,6 +1025,11 @@ export async function generateResponse(
     },
     options?.onToken,
   );
+
+  recordUsage(firstCall);
+  if (firstCall.firstTokenAt !== null) {
+    ttfbMs = Math.round(firstCall.firstTokenAt - startedAt);
+  }
 
   // Any content here has already reached the client, so it is kept even when
   // the model goes on to call a tool.
@@ -1247,6 +1294,11 @@ export async function generateResponse(
       options?.onToken,
     );
 
+    recordUsage(secondCall);
+    if (ttfbMs === null && secondCall.firstTokenAt !== null) {
+      ttfbMs = Math.round(secondCall.firstTokenAt - startedAt);
+    }
+
     answerText += secondCall.content;
   }
 
@@ -1260,5 +1312,23 @@ export async function generateResponse(
 
   const sources = buildSourceReferences(reRankedChunks as MatchedChunk[], documentMap);
 
-  return { response: finalResponse, sources };
+  const metrics: RequestMetrics = {
+    model: ANSWER_MODEL,
+    promptTokens,
+    completionTokens,
+    embeddingTokens,
+    totalCostUsd: estimateCostUsd({
+      model: ANSWER_MODEL,
+      promptTokens,
+      completionTokens,
+      embeddingModel: DEFAULT_EMBEDDING_MODEL,
+      embeddingTokens,
+    }),
+    ttfbMs,
+    totalMs: Math.round(performance.now() - startedAt),
+    retrievedChunks: chunks.length,
+    toolCalls: firstCall.toolCalls.length,
+  };
+
+  return { response: finalResponse, sources, metrics };
 }

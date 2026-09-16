@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { generateResponse } from '@/lib/ai/rag';
 import { createServerClient } from '@/lib/supabase/client';
 import { checkOrigin, isUnrestricted } from '@/lib/security/origin';
+import { recordRequestMetrics } from '@/lib/db/metrics';
 import {
   clientIpFrom,
   enforceChatRateLimits,
@@ -180,7 +181,9 @@ export async function POST(request: NextRequest) {
         .from('chat_sessions')
         .insert({
           widget_key: widgetKey,
-          visitor_id: request.headers.get('x-forwarded-for') || 'unknown',
+          visitor_id: clientIp,
+          // Which customer domain this conversation came from.
+          origin: origin || null,
         })
         .select('id')
         .single();
@@ -306,7 +309,7 @@ export async function POST(request: NextRequest) {
           };
           
           try {
-            const { response, sources } = await generateResponse(
+            const { response, sources, metrics } = await generateResponse(
               message,
               strictMode,
               persona,
@@ -315,6 +318,14 @@ export async function POST(request: NextRequest) {
             
             // Persist before announcing completion so the id is real.
             const messageId = await persistAssistantMessage(response, sources);
+            
+            recordRequestMetrics({
+              ...metrics,
+              widgetKey,
+              userId: widget.user_id || null,
+              sessionId: currentSessionId,
+              messageId,
+            });
             
             send({ type: 'sources', sources });
             send({ type: 'done', messageId, sessionId: currentSessionId });
@@ -355,9 +366,21 @@ export async function POST(request: NextRequest) {
     }
     
     // Generate response using RAG with persona context
-    const { response, sources } = await generateResponse(message, strictMode, persona);
+    const { response, sources, metrics } = await generateResponse(
+      message,
+      strictMode,
+      persona
+    );
     
     const messageId = await persistAssistantMessage(response, sources);
+    
+    recordRequestMetrics({
+      ...metrics,
+      widgetKey,
+      userId: widget.user_id || null,
+      sessionId: currentSessionId,
+      messageId,
+    });
     
     console.log('[CHAT] Sending response:', {
       sessionIdReturned: currentSessionId || 'NONE',

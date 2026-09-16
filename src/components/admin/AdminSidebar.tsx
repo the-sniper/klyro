@@ -9,6 +9,7 @@ import {
   MessageSquare,
   MessageCircle,
   Code2,
+  BarChart3,
   Fingerprint,
   LogOut,
   User,
@@ -22,6 +23,7 @@ const navItems = [
   { href: "/admin/test-chat", label: "Test Chat", icon: MessageSquare },
   { href: "/admin/integrations", label: "Integrations", icon: Code2 },
   { href: "/admin/conversations", label: "Conversations", icon: MessageCircle },
+  { href: "/admin/usage", label: "Usage", icon: BarChart3 },
 ];
 
 import { WhatsNewModal } from "./WhatsNewModal";

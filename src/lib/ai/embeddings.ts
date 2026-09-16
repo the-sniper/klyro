@@ -1,4 +1,7 @@
 import OpenAI from 'openai';
+import { DEFAULT_EMBEDDING_MODEL } from './pricing';
+
+const EMBEDDING_MODEL = DEFAULT_EMBEDDING_MODEL;
 
 let openaiClient: OpenAI | null = null;
 
@@ -53,10 +56,18 @@ export function chunkDocument(content: string): string[] {
   return chunks;
 }
 
+export interface EmbeddingResult {
+  embedding: number[];
+  /** Tokens billed for this embedding call. */
+  tokens: number;
+}
+
 /**
- * Generate embedding for a text using OpenAI
+ * Generate embedding for a text using OpenAI, reporting token usage.
  */
-export async function generateEmbedding(text: string): Promise<number[]> {
+export async function generateEmbeddingWithUsage(
+  text: string,
+): Promise<EmbeddingResult> {
   // Validate input - OpenAI requires a non-empty string
   if (!text || typeof text !== 'string') {
     console.error('[Embeddings] Invalid input received:', { text, type: typeof text });
@@ -71,11 +82,22 @@ export async function generateEmbedding(text: string): Promise<number[]> {
   
   const openai = getOpenAI();
   const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
+    model: EMBEDDING_MODEL,
     input: cleanedText,
   });
   
-  return response.data[0].embedding;
+  return {
+    embedding: response.data[0].embedding,
+    tokens: response.usage?.total_tokens ?? 0,
+  };
+}
+
+/**
+ * Generate embedding for a text using OpenAI
+ */
+export async function generateEmbedding(text: string): Promise<number[]> {
+  const { embedding } = await generateEmbeddingWithUsage(text);
+  return embedding;
 }
 
 /**
@@ -96,7 +118,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
   
   const openai = getOpenAI();
   const response = await openai.embeddings.create({
-    model: 'text-embedding-3-small',
+    model: EMBEDDING_MODEL,
     input: texts,
   });
   
