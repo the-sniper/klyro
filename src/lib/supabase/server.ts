@@ -1,11 +1,6 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from './client';
-
-interface SessionData {
-  userId: string;
-  email: string;
-  exp: number;
-}
+import { parseSession, SESSION_COOKIE_NAME } from '@/lib/auth/session';
 
 interface User {
   id: string;
@@ -14,29 +9,12 @@ interface User {
 }
 
 /**
- * Parse session from cookie
- */
-function parseSession(cookie: string | undefined): SessionData | null {
-  if (!cookie) return null;
-  
-  try {
-    const data = JSON.parse(Buffer.from(cookie, 'base64').toString());
-    if (data.exp && data.exp > Date.now()) {
-      return data as SessionData;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Get the currently authenticated user from session cookie.
  */
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session')?.value;
-  const session = parseSession(sessionCookie);
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+  const session = await parseSession(sessionCookie);
   
   if (!session) return null;
   

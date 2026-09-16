@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
 import bcrypt from 'bcryptjs';
+import {
+  createSessionToken,
+  SESSION_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+} from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,12 +44,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create session token
-    const sessionToken = Buffer.from(JSON.stringify({
-      userId: user.id,
-      email: user.email,
-      exp: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
-    })).toString('base64');
+    // Create signed session token
+    const sessionToken = await createSessionToken(user.id, user.email);
 
     const response = NextResponse.json({
       success: true,
@@ -56,13 +57,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Set session cookie
-    response.cookies.set('session', sessionToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: '/',
-    });
+    response.cookies.set(SESSION_COOKIE_NAME, sessionToken, SESSION_COOKIE_OPTIONS);
 
     return response;
 

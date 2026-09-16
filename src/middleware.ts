@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { parseSession } from '@/lib/auth/session'
+import { parseSession, SESSION_COOKIE_NAME } from '@/lib/auth/session'
 
 export async function middleware(request: NextRequest) {
-  const sessionCookie = request.cookies.get('session')?.value;
-  const session = parseSession(sessionCookie);
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const session = await parseSession(sessionCookie);
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
                      request.nextUrl.pathname.startsWith('/signup');
