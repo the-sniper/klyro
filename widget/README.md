@@ -68,9 +68,55 @@ Add the following script tag to your HTML `<head>` or before the closing `</body
 
 When using `initKlyro(options)`, you can pass the following properties:
 
-| Property | Type     | Description                   | Required |
-| -------- | -------- | ----------------------------- | -------- |
-| `key`    | `string` | Your unique Klyro widget key. | Yes      |
+| Property    | Type                  | Description                                                                                                                                 | Required |
+| ----------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `key`       | `string`              | Your unique Klyro widget key.                                                                                                               | Yes      |
+| `apiBase`   | `string`              | Origin the widget calls for config and chat. Defaults to `https://klyro-pro.vercel.app`. Set this when self-hosting or pointing at a local dev server. | No       |
+| `inline`    | `boolean`             | Render the chat panel in the page instead of as a floating launcher button. Defaults to `false`.                                            | No       |
+| `container` | `string \| Element`   | Where to mount when `inline` is `true`: a CSS selector or an element. Ignored unless `inline` is set.                                        | No       |
+
+`initKlyro` also accepts a bare string as shorthand for `{ key }`:
+
+```js
+initKlyro("YOUR_WIDGET_KEY");
+```
+
+### Inline mode
+
+```html
+<div id="chat" style="height: 600px"></div>
+<script src="https://unpkg.com/@klyro/widget/dist/widget.js"></script>
+<script>
+  initKlyro({
+    key: "YOUR_WIDGET_KEY",
+    inline: true,
+    container: document.getElementById("chat"),
+  });
+</script>
+```
+
+### Sending a message programmatically
+
+```js
+klyroSendMessage("What have you been working on?");
+```
+
+Both `initKlyro` and `klyroSendMessage` are available as named exports from the
+package and as globals on `window` when loaded from a script tag.
+
+---
+
+## Streaming
+
+From `3.0.0` the widget streams answers token by token over Server-Sent Events,
+rendering text as the model produces it instead of waiting for the full
+response. Citations arrive after the answer and render as a collapsed
+**Sources (n)** row beneath each reply.
+
+This requires a Klyro backend that supports streaming. Against an older
+deployment the widget detects that the response is not `text/event-stream` and
+falls back to the previous buffered JSON request automatically, so it stays
+compatible either way.
 
 ---
 

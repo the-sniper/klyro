@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const WIDGET_VERSION = "2.3.3";
+  const WIDGET_VERSION = "3.0.0";
   let widgetKey = null;
   let API_BASE = "";
   let STORAGE_KEY = "";
@@ -1859,9 +1859,15 @@
     if (_sendMessageFn) _sendMessageFn(text);
   }
 
+  // These are not exclusive. esbuild wraps this file in a CommonJS shim when
+  // it bundles, so `module` is defined even in the IIFE build for a script
+  // tag: the old if/else meant window.initKlyro was never assigned and the
+  // documented initKlyro({ ... }) entry point did not exist on the page.
   if (typeof module !== "undefined" && module.exports) {
     module.exports = { initKlyro, sendMessage: klyroSendMessage };
-  } else {
+  }
+
+  if (typeof window !== "undefined") {
     window.initKlyro = initKlyro;
     window.klyroSendMessage = klyroSendMessage;
   }

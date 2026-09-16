@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "build:widget": "node widget/build.js && cp widget/dist/widget.js public/widget.js"
+    "build:widget": "node widget/build.js"
   },
   "dependencies": {
     "@klyro/widget": "file:./widget",
