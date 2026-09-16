@@ -3,6 +3,7 @@ import { generateResponse } from '@/lib/ai/rag';
 import { createServerClient } from '@/lib/supabase/client';
 import { checkOrigin, isUnrestricted } from '@/lib/security/origin';
 import { recordRequestMetrics } from '@/lib/db/metrics';
+import { isExternalRequestError } from '@/lib/net/fetch-with-timeout';
 import {
   clientIpFrom,
   enforceChatRateLimits,
@@ -20,6 +21,18 @@ const DEFAULT_MAX_MESSAGE_LENGTH = 2000;
 
 /** Widget keys we have already warned about running without domain restrictions. */
 const warnedUnrestrictedWidgets = new Set<string>();
+
+/**
+ * Turn an upstream failure into something a visitor can read. A third party
+ * being slow is not an internal server error, and should not look like one.
+ */
+function friendlyErrorMessage(error: unknown): string | null {
+  if (!isExternalRequestError(error)) return null;
+  
+  return error.isTimeout
+    ? `I could not reach ${error.service} in time, so I cannot answer that right now. Please try again in a moment.`
+    : `I could not reach ${error.service} just now, so I cannot answer that right now. Please try again in a moment.`;
+}
 
 // CORS headers for cross-origin widget requests
 const corsHeaders = {
@@ -339,7 +352,9 @@ export async function POST(request: NextRequest) {
             console.error('[CHAT] Streaming error:', error);
             send({
               type: 'error',
-              message: 'Sorry, I hit a problem generating that answer. Please try again.',
+              message:
+                friendlyErrorMessage(error) ??
+                'Sorry, I hit a problem generating that answer. Please try again.',
             });
           } finally {
             closed = true;
@@ -397,6 +412,13 @@ export async function POST(request: NextRequest) {
     
   } catch (error) {
     console.error('Chat API error:', error);
+    
+    const friendly = friendlyErrorMessage(error);
+    if (friendly) {
+      // An upstream timeout is a 503, not an unexplained 500.
+      return jsonResponse({ error: friendly }, 503);
+    }
+    
     return jsonResponse(
       { error: 'Internal server error' },
       500

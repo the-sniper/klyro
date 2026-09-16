@@ -1,4 +1,5 @@
 import { createServerClient } from '@/lib/supabase/client';
+import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
 import { chunkDocument, generateEmbeddings } from '@/lib/ai/embeddings';
 import type { Document, DocumentSourceType, DocumentCategory } from '@/types';
 
@@ -14,9 +15,15 @@ function getAdminClient() {
  * Fetch content from a URL
  */
 async function fetchUrlContent(url: string): Promise<string> {
-  const response = await fetch(url);
+  const response = await fetchWithTimeout(url, {
+    service: 'url-scraper',
+    timeoutMs: 10_000,
+  });
+  
   if (!response.ok) {
-    throw new Error(`Failed to fetch URL: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch URL: ${response.status} ${response.statusText}`,
+    );
   }
   
   const html = await response.text();

@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
+
 export interface GitHubRepo {
   name: string;
   description: string;
@@ -20,7 +22,9 @@ export async function fetchLatestRepos(githubInput: string, limit: number = 5): 
 
     if (!username) return [];
 
-    const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=${limit}`, {
+    const response = await fetchWithTimeout(`https://api.github.com/users/${username}/repos?sort=updated&per_page=${limit}`, {
+      service: 'github',
+      timeoutMs: 10_000,
       headers: {
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'Klyro-App',
@@ -62,7 +66,9 @@ export async function fetchRepoReadme(githubInput: string, repo: string): Promis
 
     if (!username || !repo) return null;
 
-    const response = await fetch(`https://api.github.com/repos/${username}/${repo}/readme`, {
+    const response = await fetchWithTimeout(`https://api.github.com/repos/${username}/${repo}/readme`, {
+      service: 'github',
+      timeoutMs: 10_000,
       headers: {
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'Klyro-App',

@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
 /**
  * Portfolio/Website content fetcher
  * Extracts relevant information from portfolio websites for AI context
@@ -37,7 +38,9 @@ export async function fetchPortfolioContent(url: string): Promise<PortfolioInfo 
 
     console.log('[Portfolio] Fetching:', normalizedUrl);
 
-    const response = await fetch(normalizedUrl, {
+    const response = await fetchWithTimeout(normalizedUrl, {
+      service: 'url-scraper',
+      timeoutMs: 10_000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',

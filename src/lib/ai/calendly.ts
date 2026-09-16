@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
 
 const CALENDLY_API_BASE = 'https://api.calendly.com';
 
@@ -25,7 +26,9 @@ export interface CalendlyEventType {
 
 export async function getCalendlyUser(token: string): Promise<CalendlyUser | null> {
   try {
-    const res = await fetch(`${CALENDLY_API_BASE}/users/me`, {
+    const res = await fetchWithTimeout(`${CALENDLY_API_BASE}/users/me`, {
+      service: 'calendly',
+      timeoutMs: 10_000,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -46,7 +49,9 @@ export async function getCalendlyUser(token: string): Promise<CalendlyUser | nul
 
 export async function getEventTypes(token: string, userUri: string): Promise<CalendlyEventType[]> {
   try {
-    const res = await fetch(`${CALENDLY_API_BASE}/event_types?user=${encodeURIComponent(userUri)}&active=true`, {
+    const res = await fetchWithTimeout(`${CALENDLY_API_BASE}/event_types?user=${encodeURIComponent(userUri)}&active=true`, {
+      service: 'calendly',
+      timeoutMs: 10_000,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -75,7 +80,9 @@ export async function getEventTypes(token: string, userUri: string): Promise<Cal
 }
 export async function getAvailableSlots(token: string, eventTypeUri: string, startTime: string, endTime: string): Promise<any[]> {
   try {
-    const res = await fetch(`${CALENDLY_API_BASE}/event_type_available_times?event_type=${encodeURIComponent(eventTypeUri)}&start_time=${startTime}&end_time=${endTime}`, {
+    const res = await fetchWithTimeout(`${CALENDLY_API_BASE}/event_type_available_times?event_type=${encodeURIComponent(eventTypeUri)}&start_time=${startTime}&end_time=${endTime}`, {
+      service: 'calendly',
+      timeoutMs: 10_000,
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',

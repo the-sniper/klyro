@@ -3,6 +3,9 @@ import { DEFAULT_EMBEDDING_MODEL } from './pricing';
 
 const EMBEDDING_MODEL = DEFAULT_EMBEDDING_MODEL;
 
+/** Per-call deadline for OpenAI requests. */
+const OPENAI_TIMEOUT_MS = 20_000;
+
 let openaiClient: OpenAI | null = null;
 
 function getOpenAI(): OpenAI {
@@ -11,7 +14,8 @@ function getOpenAI(): OpenAI {
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY is not configured');
     }
-    openaiClient = new OpenAI({ apiKey });
+    // Without this an unhealthy upstream hangs the whole request.
+    openaiClient = new OpenAI({ apiKey, timeout: OPENAI_TIMEOUT_MS });
   }
   return openaiClient;
 }
