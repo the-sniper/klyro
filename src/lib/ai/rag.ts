@@ -10,7 +10,10 @@ import {
 import type {
   ChatCompletionTool,
   ChatCompletionMessageParam,
+  ChatCompletionMessageToolCall,
+  CompletionUsage,
 } from "openai/resources/index";
+import type { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions";
 
 let openaiClient: OpenAI | null = null;
 
@@ -23,6 +26,126 @@ function getOpenAI(): OpenAI {
     openaiClient = new OpenAI({ apiKey });
   }
   return openaiClient;
+}
+
+/** Model used for the answer calls. */
+const ANSWER_MODEL = "gpt-4o-mini";
+
+/**
+ * Replace typographic dashes the persona prompt forbids.
+ *
+ * Both patterns are single code points matched without surrounding context, so
+ * scrubbing each streamed delta on its own produces exactly the same string as
+ * scrubbing the whole answer at the end. That identity is what lets the text we
+ * persist match the text the client received, with no lookbehind buffer.
+ */
+export function scrubDashes(text: string): string {
+  return text.replace(/\u2014/g, ", ").replace(/\u2013/g, "-");
+}
+
+/** Called with each dash-scrubbed delta as the model produces it. */
+export type TokenSink = (text: string) => void;
+
+export interface GenerateResponseOptions {
+  /** Provide to stream the answer; omit for the original buffered behaviour. */
+  onToken?: TokenSink;
+}
+
+interface CompletionOutcome {
+  /** Dash-scrubbed assistant text. */
+  content: string;
+  toolCalls: ChatCompletionMessageToolCall[];
+  usage: CompletionUsage | null;
+  /** Milliseconds from issuing the call to the first content delta. */
+  firstTokenMs: number | null;
+}
+
+/**
+ * Issue a chat completion, streaming it when a token sink is supplied.
+ *
+ * Streaming and tool calls coexist: the model commits to either content or
+ * tool_calls from its first delta, so content is forwarded as it arrives and
+ * tool call fragments are reassembled by index. In the rare case where the
+ * model emits a short preamble before calling a tool, that preamble has
+ * already reached the client, so the caller keeps it and appends the post-tool
+ * answer to it rather than discarding it.
+ */
+async function runChatCompletion(
+  openai: OpenAI,
+  params: Omit<ChatCompletionCreateParamsBase, "stream" | "stream_options">,
+  onToken?: TokenSink,
+): Promise<CompletionOutcome> {
+  const startedAt = performance.now();
+
+  if (!onToken) {
+    const completion = await openai.chat.completions.create({
+      ...params,
+      stream: false,
+    });
+    const message = completion.choices[0]?.message;
+
+    return {
+      content: scrubDashes(message?.content || ""),
+      toolCalls: message?.tool_calls ?? [],
+      usage: completion.usage ?? null,
+      firstTokenMs: message?.content ? performance.now() - startedAt : null,
+    };
+  }
+
+  const stream = await openai.chat.completions.create({
+    ...params,
+    stream: true,
+    stream_options: { include_usage: true },
+  });
+
+  let content = "";
+  let usage: CompletionUsage | null = null;
+  let firstTokenMs: number | null = null;
+  const toolCallsByIndex = new Map<
+    number,
+    { id: string; name: string; args: string }
+  >();
+
+  for await (const chunk of stream) {
+    if (chunk.usage) usage = chunk.usage;
+
+    const delta = chunk.choices[0]?.delta;
+    if (!delta) continue;
+
+    if (delta.content) {
+      if (firstTokenMs === null) firstTokenMs = performance.now() - startedAt;
+      const scrubbed = scrubDashes(delta.content);
+      content += scrubbed;
+      onToken(scrubbed);
+    }
+
+    for (const toolDelta of delta.tool_calls ?? []) {
+      const existing = toolCallsByIndex.get(toolDelta.index) ?? {
+        id: "",
+        name: "",
+        args: "",
+      };
+
+      if (toolDelta.id) existing.id = toolDelta.id;
+      if (toolDelta.function?.name) existing.name = toolDelta.function.name;
+      if (toolDelta.function?.arguments) {
+        existing.args += toolDelta.function.arguments;
+      }
+
+      toolCallsByIndex.set(toolDelta.index, existing);
+    }
+  }
+
+  const toolCalls: ChatCompletionMessageToolCall[] = [...toolCallsByIndex.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, call]) => ({
+      id: call.id,
+      type: "function" as const,
+      function: { name: call.name, arguments: call.args || "{}" },
+    }))
+    .filter((call) => call.id && call.function.name);
+
+  return { content, toolCalls, usage, firstTokenMs };
 }
 
 /**
@@ -484,6 +607,22 @@ export function buildContext(
 }
 
 /**
+ * Build the source citations attached to an assistant message.
+ */
+export function buildSourceReferences(
+  chunks: MatchedChunk[],
+  documentMap: Map<string, string>,
+): SourceReference[] {
+  return chunks.map((chunk) => ({
+    document_id: chunk.document_id,
+    document_name: documentMap.get(chunk.document_id) || "Unknown",
+    chunk_content:
+      chunk.content.slice(0, 200) + (chunk.content.length > 200 ? "..." : ""),
+    similarity: chunk.similarity,
+  }));
+}
+
+/**
  * Build conversation history for context continuity
  */
 function buildConversationMessages(
@@ -593,6 +732,7 @@ export async function generateResponse(
   query: string,
   strictMode: boolean = true,
   persona?: PersonaContext,
+  options?: GenerateResponseOptions,
 ): Promise<{ response: string; sources: SourceReference[] }> {
   const supabase = createServerClient();
   const openai = getOpenAI();
@@ -788,21 +928,31 @@ export async function generateResponse(
     });
   }
 
-  let completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages,
-    ...(useTools && { tools: TOOLS, tool_choice: "auto" as const }),
-    temperature: 0.75,
-    max_tokens: 600,
-  });
+  const firstCall = await runChatCompletion(
+    openai,
+    {
+      model: ANSWER_MODEL,
+      messages,
+      ...(useTools && { tools: TOOLS, tool_choice: "auto" as const }),
+      temperature: 0.75,
+      max_tokens: 600,
+    },
+    options?.onToken,
+  );
 
-  let responseMessage = completion.choices[0]?.message;
+  // Any content here has already reached the client, so it is kept even when
+  // the model goes on to call a tool.
+  let answerText = firstCall.content;
 
   // Handle tool calls if any
-  if (responseMessage.tool_calls) {
-    messages.push(responseMessage);
+  if (firstCall.toolCalls.length > 0) {
+    messages.push({
+      role: "assistant",
+      content: firstCall.content || null,
+      tool_calls: firstCall.toolCalls,
+    });
 
-    for (const toolCall of responseMessage.tool_calls) {
+    for (const toolCall of firstCall.toolCalls) {
       if (toolCall.function.name === "fetch_latest_projects") {
         const args = JSON.parse(toolCall.function.arguments);
         const { limit = 5 } = args;
@@ -1042,29 +1192,29 @@ export async function generateResponse(
     }
 
     // Second call to generate final response with tool results
-    completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages,
-      temperature: 0.75,
-      max_tokens: 600,
-    });
+    const secondCall = await runChatCompletion(
+      openai,
+      {
+        model: ANSWER_MODEL,
+        messages,
+        temperature: 0.75,
+        max_tokens: 600,
+      },
+      options?.onToken,
+    );
+
+    answerText += secondCall.content;
   }
 
-  const finalResponse = (
-    completion.choices[0]?.message?.content ||
-    "Hmm, I hit a snag there. Mind trying again?"
-  )
-    .replace(/\u2014/g, ", ") // Replace em-dashes with comma+space
-    .replace(/\u2013/g, "-"); // Replace en-dashes with hyphens
+  let finalResponse = answerText;
 
-  // Build source references using the re-ranked chunks
-  const sources: SourceReference[] = (reRankedChunks as any[]).map((chunk) => ({
-    document_id: chunk.document_id,
-    document_name: documentMap.get(chunk.document_id) || "Unknown",
-    chunk_content:
-      chunk.content.slice(0, 200) + (chunk.content.length > 200 ? "..." : ""),
-    similarity: chunk.similarity,
-  }));
+  if (finalResponse.trim().length === 0) {
+    finalResponse = "Hmm, I hit a snag there. Mind trying again?";
+    // Nothing streamed, so the client has an empty bubble: send the fallback.
+    options?.onToken?.(finalResponse);
+  }
+
+  const sources = buildSourceReferences(reRankedChunks as MatchedChunk[], documentMap);
 
   return { response: finalResponse, sources };
 }

@@ -64,6 +64,10 @@
         const data = JSON.parse(stored);
         messages = data.messages || [];
         sessionId = data.sessionId || null;
+        // A reload mid-stream would otherwise restore a permanent caret.
+        messages.forEach((msg) => {
+          delete msg.streaming;
+        });
         console.log(
           "[Klyro] Loaded persisted chat:",
           messages.length,
@@ -604,6 +608,23 @@
       margin-bottom: 4px;
     }
     
+    .klyro-message.streaming::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 0.9em;
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      background: currentColor;
+      opacity: 0.6;
+      animation: klyro-caret 1s steps(2, start) infinite;
+    }
+
+    @keyframes klyro-caret {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0; }
+    }
+
     .klyro-typing {
       display: flex;
       gap: 6px;
@@ -1313,6 +1334,99 @@
       popover.classList.remove("open");
     });
 
+    // Repaint only the streaming bubble, so a token does not cost a full
+    // re-render of the transcript.
+    function updateStreamingBubble(msg) {
+      const bubble = messagesContainer.querySelector(".klyro-message.streaming");
+      if (bubble) {
+        bubble.innerHTML = formatMessage(msg.content);
+      } else {
+        renderMessages();
+      }
+    }
+
+    // Read an SSE body and drive the pending assistant message from it.
+    // Returns true if the stream completed, false if the caller should fall
+    // back to the buffered JSON path.
+    async function consumeEventStream(res) {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let pending = null;
+      let sawDone = false;
+
+      const ensurePending = () => {
+        if (pending) return pending;
+        isLoading = false;
+        pending = { role: "assistant", content: "", sources: [], streaming: true };
+        messages.push(pending);
+        renderMessages();
+        return pending;
+      };
+
+      const handleEvent = (event) => {
+        if (event.type === "token") {
+          const msg = ensurePending();
+          msg.content += event.text || "";
+          updateStreamingBubble(msg);
+        } else if (event.type === "sources") {
+          const msg = ensurePending();
+          msg.sources = Array.isArray(event.sources) ? event.sources : [];
+        } else if (event.type === "done") {
+          const msg = ensurePending();
+          msg.streaming = false;
+          if (event.sessionId) sessionId = event.sessionId;
+          if (event.messageId) msg.messageId = event.messageId;
+          sawDone = true;
+        } else if (event.type === "error") {
+          const msg = ensurePending();
+          msg.streaming = false;
+          if (!msg.content) {
+            msg.content =
+              event.message || "Sorry, I encountered an error. Please try again.";
+          }
+          sawDone = true;
+        }
+      };
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE frames are separated by a blank line.
+        let boundary = buffer.indexOf("\n\n");
+        while (boundary !== -1) {
+          const frame = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+          boundary = buffer.indexOf("\n\n");
+
+          for (const line of frame.split("\n")) {
+            if (!line.startsWith("data:")) continue;
+            const payload = line.slice(5).trim();
+            if (!payload) continue;
+            try {
+              handleEvent(JSON.parse(payload));
+            } catch (err) {
+              console.warn("[Klyro] Ignoring malformed stream frame:", payload);
+            }
+          }
+        }
+      }
+
+      if (pending) {
+        pending.streaming = false;
+        if (!pending.content) {
+          pending.content = "Sorry, I encountered an error. Please try again.";
+        }
+        persistChat();
+        renderMessages();
+      }
+
+      return sawDone || pending !== null;
+    }
+
     async function sendMessage(textOverride) {
       const text = textOverride || input.value.trim();
       if (!text || isLoading) return;
@@ -1328,26 +1442,51 @@
       try {
         const res = await fetch(`${API_BASE}/api/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
           body: JSON.stringify({
             message: text,
             widgetKey,
             sessionId,
+            stream: true,
           }),
         });
 
-        const data = await res.json();
-        isLoading = false;
+        const contentType = res.headers.get("content-type") || "";
+        const canStream =
+          res.ok &&
+          contentType.indexOf("text/event-stream") !== -1 &&
+          res.body &&
+          typeof res.body.getReader === "function";
 
-        if (res.ok) {
-          sessionId = data.sessionId;
-          messages.push({ role: "assistant", content: data.response });
-          persistChat();
+        if (canStream) {
+          const handled = await consumeEventStream(res);
+          isLoading = false;
+          if (handled) return;
         } else {
-          messages.push({
-            role: "assistant",
-            content: "Sorry, I encountered an error. Please try again.",
-          });
+          // Buffered JSON path: older deployments, or any non-2xx response.
+          const data = await res.json();
+          isLoading = false;
+
+          if (res.ok) {
+            sessionId = data.sessionId;
+            messages.push({
+              role: "assistant",
+              content: data.response,
+              sources: Array.isArray(data.sources) ? data.sources : [],
+            });
+            persistChat();
+          } else {
+            messages.push({
+              role: "assistant",
+              content:
+                data && data.error
+                  ? data.error
+                  : "Sorry, I encountered an error. Please try again.",
+            });
+          }
         }
       } catch (err) {
         isLoading = false;
@@ -1402,7 +1541,7 @@
         messagesContainer.innerHTML = displayMessages
           .map(
             (msg) => `
-          <div class="klyro-message ${msg.role}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
+          <div class="klyro-message ${msg.role}${msg.streaming ? " streaming" : ""}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
             ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
           </div>
         `,

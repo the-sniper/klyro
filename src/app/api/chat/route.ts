@@ -7,7 +7,12 @@ import {
   enforceChatRateLimits,
   readLimitFromEnv,
 } from '@/lib/security/rate-limit';
-import type { PersonaContext } from '@/types';
+import type { PersonaContext, SourceReference } from '@/types';
+
+// The SSE path holds a connection open while the model generates, which the
+// Edge runtime's default budget does not accommodate.
+export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 /** Longest message we will embed and answer. Overridable per deployment. */
 const DEFAULT_MAX_MESSAGE_LENGTH = 2000;
@@ -253,18 +258,106 @@ export async function POST(request: NextRequest) {
       calendlyLength: persona.calendly_token?.length || 0
     });
     
+    // Persist the assistant turn and hand back its id, shared by both paths.
+    const persistAssistantMessage = async (
+      response: string,
+      sources: SourceReference[]
+    ): Promise<string | null> => {
+      if (!currentSessionId) return null;
+      
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .insert({
+          session_id: currentSessionId,
+          role: 'assistant',
+          content: response,
+          sources,
+        })
+        .select('id')
+        .single();
+      
+      if (error) {
+        console.error('[CHAT] Failed to persist assistant message:', error);
+        return null;
+      }
+      
+      return data?.id ?? null;
+    };
+    
+    // Opt in to streaming with Accept: text/event-stream or {"stream": true}.
+    const wantsStream =
+      request.headers.get('accept')?.includes('text/event-stream') === true ||
+      body.stream === true;
+    
+    if (wantsStream) {
+      const encoder = new TextEncoder();
+      let closed = false;
+      
+      const stream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          const send = (event: object) => {
+            if (closed) return;
+            try {
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+            } catch {
+              // Client went away mid-stream; stop trying to write to it.
+              closed = true;
+            }
+          };
+          
+          try {
+            const { response, sources } = await generateResponse(
+              message,
+              strictMode,
+              persona,
+              { onToken: (text) => send({ type: 'token', text }) }
+            );
+            
+            // Persist before announcing completion so the id is real.
+            const messageId = await persistAssistantMessage(response, sources);
+            
+            send({ type: 'sources', sources });
+            send({ type: 'done', messageId, sessionId: currentSessionId });
+            
+            console.log('[CHAT] Streamed response:', {
+              sessionIdReturned: currentSessionId || 'NONE',
+              responseLength: response.length,
+              sourcesCount: sources?.length || 0,
+            });
+          } catch (error) {
+            console.error('[CHAT] Streaming error:', error);
+            send({
+              type: 'error',
+              message: 'Sorry, I hit a problem generating that answer. Please try again.',
+            });
+          } finally {
+            closed = true;
+            try {
+              controller.close();
+            } catch {
+              // Already closed by the client disconnecting.
+            }
+          }
+        },
+      });
+      
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+          Connection: 'keep-alive',
+          // Stop proxies from buffering the stream into one lump.
+          'X-Accel-Buffering': 'no',
+        },
+      });
+    }
+    
     // Generate response using RAG with persona context
     const { response, sources } = await generateResponse(message, strictMode, persona);
     
-    // Save assistant message
-    if (currentSessionId) {
-      await supabase.from('chat_messages').insert({
-        session_id: currentSessionId,
-        role: 'assistant',
-        content: response,
-        sources,
-      });
-    }
+    const messageId = await persistAssistantMessage(response, sources);
     
     console.log('[CHAT] Sending response:', {
       sessionIdReturned: currentSessionId || 'NONE',
@@ -276,6 +369,7 @@ export async function POST(request: NextRequest) {
       response,
       sources,
       sessionId: currentSessionId,
+      messageId,
     });
     
   } catch (error) {
