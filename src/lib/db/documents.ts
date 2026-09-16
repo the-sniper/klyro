@@ -1,5 +1,6 @@
 import { createServerClient } from '@/lib/supabase/client';
 import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
+import { decodeHtmlEntities } from '@/lib/text/html-entities';
 import { chunkDocument, generateEmbeddings } from '@/lib/ai/embeddings';
 import type { Document, DocumentSourceType, DocumentCategory } from '@/types';
 
@@ -28,11 +29,14 @@ async function fetchUrlContent(url: string): Promise<string> {
   
   const html = await response.text();
   
-  // Simple HTML to text extraction (strip tags)
-  const textContent = html
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
+  // Simple HTML to text extraction (strip tags, then decode entities so the
+  // stored chunk holds "&" rather than the literal "&amp;")
+  const textContent = decodeHtmlEntities(
+    html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+  )
     .replace(/\s+/g, ' ')
     .trim();
   

@@ -1,4 +1,5 @@
 import { fetchWithTimeout } from '@/lib/net/fetch-with-timeout';
+import { decodeHtmlEntities } from '@/lib/text/html-entities';
 /**
  * Portfolio/Website content fetcher
  * Extracts relevant information from portfolio websites for AI context
@@ -98,15 +99,11 @@ function extractTextFromHtml(html: string): string {
     .replace(/<br\s*\/?>/gi, '\n')
     // Remove remaining tags
     .replace(/<[^>]+>/g, ' ')
-    // Decode common HTML entities
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&mdash;/g, '-')
-    .replace(/&ndash;/g, '-')
+    // Decode HTML entities (shared decoder: named plus numeric references)
+    .replace(/&[#0-9A-Za-z]+;/g, (entity) => decodeHtmlEntities(entity))
+    // Keep this module's existing dash normalisation
+    .replace(/\u2014/g, '-')
+    .replace(/\u2013/g, '-')
     // Clean up whitespace
     .replace(/\s+/g, ' ')
     .replace(/\n\s+/g, '\n')
