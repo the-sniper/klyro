@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import type { Widget } from "@/types";
 import { useBodyScrollLock } from "@/lib/hooks/useBodyScrollLock";
-import { getSupabase } from "@/lib/supabase/client";
 
 export default function IntegrationsPage() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
@@ -80,25 +79,25 @@ export default function IntegrationsPage() {
 
     setUploadingLogo(true);
     try {
-      const supabase = getSupabase();
-      const fileExt = logoFile.name.split(".").pop();
-      const fileName = `${widgetKey}-${Date.now()}.${fileExt}`;
-      const filePath = fileName;
+      // Uploaded through the server: the browser no longer has write access
+      // to the logos bucket.
+      const body = new FormData();
+      body.append("file", logoFile);
+      body.append("widgetKey", widgetKey);
 
-      const { error: uploadError } = await supabase.storage
-        .from("logos")
-        .upload(filePath, logoFile);
+      const res = await fetch("/api/widget/logo", { method: "POST", body });
+      const data = await res.json();
 
-      if (uploadError) throw uploadError;
+      if (!res.ok) throw new Error(data?.error || "Upload failed");
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("logos").getPublicUrl(filePath);
-
-      return publicUrl;
+      return data.url as string;
     } catch (error) {
       console.error("Error uploading logo:", error);
-      alert("Failed to upload logo. Please try again.");
+      alert(
+        error instanceof Error
+          ? `Failed to upload logo: ${error.message}`
+          : "Failed to upload logo. Please try again.",
+      );
       return null;
     } finally {
       setUploadingLogo(false);
