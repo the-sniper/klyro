@@ -1,17 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateResponse } from '@/lib/ai/rag';
 import { createServerClient } from '@/lib/supabase/client';
+import { checkOrigin, isUnrestricted } from '@/lib/security/origin';
+import {
+  clientIpFrom,
+  enforceChatRateLimits,
+  readLimitFromEnv,
+} from '@/lib/security/rate-limit';
 import type { PersonaContext } from '@/types';
+
+/** Longest message we will embed and answer. Overridable per deployment. */
+const DEFAULT_MAX_MESSAGE_LENGTH = 2000;
+
+/** Widget keys we have already warned about running without domain restrictions. */
+const warnedUnrestrictedWidgets = new Set<string>();
 
 // CORS headers for cross-origin widget requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+  // Retry-After is not CORS-safelisted, so cross-origin widgets cannot read it
+  // off a 429 unless it is explicitly exposed.
+  'Access-Control-Expose-Headers': 'Retry-After',
 };
 
-function jsonResponse(data: object, status = 200) {
-  return NextResponse.json(data, { status, headers: corsHeaders });
+function jsonResponse(data: object, status = 200, extraHeaders: Record<string, string> = {}) {
+  return NextResponse.json(data, {
+    status,
+    headers: { ...corsHeaders, ...extraHeaders },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -23,6 +41,49 @@ export async function POST(request: NextRequest) {
       return jsonResponse(
         { error: 'Message and widgetKey are required' },
         400
+      );
+    }
+    
+    if (typeof message !== 'string' || typeof widgetKey !== 'string') {
+      return jsonResponse(
+        { error: 'Message and widgetKey must be strings' },
+        400
+      );
+    }
+    
+    const maxMessageLength = readLimitFromEnv(
+      'CHAT_MAX_MESSAGE_LENGTH',
+      DEFAULT_MAX_MESSAGE_LENGTH
+    );
+    
+    if (message.length > maxMessageLength) {
+      return jsonResponse(
+        {
+          error: `Message is too long (${message.length} characters, limit ${maxMessageLength})`,
+        },
+        400
+      );
+    }
+    
+    // Rate limit before touching any other table, so a flood costs one RPC.
+    const clientIp = clientIpFrom(request.headers);
+    const rejection = await enforceChatRateLimits(widgetKey, clientIp);
+    
+    if (rejection) {
+      console.warn('[CHAT] Rate limited:', {
+        scope: rejection.scope,
+        limit: rejection.limit,
+        widgetKey,
+        ip: clientIp,
+      });
+      return jsonResponse(
+        {
+          error: 'Too many requests. Please slow down and try again shortly.',
+          scope: rejection.scope,
+          retryAfter: rejection.retryAfterSeconds,
+        },
+        429,
+        { 'Retry-After': String(rejection.retryAfterSeconds) }
       );
     }
     
@@ -43,20 +104,34 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Check domain if allowed_domains is configured
+    // Check domain if allowed_domains is configured.
+    // Fails closed on a missing Origin: a restricted widget must not be usable
+    // from a server-side caller that simply omits the header.
     const origin = request.headers.get('origin');
-    if (widget.allowed_domains?.length > 0 && origin) {
-      const originHost = new URL(origin).hostname;
-      const isAllowed = widget.allowed_domains.some((domain: string) => 
-        originHost === domain || originHost.endsWith(`.${domain}`)
+    const originDecision = checkOrigin(origin, widget.allowed_domains);
+    
+    if (!originDecision.allowed) {
+      console.warn('[CHAT] Origin rejected:', {
+        widgetKey,
+        origin: origin || 'none',
+        reason: originDecision.reason,
+      });
+      return jsonResponse(
+        {
+          error:
+            originDecision.reason === 'missing_origin'
+              ? 'Origin header required for this widget'
+              : 'Domain not allowed',
+        },
+        403
       );
-      
-      if (!isAllowed) {
-        return jsonResponse(
-          { error: 'Domain not allowed' },
-          403
-        );
-      }
+    }
+    
+    if (isUnrestricted(widget.allowed_domains) && !warnedUnrestrictedWidgets.has(widgetKey)) {
+      warnedUnrestrictedWidgets.add(widgetKey);
+      console.warn(
+        `[CHAT] Widget "${widgetKey}" has no allowed_domains configured and accepts requests from any origin.`
+      );
     }
     
     // Create or validate session
