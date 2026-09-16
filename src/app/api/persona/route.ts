@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
 import { requireAuth } from '@/lib/supabase/server';
+import { generateWidgetKey } from '@/lib/security/random';
 
 // Get persona configuration for the current user's widget
 export async function GET() {
@@ -94,7 +95,7 @@ export async function PUT(request: NextRequest) {
       const { error: insertError } = await supabase
         .from('widgets')
         .insert({
-          widget_key: Math.random().toString(36).substring(2, 14),
+          widget_key: generateWidgetKey(),
           name: 'Default Persona',
           is_active: true,
           user_id: user.id,

@@ -123,6 +123,17 @@ export async function POST(request: NextRequest) {
       );
     }
     
+    // Retrieval is scoped by user_id. An ownerless widget cannot be answered
+    // without searching every tenant's documents, so refuse it here with a
+    // clear reason rather than letting it surface as a 500 from the pipeline.
+    if (!widget.user_id) {
+      console.error('[CHAT] Widget has no owner, refusing to answer:', widgetKey);
+      return jsonResponse(
+        { error: 'This widget is not linked to an account yet.' },
+        409
+      );
+    }
+    
     // Check domain if allowed_domains is configured.
     // Fails closed on a missing Origin: a restricted widget must not be usable
     // from a server-side caller that simply omits the header.

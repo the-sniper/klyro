@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/client';
 import { requireAuth } from '@/lib/supabase/server';
-import { nanoid } from 'nanoid';
-
-// Simple nanoid implementation for widget key generation
-function generateWidgetKey(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 12; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
+import { generateWidgetKey } from '@/lib/security/random';
 
 // List all widgets for the current user
 export async function GET() {

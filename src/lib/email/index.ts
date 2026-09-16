@@ -4,6 +4,7 @@
  */
 
 import nodemailer from 'nodemailer';
+import { generateOtpCode } from '@/lib/security/random';
 
 interface SendOTPEmailParams {
   to: string;
@@ -213,5 +214,5 @@ This code will expire in 10 minutes. If you didn't request this code, you can sa
  * Generate a random 6-digit OTP
  */
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return generateOtpCode();
 }

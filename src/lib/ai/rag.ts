@@ -585,6 +585,15 @@ export async function retrieveRelevantChunks(
   threshold: number = 0.4,
   onEmbeddingTokens?: (tokens: number) => void,
 ): Promise<MatchedChunk[]> {
+  // match_document_chunks treats a null filter_user_id as "search every
+  // tenant", so a widget with no owner would read every customer's documents.
+  // Refuse rather than leak.
+  if (!userId) {
+    throw new Error(
+      "retrieveRelevantChunks requires a userId; refusing to search across all tenants",
+    );
+  }
+
   const supabase = createServerClient();
 
   // Generate embedding for the query
@@ -597,7 +606,7 @@ export async function retrieveRelevantChunks(
     query_embedding: queryEmbedding,
     match_threshold: threshold,
     match_count: limit,
-    filter_user_id: userId || null,
+    filter_user_id: userId,
   });
 
   if (error) {
@@ -625,6 +634,48 @@ export function buildContext(
   });
 
   return contextParts.join("\n\n---\n\n");
+}
+
+/**
+ * Decide whether the model may fetch `candidate`.
+ *
+ * The previous check was `url.includes(allowed) || allowed.includes(url)`,
+ * which a crafted URL satisfies trivially: an attacker-controlled
+ * "https://evil.example/?next=https://klyro.dev" contains an allowed entry as
+ * a substring and passes. Compare structurally instead: same host, and a path
+ * at or beneath the allowed path.
+ */
+export function isAllowedFetchUrl(candidate: string, allowedUrls: string[]): boolean {
+  let target: URL;
+  try {
+    target = new URL(candidate);
+  } catch {
+    return false;
+  }
+
+  // Only ever fetch over http(s); no file:, data: or anything exotic.
+  if (target.protocol !== "http:" && target.protocol !== "https:") return false;
+
+  const stripTrailingSlash = (path: string) => path.replace(/\/+$/, "");
+  const targetPath = stripTrailingSlash(target.pathname);
+
+  return allowedUrls.some((allowed) => {
+    let base: URL;
+    try {
+      base = new URL(allowed);
+    } catch {
+      return false;
+    }
+
+    if (base.hostname.toLowerCase() !== target.hostname.toLowerCase()) return false;
+
+    const basePath = stripTrailingSlash(base.pathname);
+
+    // An allowed entry with no path grants the whole host.
+    if (basePath === "") return true;
+
+    return targetPath === basePath || targetPath.startsWith(`${basePath}/`);
+  });
 }
 
 /**
@@ -1105,8 +1156,9 @@ export async function generateResponse(
 
         if (url) {
           // Validate that the URL is in our allowed list
-          const isAllowedUrl = availableUrls.some(
-            (u) => u.url === url || url.includes(u.url) || u.url.includes(url),
+          const isAllowedUrl = isAllowedFetchUrl(
+            url,
+            availableUrls.map((u) => u.url),
           );
 
           if (isAllowedUrl) {
