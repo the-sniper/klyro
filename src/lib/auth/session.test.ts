@@ -134,6 +134,36 @@ describe("session cookies", () => {
     ).rejects.toThrow(/SESSION_SECRET/);
   });
 
+  it("passes the signature to WebCrypto as a TypedArray, not an ArrayBuffer", async () => {
+    // Regression guard. Node's WebCrypto accepts a bare ArrayBuffer, but the
+    // Edge runtime middleware runs on rejects it with "3rd argument is not
+    // instance of ArrayBuffer, Buffer, TypedArray, or DataView", so a version
+    // of this that passed an ArrayBuffer verified fine under vitest while
+    // rejecting every real session in middleware.
+    const realVerify = crypto.subtle.verify.bind(crypto.subtle);
+
+    vi.spyOn(crypto.subtle, "verify").mockImplementation(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((algorithm: any, key: any, signature: any, data: any) => {
+        if (!ArrayBuffer.isView(signature)) {
+          throw new TypeError(
+            "Failed to execute 'verify' on 'SubtleCrypto': 3rd argument is not instance of ArrayBuffer, Buffer, TypedArray, or DataView.",
+          );
+        }
+        return realVerify(algorithm, key, signature as BufferSource, data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any,
+    );
+
+    const cookie = await encodeSession({
+      userId: "user-1",
+      email: "areef@example.com",
+      exp: Date.now() + 60_000,
+    });
+
+    expect(await parseSession(cookie)).toMatchObject({ userId: "user-1" });
+  });
+
   it("fails closed when SESSION_SECRET is too short to key an HMAC", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     process.env.SESSION_SECRET = "too-short";

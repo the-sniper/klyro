@@ -14,8 +14,14 @@ export async function middleware(request: NextRequest) {
                         request.nextUrl.pathname.startsWith('/api/chat') ||
                         request.nextUrl.pathname.startsWith('/api/auth');
 
-  // Redirect unauthenticated users to login
   if (!session && !isPublicRoute) {
+    // An API client fetching with a bad cookie should get a status it can act
+    // on, not a 307 to an HTML login page.
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Redirect unauthenticated users to login
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

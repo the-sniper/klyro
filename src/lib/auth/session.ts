@@ -44,7 +44,15 @@ function bytesToBase64Url(bytes: Uint8Array): string {
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function base64UrlToBuffer(value: string): ArrayBuffer {
+/**
+ * Decode base64url to bytes.
+ *
+ * Returns a Uint8Array, not a bare ArrayBuffer: the Edge runtime's SubtleCrypto
+ * rejects an ArrayBuffer with "3rd argument is not instance of ArrayBuffer,
+ * Buffer, TypedArray, or DataView", while Node's WebCrypto accepts it. A
+ * TypedArray is accepted by both.
+ */
+function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
   const padding = "=".repeat((4 - (normalized.length % 4)) % 4);
   const binary = atob(normalized + padding);
@@ -53,7 +61,7 @@ function base64UrlToBuffer(value: string): ArrayBuffer {
   for (let i = 0; i < binary.length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
-  return buffer;
+  return bytes;
 }
 
 let cachedKey: { secret: string; key: CryptoKey } | null = null;
@@ -144,12 +152,12 @@ export async function parseSession(
     const isValid = await crypto.subtle.verify(
       "HMAC",
       key,
-      base64UrlToBuffer(signature),
+      base64UrlToBytes(signature),
       encoder.encode(payload),
     );
     if (!isValid) return null;
 
-    const data = JSON.parse(decoder.decode(base64UrlToBuffer(payload)));
+    const data = JSON.parse(decoder.decode(base64UrlToBytes(payload)));
 
     if (
       typeof data?.userId !== "string" ||
