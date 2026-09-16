@@ -607,19 +607,63 @@ export function buildContext(
 }
 
 /**
+ * Keep sources within this fraction of the best match. Measured against the
+ * live knowledge base, a good answer's chunks cluster tightly (0.383 down to
+ * 0.306 for "what is your tech stack?"), while absolute values shift a lot by
+ * question ("are you available for freelance work?" tops out at 0.279). A
+ * relative cut travels across both; a fixed threshold does not.
+ */
+const SOURCE_RELATIVE_FLOOR = 0.75;
+
+/** Below this, a chunk is noise regardless of how weak the best match was. */
+const SOURCE_ABSOLUTE_FLOOR = 0.15;
+
+/** Citing every retrieved chunk is not a citation, it is a wall. */
+const MAX_SOURCES = 4;
+
+/**
  * Build the source citations attached to an assistant message.
+ *
+ * Retrieval runs at a deliberately loose 0.1 threshold to catch keyword
+ * matches, so the retrieved set is wider than what is worth showing a visitor.
+ * This keeps the best chunk per document, drops anything far below the top
+ * match, and caps the list.
  */
 export function buildSourceReferences(
   chunks: MatchedChunk[],
   documentMap: Map<string, string>,
 ): SourceReference[] {
-  return chunks.map((chunk) => ({
-    document_id: chunk.document_id,
-    document_name: documentMap.get(chunk.document_id) || "Unknown",
-    chunk_content:
-      chunk.content.slice(0, 200) + (chunk.content.length > 200 ? "..." : ""),
-    similarity: chunk.similarity,
-  }));
+  const scored = chunks.filter(
+    (chunk) => typeof chunk.similarity === "number" && Number.isFinite(chunk.similarity),
+  );
+
+  if (scored.length === 0) return [];
+
+  const topSimilarity = Math.max(...scored.map((chunk) => chunk.similarity));
+  const floor = Math.max(topSimilarity * SOURCE_RELATIVE_FLOOR, SOURCE_ABSOLUTE_FLOOR);
+
+  // One entry per document, represented by its strongest chunk.
+  const bestPerDocument = new Map<string, MatchedChunk>();
+
+  for (const chunk of scored) {
+    if (chunk.similarity < floor) continue;
+
+    const incumbent = bestPerDocument.get(chunk.document_id);
+    if (!incumbent || chunk.similarity > incumbent.similarity) {
+      bestPerDocument.set(chunk.document_id, chunk);
+    }
+  }
+
+  return [...bestPerDocument.values()]
+    .sort((a, b) => b.similarity - a.similarity)
+    .slice(0, MAX_SOURCES)
+    .map((chunk) => ({
+      document_id: chunk.document_id,
+      document_name: documentMap.get(chunk.document_id) || "Unknown",
+      chunk_content:
+        chunk.content.slice(0, 200) + (chunk.content.length > 200 ? "..." : ""),
+      similarity: chunk.similarity,
+    }));
 }
 
 /**

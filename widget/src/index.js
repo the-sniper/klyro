@@ -608,6 +608,93 @@
       margin-bottom: 4px;
     }
     
+    .klyro-sources {
+      align-self: flex-start;
+      max-width: 88%;
+      margin-top: -8px;
+    }
+
+    .klyro-sources-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      color: #6b7280;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .klyro-sources-toggle:hover {
+      color: #374151;
+      border-color: rgba(0, 0, 0, 0.16);
+    }
+
+    .klyro-sources-chevron {
+      display: inline-block;
+      transition: transform 0.15s ease;
+    }
+
+    .klyro-sources.open .klyro-sources-chevron {
+      transform: rotate(90deg);
+    }
+
+    .klyro-sources-list {
+      display: none;
+      margin-top: 8px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .klyro-sources.open .klyro-sources-list {
+      display: flex;
+    }
+
+    .klyro-source {
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .klyro-source-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 3px;
+      word-break: break-word;
+    }
+
+    .klyro-source-excerpt {
+      font-size: 12px;
+      line-height: 1.45;
+      color: #6b7280;
+      word-break: break-word;
+    }
+
+    .klyro-widget.dark .klyro-sources-toggle {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+      color: #9ca3af;
+    }
+
+    .klyro-widget.dark .klyro-sources-toggle:hover {
+      color: #e5e7eb;
+    }
+
+    .klyro-widget.dark .klyro-source {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .klyro-widget.dark .klyro-source-name { color: #e5e7eb; }
+    .klyro-widget.dark .klyro-source-excerpt { color: #9ca3af; }
+
     .klyro-message.streaming::after {
       content: "";
       display: inline-block;
@@ -1504,20 +1591,69 @@
       if (e.key === "Enter") sendMessage();
     });
 
+    // Delegated, because renderMessages() rebuilds the transcript wholesale.
+    messagesContainer.addEventListener("click", (e) => {
+      const toggle =
+        e.target && e.target.closest
+          ? e.target.closest(".klyro-sources-toggle")
+          : null;
+      if (!toggle) return;
+
+      const index = parseInt(toggle.getAttribute("data-sources-index"), 10);
+      const msg = messages[index];
+      if (!msg) return;
+
+      msg.sourcesOpen = !msg.sourcesOpen;
+      renderMessages();
+    });
+
+    // Collapsed citation row under an assistant message. Nothing is rendered
+    // for a message with no retrieved sources.
+    function renderSources(msg, index) {
+      if (msg.role !== "assistant" || msg.streaming) return "";
+
+      const sources = Array.isArray(msg.sources) ? msg.sources : [];
+      if (sources.length === 0) return "";
+
+      const isOpen = !!msg.sourcesOpen;
+      const items = sources
+        .map(
+          (source) => `
+            <div class="klyro-source">
+              <div class="klyro-source-name">${escapeHtml(source.document_name || "Unknown")}</div>
+              <div class="klyro-source-excerpt">${escapeHtml(source.chunk_content || "")}</div>
+            </div>`,
+        )
+        .join("");
+
+      return `
+        <div class="klyro-sources${isOpen ? " open" : ""}">
+          <button class="klyro-sources-toggle" type="button" data-sources-index="${escapeHtml(String(index))}" aria-expanded="${isOpen ? "true" : "false"}">
+            <span class="klyro-sources-chevron">\u25B8</span>
+            <span>Sources (${escapeHtml(String(sources.length))})</span>
+          </button>
+          <div class="klyro-sources-list">${items}</div>
+        </div>`;
+    }
+
     function renderMessages() {
       // Filter out legacy welcome message from display if it's the first one
       // (Since we now have the empty state placeholder)
-      const displayMessages = messages.filter((msg, idx) => {
-        if (
-          idx === 0 &&
-          msg.role === "assistant" &&
-          config.welcomeMessage &&
-          msg.content.trim() === config.welcomeMessage.trim()
-        ) {
-          return false;
-        }
-        return true;
-      });
+      // Keep each message's index in `messages` so the sources toggle can
+      // address the right one after the legacy welcome message is filtered out.
+      const displayMessages = messages
+        .map((msg, index) => ({ msg, index }))
+        .filter(({ msg, index }) => {
+          if (
+            index === 0 &&
+            msg.role === "assistant" &&
+            config.welcomeMessage &&
+            msg.content.trim() === config.welcomeMessage.trim()
+          ) {
+            return false;
+          }
+          return true;
+        });
 
       // Update header style based on chat activity
       if (displayMessages.length > 0) {
@@ -1540,10 +1676,11 @@
       } else {
         messagesContainer.innerHTML = displayMessages
           .map(
-            (msg) => `
+            ({ msg, index }) => `
           <div class="klyro-message ${msg.role}${msg.streaming ? " streaming" : ""}" ${msg.role === "user" ? `style="background: ${config.primaryColor}"` : ""}>
             ${msg.role === "assistant" ? formatMessage(msg.content) : escapeHtml(msg.content)}
           </div>
+          ${renderSources(msg, index)}
         `,
           )
           .join("");
@@ -1562,7 +1699,7 @@
       const displayMessagesForDeepScroll = displayMessages; // to avoid closure issues if any, though not needed here
       if (!isLoading && displayMessagesForDeepScroll.length > 0) {
         const lastMsg =
-          displayMessagesForDeepScroll[displayMessagesForDeepScroll.length - 1];
+          displayMessagesForDeepScroll[displayMessagesForDeepScroll.length - 1].msg;
         if (lastMsg.role === "assistant") {
           const lastMessageElement = messagesContainer.lastElementChild;
           if (lastMessageElement) {
