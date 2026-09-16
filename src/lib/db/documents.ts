@@ -39,6 +39,24 @@ async function fetchUrlContent(url: string): Promise<string> {
   return textContent;
 }
 
+/** How long a document may sit in 'processing' before it is considered stalled. */
+export const STALLED_AFTER_MS = 10 * 60 * 1000;
+
+/** How many times the reaper will retry a stalled document before failing it. */
+export const MAX_INGESTION_ATTEMPTS = 3;
+
+/** SHA-256 of the text that produced the current chunks. */
+export async function computeContentHash(content: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(content),
+  );
+  
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 /**
  * Process a document: chunk it and generate embeddings
  * Uses admin client since this runs in background and needs to bypass RLS
@@ -47,10 +65,14 @@ export async function processDocument(documentId: string): Promise<void> {
   const supabase = getAdminClient();
   
   try {
-    // Update status to processing
+    // Stamp the start so a reaper can tell a running job from a stranded one.
     await supabase
       .from('documents')
-      .update({ status: 'processing', error_message: null })
+      .update({
+        status: 'processing',
+        error_message: null,
+        processing_started_at: new Date().toISOString(),
+      })
       .eq('id', documentId);
     
     // Fetch the document
@@ -79,6 +101,28 @@ export async function processDocument(documentId: string): Promise<void> {
     
     if (!content || content.trim().length === 0) {
       throw new Error('Document has no content');
+    }
+    
+    // Re-embedding identical content is pure cost, so skip it when the hash
+    // matches and the chunks from that run are still present.
+    const contentHash = await computeContentHash(content);
+    
+    if (document.content_hash === contentHash) {
+      const { count } = await supabase
+        .from('document_chunks')
+        .select('id', { count: 'exact', head: true })
+        .eq('document_id', documentId);
+      
+      if ((count ?? 0) > 0) {
+        console.log(`[Documents] Content unchanged for ${documentId}, skipping re-embedding`);
+        
+        await supabase
+          .from('documents')
+          .update({ status: 'ready', error_message: null, processing_started_at: null })
+          .eq('id', documentId);
+        
+        return;
+      }
     }
     
     // Delete existing chunks
@@ -123,7 +167,11 @@ export async function processDocument(documentId: string): Promise<void> {
     // Update status to ready
     await supabase
       .from('documents')
-      .update({ status: 'ready' })
+      .update({
+        status: 'ready',
+        content_hash: contentHash,
+        processing_started_at: null,
+      })
       .eq('id', documentId);
     
   } catch (error) {
@@ -135,6 +183,7 @@ export async function processDocument(documentId: string): Promise<void> {
       .update({
         status: 'failed',
         error_message: error instanceof Error ? error.message : 'Unknown error',
+        processing_started_at: null,
       })
       .eq('id', documentId);
     
