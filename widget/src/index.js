@@ -507,11 +507,17 @@
 
     .klyro-empty-state {
       flex: 1;
+      min-height: 0;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
+      /* A centred flex container clips both ends once content outgrows it,
+         with no way to scroll to them. "safe" falls back to flex-start in that
+         case; the plain value stays first for browsers that lack it. */
       justify-content: center;
-      padding: 0 20px 60px;
+      justify-content: safe center;
+      padding: 24px 20px 32px;
       text-align: center;
     }
 
@@ -519,9 +525,10 @@
       font-size: 28px;
       font-weight: 700;
       color: #111827;
-      line-height: 1.1;
+      line-height: 1.2;
       margin-bottom: 12px;
       letter-spacing: -0.02em;
+      max-width: min(640px, 100%);
     }
 
     .klyro-empty-state h1 span {
@@ -544,16 +551,33 @@
       font-size: 16px;
       color: #4b5563;
       line-height: 1.5;
-      max-width: 280px;
+      /* Grows with the container instead of staying a 280px ribbon in a wide
+         inline mount, but stays inside a readable measure. */
+      max-width: min(520px, 88%);
       background: white;
       padding: 16px 20px;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       border: 1px solid rgba(0, 0, 0, 0.04);
       margin-top: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Wider mounts can carry a larger headline. This must key off the widget's
+       own width, not the viewport: a 380px widget on a 1440px page is still a
+       narrow widget. Browsers without container queries keep the base sizes. */
+    @container (min-width: 600px) {
+      .klyro-empty-state h1 {
+        font-size: 34px;
+      }
+      .klyro-empty-state p {
+        font-size: 17px;
+      }
     }
     
     .klyro-messages {
+      /* Establishes the container the empty state sizes itself against. */
+      container-type: inline-size;
       flex: 1;
       overflow-y: auto;
       padding: 20px;
