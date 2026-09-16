@@ -12,7 +12,10 @@ export async function middleware(request: NextRequest) {
                         request.nextUrl.pathname === '/' ||
                         request.nextUrl.pathname.startsWith('/api/widget') ||
                         request.nextUrl.pathname.startsWith('/api/chat') ||
-                        request.nextUrl.pathname.startsWith('/api/auth');
+                        request.nextUrl.pathname.startsWith('/api/auth') ||
+                        // Cron requests carry no session cookie; these routes
+                        // authenticate themselves with CRON_SECRET.
+                        request.nextUrl.pathname.startsWith('/api/cron');
 
   if (!session && !isPublicRoute) {
     // An API client fetching with a bad cookie should get a status it can act

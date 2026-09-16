@@ -48,6 +48,13 @@ export function getAdminClient(): SupabaseClient {
         autoRefreshToken: false,
         persistSession: false,
       },
+      global: {
+        // supabase-js reads over fetch, and Next caches fetch by default, so
+        // a repeated .select() was being served from the data cache and
+        // returning rows as they looked on the first read. Database reads must
+        // never be cached.
+        fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+      },
     });
   }
   return serverClient;

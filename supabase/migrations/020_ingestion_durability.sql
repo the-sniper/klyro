@@ -18,3 +18,7 @@ alter table documents add column if not exists content_hash text;
 create index if not exists idx_documents_processing_started_at
   on documents (processing_started_at)
   where status = 'processing';
+
+-- PostgREST caches the schema; without this it can keep serving the old column
+-- set (a new column reads back as null through select('*')) until it restarts.
+notify pgrst, 'reload schema';

@@ -79,10 +79,16 @@ export async function processDocument(documentId: string): Promise<void> {
       })
       .eq('id', documentId);
     
-    // Fetch the document
+    // Fetch the document.
+    // Explicit columns, not '*': PostgREST expands '*' from its cached schema,
+    // and after migration 020 added content_hash a long-lived client kept
+    // getting null for it from '*' while an explicit list returned the value.
+    // Selecting what we use is both correct and self-documenting.
     const { data: document, error: fetchError } = await supabase
       .from('documents')
-      .select('*')
+      .select(
+        'id, name, source_type, content, source_url, category, content_hash, attempts'
+      )
       .eq('id', documentId)
       .single();
     

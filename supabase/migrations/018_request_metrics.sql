@@ -35,3 +35,7 @@ alter table chat_sessions add column if not exists origin text;
 
 create index if not exists idx_chat_sessions_origin
   on chat_sessions (origin);
+
+-- PostgREST caches the schema; without this it can keep serving the old column
+-- set (a new column reads back as null through select('*')) until it restarts.
+notify pgrst, 'reload schema';
