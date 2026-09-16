@@ -31,10 +31,9 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
-# Markdown (except README)
+# Markdown notes are local; docs that the repo depends on are tracked
 *.md
 !README.md
 !WHATS_NEW.md
-
-
-package-lock.json
+!CLAUDE.md
+!**/SKILL.md
