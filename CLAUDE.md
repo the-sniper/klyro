@@ -74,7 +74,10 @@ widget/src/index.js  the embeddable widget, no dependencies
    keyword overlap, and calls the model. Tools (GitHub, Calendly, URL fetch)
    may trigger a second answer call.
 6. Answer tokens stream back through `onToken` as SSE `token` frames, then
-   `sources`, then `done`.
+   `done`. Sources are never sent to the visitor: they come from retrieval,
+   not from the answer, so they would leak knowledge base text the reply
+   declined to share. They are stored on the message for the owner's
+   transcripts only.
 7. The assistant message is persisted to `chat_messages` before `done` is sent,
    and `src/lib/db/metrics.ts` writes a `request_metrics` row fire-and-forget.
 

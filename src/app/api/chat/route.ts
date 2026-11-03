@@ -351,7 +351,10 @@ export async function POST(request: NextRequest) {
               messageId,
             });
             
-            send({ type: 'sources', sources });
+            // Sources are deliberately not sent. They come from retrieval, not
+            // from the answer, so they would hand a visitor raw knowledge base
+            // text the reply itself declined to share. They stay on the stored
+            // message for the owner's transcripts.
             send({ type: 'done', messageId, sessionId: currentSessionId });
             
             console.log('[CHAT] Streamed response:', {
@@ -414,9 +417,9 @@ export async function POST(request: NextRequest) {
       sourcesCount: sources?.length || 0
     });
     
+    // No sources here either, for the same reason as the streaming path.
     return jsonResponse({
       response,
-      sources,
       sessionId: currentSessionId,
       messageId,
     });
